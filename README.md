@@ -1,4 +1,4 @@
-<h1>Lecture Hall Booking System</h1>
+<h1>Automated Lecture Hall Booking Portal</h1>
 
 <h2>Group Information</h2>
 <ul>
@@ -7,7 +7,7 @@
 </ul>
 
 <h2>Overview</h2>
-<p>The <strong>Lecture Hall Booking System</strong> is a web-based application that allows students and faculty to book lecture halls efficiently. It provides a user-friendly interface for scheduling, modifying, and canceling bookings while ensuring proper access control.</p>
+<p>The <strong>Automated Lecture Hall Booking Portal</strong> is a web-based application that allows students and faculty to book lecture halls efficiently. It provides a user-friendly interface for scheduling, modifying, and canceling bookings while ensuring proper access control.</p>
 
 
 
