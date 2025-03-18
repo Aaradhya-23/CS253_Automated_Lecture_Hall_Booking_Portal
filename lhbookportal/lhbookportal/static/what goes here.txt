@@ -1,0 +1,19 @@
+here, include all the base css which would be used by almost each page.
+make directories here to include the css for different functionalities which require different css
+
+example
+
+static
+|-->base1.css
+|-->base2.css
+|-->login
+|      |--> login.css
+|      |--> register.css
+|-->bookings
+       |--> new_bookings.css
+
+etc
+
+after changing static files, run
+py .\manage.py collectstatic
+this puts the content into productionfiles
