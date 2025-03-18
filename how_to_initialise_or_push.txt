@@ -1,0 +1,11 @@
+1. clone
+2. activate venv
+3. pip install -r requirements.txt
+4. py manage.py makemigrations
+5. py manage.py migrate
+6. python manage.py collectstatic
+7. python manage.py createsuperuser (agar user banana ho to django admin wala)
+8. python manage.py runserver
+
+push karne ke pehle .gitignore dekh lena. usme faltu files nahi ani chahiye
+also push karne ke pehle ek baar freeze requirements kar lena.
