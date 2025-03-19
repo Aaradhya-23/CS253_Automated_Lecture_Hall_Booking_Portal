@@ -1,0 +1,2 @@
+here put all the html content which will be further inherited by other html files.
+includes base.html, header.html, etc
