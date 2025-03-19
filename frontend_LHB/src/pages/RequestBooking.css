@@ -1,0 +1,243 @@
+.request-booking {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    background-color: #cfd8ef;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+  
+  .logo-container h1 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .logout-button {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .main-content {
+    display: flex;
+    flex: 1;
+    background-color: #f5f5f5;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: #cfd8ef;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .sidebar-button {
+    background-color: #e8eaf6;
+    border: none;
+    padding: 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+  }
+  
+  .sidebar-button:hover {
+    background-color: #c5cae9;
+  }
+  
+  .sidebar-button.active {
+    background-color: #5c6bc0;
+    color: white;
+  }
+  
+  .icon {
+    margin-left: 5px;
+  }
+  
+  .content-area {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .booking-form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-group label {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+  }
+  
+  .input-group {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .input-group input,
+  .input-group select {
+    flex: 1;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .badge {
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  
+  .tag-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .tag {
+    background-color: #e3f2fd;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .info-icon {
+    color: #1976d2;
+    cursor: pointer;
+  }
+  
+  .add-button {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .add-button.full-width {
+    width: 100%;
+  }
+  
+  .status-badge {
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .available {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .submit-button {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  
+  @media (max-width: 768px) {
+    .main-content {
+      flex-direction: column;
+    }
+    
+    .sidebar {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 10px;
+    }
+    
+    .sidebar-button {
+      min-width: 120px;
+    }
+    
+    .form-row {
+      flex-direction: column;
+    }
+  }
