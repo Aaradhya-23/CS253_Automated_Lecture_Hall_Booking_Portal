@@ -1,0 +1,4 @@
+put all the email_services codes here. also include the booking confirmation mail here.
+in templates, put the view pending(admin), status(user) pages here.
+inherit the base.html which is present in 'BASE_DIR\lhbookportal\templates' which includes the navbar, etc
+inherit the appropriate css from 'BASE_DIR\lhbookportal\styles'

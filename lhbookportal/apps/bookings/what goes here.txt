@@ -1,0 +1,4 @@
+put all the bookings related codes here. 
+in templates, put the new booking, show live booking, history pages
+inherit the base.html which is present in 'BASE_DIR\lhbookportal\templates' which includes the navbar, etc
+inherit the appropriate css from 'BASE_DIR\lhbookportal\styles'

@@ -1,0 +1,5 @@
+put all the report related codes here, which includes generate bill(user), and admin-related report generation.
+put the feedback and help section here itself. 
+in templates, put the admin-report-generation page and the feedback page
+inherit the base.html which is present in 'BASE_DIR\lhbookportal\templates' which includes the navbar, etc
+inherit the appropriate css from 'BASE_DIR\lhbookportal\styles'

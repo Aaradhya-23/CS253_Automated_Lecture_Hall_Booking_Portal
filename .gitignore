@@ -1,0 +1,35 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Virtual Environment
+alhbp/
+# baaki log isme apne venv ka naam daal dena taaki galti se vo push na kar do github pe.
+
+# Django/Migrations
+*/migrations/*
+!*/migrations/__init__.py
+
+# # SQLite Database (If using SQLite)
+# db.sqlite3
+
+# Logs
+*.log
+*.log.*
+
+# IDE Files
+.vscode/
+.idea/
+
+# Environment Variables
+.env
+.env.*
+
+# Static Files
+generatedstaticfiles/
+
+# Other
+.DS_Store
+Thumbs.db
