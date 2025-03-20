@@ -20,6 +20,8 @@ class BookingPermissions(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             # Allow read access to all roles
             return True
+        
+        
         elif not request.user.is_authenticated:
             return False
         elif request.method in ['POST']:

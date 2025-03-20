@@ -20,12 +20,50 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+"""  
+WHEN IN DEPLOYEMENT UN COMMENT THE BELOW CODE 
+CREATE env variable in linux server named JWT_SECRET_KEY
+
+"""
+# import os
+# SIGNING_KEY = os.getenv('JWT_SECRET_KEY', 'fallback_default_secret')
+
 SECRET_KEY = 'django-insecure-7)is^)xj2t&1n)wh(d9$azkvwg8*4+9d60m(3^j9oc0x=63u3r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Require authentication by default
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',  # Rate limit for anonymous users
+        'rest_framework.throttling.UserRateThrottle',  # Rate limit for authenticated users
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',  # Limit anonymous users to 10 requests per minute
+        'user': '100/hour',   # Limit authenticated users to 100 requests per hour
+    }
+}
+
+# JWT Token Expiry Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Token expires in 30 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Refresh token expires in 1 day
+    'ROTATE_REFRESH_TOKENS': True,  # Issue new refresh token on refresh
+    'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old refresh token
+    'ALGORITHM': 'HS256',  # Default hashing algorithm
+    'SIGNING_KEY': SECRET_KEY,  # Change this to a secure key
+}
+
 
 
 # Application definition
