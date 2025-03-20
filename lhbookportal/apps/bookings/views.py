@@ -3,8 +3,10 @@ from django.contrib.auth import get_user_model
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import generics, authentication, permissions, mixins
+from rest_framework import generics, authentication, permissions, mixins, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
+from rest_framework.permissions import IsAuthenticated
 from .serializers import *
 from rest_framework.permissions import IsAdminUser
 from .permissions import *
@@ -79,6 +81,36 @@ class BookingCRUDView(
     # DELETE: Delete a booking
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+#example
+# Search by title	/api/bookings/search/?search=math
+# Filter by status	/api/bookings/search/?status=approved
+# Filter by room	/api/bookings/search/?room=2
+# Sort by start time	/api/bookings/search/?ordering=start_time
+# Reverse sort by start time	/api/bookings/search/?ordering=-start_time
+class BookingSearchView(generics.ListAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # Exact field filters
+    filterset_fields = ['status', 'type', 'room', 'creator']
+
+    # Full-text search fields
+    search_fields = ['title', 'room__number', 'creator__username']
+
+    # Sorting options
+    ordering_fields = ['start_time', 'end_time', 'requested_on']
+    ordering = ['-start_time']  # Default sorting (latest bookings first)
+
+class UserBookingHistoryView(generics.ListAPIView):
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can see their history
+
+    def get_queryset(self):
+        """Return only the bookings of the logged-in user"""
+        return Booking.objects.filter(user=self.request.user).order_by('-requested_on')
 
 
 class RoomCRUDView(
