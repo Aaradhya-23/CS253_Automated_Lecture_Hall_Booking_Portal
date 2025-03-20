@@ -1,0 +1,9 @@
+token based authentication
+remove exposed signing key during deployement
+create and use environment variable stored in server instead
+store token in local storage
+include it in requests
+call api/token to get access and refresh token 
+view requests no authentication required
+access token expires in 30 min
+use refresh token to get new access token
