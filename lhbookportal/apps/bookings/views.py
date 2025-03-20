@@ -9,7 +9,7 @@ from .serializers import *
 from rest_framework.permissions import IsAdminUser
 from .permissions import *
 from django.utils.timezone import now
-
+from rest_framework.throttling import UserRateThrottle
 User = get_user_model()
 
 
@@ -25,8 +25,11 @@ class BookingCRUDView(
 ):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    authentication_classes = []
     permission_classes = [BookingPermissions]  # Restrict access to authenticated users
-
+    throttle_classes  = [UserRateThrottle]
+    
+    
     # Set `creator` and `status` dynamically
     def perform_create(self, serializer):
         user = self.request.user
@@ -89,6 +92,7 @@ class RoomCRUDView(
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [IsAdmin]  # Restrict access to authenticated users
+    throttle_classes  = [UserRateThrottle]
 
     def perform_create(self, serializer):
         """Set custom behavior before saving a new Room."""
