@@ -40,9 +40,12 @@ class Booking(models.Model):
     title = models.CharField(max_length=100)
     Type = models.CharField(max_length = 20, choices = TYPE_CHOICES, default = 'nonacademic')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings')
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    booking_date = models.DateField()
+    start_time = models.PositiveSmallIntegerField()
+    end_time = models.PositiveIntegerField()
     requested_on = models.DateTimeField()
+    duration = models.PositiveSmallIntegerField()
+    cost = models.PositiveBigIntegerField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
