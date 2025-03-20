@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 from datetime import timedelta
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT
     ),
@@ -81,6 +82,7 @@ INSTALLED_APPS = [
     'apps.bookings',
     'apps.email_services',
     'apps.reports',
+    'django-filters',
 ]
 
 MIDDLEWARE = [
