@@ -4,6 +4,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from .models import *
 from django.utils import timezone
+import datetime
 
 User = get_user_model()
 
@@ -38,7 +39,7 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on']  # Status should not be set directly by the user
+        read_only_fields = ['status', 'creator', 'requested_on', 'cost']  # Status should not be set directly by the user
         depth = 1
 
     def validate(self, data):
@@ -50,20 +51,25 @@ class BookingSerializer(serializers.ModelSerializer):
         """
         start_time = data.get('start_time')
         end_time = data.get('end_time')
-        requested_on = data.get('requested_on')
+        booking_date = data.get('booking_date')
         room = data.get('room')
+        
 
         # 1. Ensure start time is before end time
+        if (start_time > 24 or end_time > 24):
+            raise serializers.ValidationError("Start time must not be greater than 24")
         if start_time >= end_time:
             raise serializers.ValidationError("Start time must be before end time.")
-
+        
+        booking_datetime = datetime.datetime.combine(booking_date, start_time)
         # 2. Ensure the booking is not in the past
-        if start_time < timezone.now():
+        if booking_datetime < timezone.now():
             raise serializers.ValidationError("Booking cannot be in the past.")
 
         # 3. Ensure the room is available during the requested time slot
         conflicting_bookings = Booking.objects.filter(
             room=room,
+            booking_date = booking_date,
             start_time__lt=end_time,
             end_time__gt=start_time,
         ).exclude(status='cancelled')  # Exclude cancelled bookings

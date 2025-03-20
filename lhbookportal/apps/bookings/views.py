@@ -44,10 +44,17 @@ class BookingCRUDView(
         if Type == 'academic': 
             status = 'approved'
         
+        start_time = self.request.POST.get('start_time')
+        end_time = self.request.POST.get('end_time')
+        duration = end_time - start_time
+        Ty = self.request.POST.get('room')
+        room = Room.objects.filter(pk = Ty)
+        cost = room.price_get_hour*duration
+        requested_on = timezone.now()
         
-        requested_on = now()
         
-        serializer.save(creator=user, status=status, Type = Type, requested_on = requested_on)
+        
+        serializer.save(creator=user, status=status, Type = Type, requested_on = requested_on, cost = cost, duration = duration)
 
     # def perform_update(self, serializer):
     #     user = self.request.user
