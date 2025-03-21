@@ -3,12 +3,9 @@ from django.db import models
 
 User = get_user_model()
 class Room(models.Model):
-    TUTORIAL = 'tutorial'
-    LECTURE = 'lecture_hall'
-
     ROOM_TYPES = [
-        (TUTORIAL, 'Tutorial Block Room'),
-        (LECTURE, 'Lecture Hall Room'),
+        ('tutorial', 'Tutorial Block Room'),
+        ('lecture_hall', 'Lecture Hall Room'),
     ]
 
     number = models.PositiveSmallIntegerField(unique=True)
@@ -38,18 +35,17 @@ class Booking(models.Model):
 
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='bookings')
     title = models.CharField(max_length=100)
-    Type = models.CharField(max_length = 20, choices = TYPE_CHOICES, default = 'nonacademic')
+    type = models.CharField(max_length = 20, choices = TYPE_CHOICES, default = 'nonacademic')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     requested_on = models.DateTimeField()
+    duration = models.PositiveSmallIntegerField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    need_ac = models.BooleanField(default= False)
+    need_projector = models.BooleanField(default= False)
+    cost = models.PositiveBigIntegerField(default=0)
 
     def __str__(self):
         return f"{self.creator.username} - {self.room.number} ({self.status})"
     
-    
-
-
-
-
