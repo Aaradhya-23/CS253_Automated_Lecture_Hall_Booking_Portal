@@ -1,5 +1,13 @@
+
 from django.urls import path
 
+from .views import *
+
 urlpatterns = [
-    # path(),
+    path('booking/', BookingCRUDView.as_view()),  # List and create rooms
+    path('booking/<int:pk>/', BookingCRUDView.as_view()),  # Retrieve, update, delete a specific room
+    path('rooms/', RoomCRUDView.as_view()),  # List and create rooms
+    path('rooms/<int:pk>/', RoomCRUDView.as_view()),  # Retrieve, update, delete a specific room
+    path('booking/search/', BookingSearchView.as_view(), name='booking-search'),
+    path('booking/history/', UserBookingHistoryView.as_view(), name='booking-history')
 ]
