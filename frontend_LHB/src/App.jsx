@@ -4,7 +4,7 @@ import LoginPage from './pages/Login';
 import CreateUser from './pages/create_user';
 import RequestBooking from './pages/request_booking';
 import ViewBookings from './pages/view_bookings';
-
+import HelpPage from './pages/help';
 function App() {
   return (
     <Routes>
@@ -12,6 +12,7 @@ function App() {
       <Route path="/create-user" element={<CreateUser />} />
       <Route path="/request-booking" element={<RequestBooking />} />
       <Route path="/view-bookings" element={<ViewBookings />} />
+      <Route path="/help" element={<HelpPage />} /> {HelpPage}
     </Routes>
   );
 }
