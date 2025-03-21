@@ -2,5 +2,30 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.14",
     "tailwindcss": "^4.0.14"
-  }
+  },
+  "name": "cs253_automated_lecture_hall_booking_portal",
+  "version": "1.0.0",
+  "description": "<h1>Automated Lecture Hall Booking Portal</h1>",
+  "main": "index.js",
+  "devDependencies": {
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.10",
+    "@babel/node": "^7.26.0",
+    "@babel/preset-react": "^7.26.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaitanyavb-502/CS253_Automated_Lecture_Hall_Booking_Portal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chaitanyavb-502/CS253_Automated_Lecture_Hall_Booking_Portal/issues"
+  },
+  "homepage": "https://github.com/chaitanyavb-502/CS253_Automated_Lecture_Hall_Booking_Portal#readme"
 }
