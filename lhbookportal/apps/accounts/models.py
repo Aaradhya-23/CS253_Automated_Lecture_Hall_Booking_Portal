@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 
 
 
-#TODO : add this custom user model to settings.py app_name.User
 #TODO : make this better or use groups 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -12,8 +12,17 @@ class User(AbstractUser):
         ('Student', 'Student'),
     ]
     #student general role for student bodies like clubs socities, general secerataries, snt council etc.
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='viewer')
-    
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    email = models.EmailField(unique=True)
+    # in abstract user, email is not unique by default
+
+    authority_emails = ArrayField(models.EmailField(), blank=True, default=list)
+    # only works with postgresql
+
+    latest_booking_request = models.ForeignKey('email_services.BookingRequestPreConfirmation', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.username
 
 
 # Create your models here.
