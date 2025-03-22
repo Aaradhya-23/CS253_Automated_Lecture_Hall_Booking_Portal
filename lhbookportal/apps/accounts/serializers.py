@@ -53,10 +53,11 @@ class UserSerializer(serializers.ModelSerializer):
         required=True,
         validators=[validate_password]  # Enforce strong password validation
     )
+    role = serializers.ChoiceField(choices=User.ROLE_CHOICES, required=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 'role']
         extra_kwargs = {
             'password': {'write_only': True},  # Ensure password is never returned
             'id': {'read_only': True},  # ID is auto-generated and should not be editable
@@ -69,7 +70,9 @@ class UserSerializer(serializers.ModelSerializer):
         user = User(
             username=validated_data['username'],
             email=validated_data['email'],
-
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            role=validated_data['role'],
         )
         user.set_password(validated_data['password'])  # Hash the password
         user.save()
@@ -84,6 +87,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.email = validated_data.get('email', instance.email)
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.role = validated_data.get('role', instance.role)
 
         # Handle password update
         password = validated_data.get('password')
