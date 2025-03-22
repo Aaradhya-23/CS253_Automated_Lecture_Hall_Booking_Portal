@@ -42,7 +42,7 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost']  # Fields not set by the user
+        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token']  # Fields not set by the user
         depth = 1
 
     def validate(self, data):
@@ -91,6 +91,7 @@ class BookingSerializer(serializers.ModelSerializer):
         """
         Override the create method to set the creator automatically.
         """
+      
         validated_data['creator'] = self.context['request'].user
         return super().create(validated_data)
 

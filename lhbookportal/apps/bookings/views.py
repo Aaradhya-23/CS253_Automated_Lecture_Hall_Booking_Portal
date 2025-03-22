@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, authentication, permissions, mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
+from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
 from .permissions import *
@@ -67,9 +68,10 @@ class BookingCRUDView(
         if(user.role == 'faculty'):return 
         
         #send mails only for students 
-        
-        approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.id]))
-        reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.id]))
+        # approve_url = f"{settings.SITE_URL}{reverse('approve_booking', kwargs={'token': booking.approval_token})}"
+        # reject_url = f"{settings.SITE_URL}{reverse('reject_booking', kwargs={'token': booking.approval_token})}"
+        approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.approval_token]))
+        reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.approval_token]))
 
         # Send email to the authority
         subject = "[LHC OFFICE]Booking Request Approval Needed"
@@ -221,36 +223,51 @@ class RoomSearchView(generics.ListAPIView):
     
     
     
-def approve_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+def approve_booking(request, token):
+    booking = get_object_or_404(Booking, approval_token=token)
+    if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
+    if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
+    
     booking.status = 'approved'
     booking.save()
 
+    # if booking.token_expiry < timezone.now():
+        
     
     # if booking.creator.role == 'student':
-    x = 'Your bill amount is : {booking.cost}'
+    x = f'Your bill amount is : {booking.cost}'
+    # print(type([booking.creator.email]))
     # Send email to user
     send_mail(
         'Booking Approved',
-        f'Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.',
-        x,
+        f"""
+        Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
+        {x}
+        """
+        ,
         settings.DEFAULT_FROM_EMAIL,
         [booking.creator.email]
     )
 
     return HttpResponse("Booking approved successfully!, You many close this page now")
 
-def reject_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+def reject_booking(request, token):
+    booking = get_object_or_404(Booking, approval_token = token)
+    if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
+
+    if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
+
     booking.status = 'rejected'
     booking.save()
 
+    # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
+    #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
     # Send email to user
     send_mail(
         'Booking Rejected',
-        f'Sorry, your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been rejected.',
+        f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
         settings.DEFAULT_FROM_EMAIL,
-        [booking.creator.email]
+        [ booking.creator.email ],
     )
 
     return HttpResponse("Booking rejected successfully!, You may close this page now")
