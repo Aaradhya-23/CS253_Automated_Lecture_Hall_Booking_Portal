@@ -27,46 +27,42 @@ class BookingCRUDView(
 ):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    authentication_classes = []
+    # authentication_classes = []
     permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
     
-    
-    # Set `creator` and `status` dynamically
     def perform_create(self, serializer):
+        print(self.request.data)
         user = self.request.user
-        
-        if user.role != 'admin': 
+        # Access validated data from the serializer
+        validated_data = serializer.validated_data
+        room = validated_data['room']  # Access the room object directly
+        duration = validated_data['duration']
+
+        # Determine Type and status based on user role
+        Type = validated_data.get('Type')
+        status = 'pending'
+
+        if user.role != 'admin':
             Type = 'academic' if user.role == 'faculty' else 'nonacademic'
-        
+
         status = 'approved' if user.role == 'admin' else 'pending'
-        
-        if Type == 'academic': 
+
+        if Type == 'academic':
             status = 'approved'
-        
-        start_time = self.request.POST.get('start_time')
-        end_time = self.request.POST.get('end_time')
-        duration = end_time - start_time
-        Ty = self.request.POST.get('room')
-        room = Room.objects.filter(pk = Ty)
-        cost = room.price_get_hour*duration
+
+        # Calculate cost
+        cost = room.price_per_hour * duration
         requested_on = timezone.now()
-        
-        
-        
-        serializer.save(creator=user, status=status, Type = Type, requested_on = requested_on, cost = cost, duration = duration)
 
-    # def perform_update(self, serializer):
-    #     user = self.request.user
-    #     if user.role == 'admin':
-    #         status = 'approved'
-    #     elif user.role == 'faculty':
-    #         status = 'under_review'
-    #     else:
-    #         status = 'pending'
-        
-    #     serializer.save(status=status, Type = Type, requested_on )  # `creator` remains unchanged
-
+        # Save the booking
+        serializer.save(
+            creator=user,
+            status=status,
+            Type=Type,
+            requested_on=requested_on,
+            cost=cost
+        )
     # GET: List all bookings or retrieve a specific booking
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:
@@ -75,6 +71,7 @@ class BookingCRUDView(
 
     # POST: Create a new booking
     def post(self, request, *args, **kwargs):
+        # print(*args)
         return self.create(request, *args, **kwargs)
 
     # PUT/PATCH: Update an existing booking
@@ -102,10 +99,10 @@ class BookingSearchView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Exact field filters
-    filterset_fields = ['status', 'type', 'room', 'creator']
+    filterset_fields = ['status', 'Type', 'room', 'creator']
 
     # Full-text search fields
-    search_fields = ['title', 'room__number', 'creator__username']
+    search_fields = ['title', 'room__name', 'creator__username']
 
     # Sorting options
     ordering_fields = ['start_time', 'end_time', 'requested_on']
@@ -162,3 +159,34 @@ class RoomCRUDView(
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 # Create your views here.
+
+
+
+
+class RoomSearchView(generics.ListAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # Exact field filters
+    filterset_fields = [
+        'room_type',  # Filter by room type (tutorial or lecture_hall)
+        'has_ac',     # Filter by AC availability
+        'has_board',  # Filter by board availability
+        'has_projector',  # Filter by projector availability
+        'capacity',   # Filter by capacity
+        'price_per_hour',  # Filter by price per hour
+    ]
+
+    # Full-text search fields
+    search_fields = [
+        'name',  # Search by room name
+    ]
+
+    # Sorting options
+    ordering_fields = [
+        'name',           # Sort by room name
+        'capacity',       # Sort by capacity
+        'price_per_hour', # Sort by price per hour
+    ]
+    ordering = ['name']  # Default sorting (alphabetical by room name)
