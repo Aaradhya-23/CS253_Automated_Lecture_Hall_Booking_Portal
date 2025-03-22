@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 User = get_user_model()
 class Room(models.Model):
@@ -47,6 +50,9 @@ class Booking(models.Model):
     need_projector = models.BooleanField(default= False)
     cost = models.PositiveBigIntegerField(default=0)
     remarks = models.CharField(max_length= 150, null = True, blank = True)
+    
+    approval_token = models.CharField(max_length=36, unique=True, default=uuid.uuid4, editable=False)
+    token_expiry = models.DateTimeField(default=timezone.now() + timedelta(days=2))
 
     def __str__(self):
         return f"{self.creator.username} - {self.room.name} ({self.status})"
