@@ -36,6 +36,13 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 from datetime import timedelta
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider's SMTP server
+EMAIL_PORT = 587  # TLS port (use 465 for SSL)
+EMAIL_USE_TLS = True  # Use TLS security
+EMAIL_HOST_USER = 'bytebit695@gmail.com'  # Your email
+EMAIL_HOST_PASSWORD = 'pkwpdshbkfqbutvi'  # App password (not your actual password)
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],

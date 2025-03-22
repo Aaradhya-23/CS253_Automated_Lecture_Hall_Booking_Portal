@@ -1,19 +1,19 @@
 
 from django.contrib.auth import get_user_model
-from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework import generics, authentication, permissions, mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
-from rest_framework.permissions import IsAdminUser
 from .permissions import *
 from django.utils.timezone import now
 from rest_framework.throttling import UserRateThrottle
 User = get_user_model()
-
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 
 
@@ -53,16 +53,44 @@ class BookingCRUDView(
 
         # Calculate cost
         cost = room.price_per_hour * duration
+        user.total_bill = user.total_bill + cost
+        user.save()
         requested_on = timezone.now()
-
-        # Save the booking
-        serializer.save(
+        
+        booking = serializer.save(
             creator=user,
             status=status,
             Type=Type,
             requested_on=requested_on,
             cost=cost
         )
+        if(user.role == 'faculty'):return 
+        
+        #send mails only for students 
+        
+        approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.id]))
+        reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.id]))
+
+        # Send email to the authority
+        subject = "[LHC OFFICE]Booking Request Approval Needed"
+        message = f"""
+        A new booking request has been submitted by {user.username}.
+
+        Purpose :     {booking.title}
+        Remarks :     {booking.remarks}
+        Room:         {room.name}
+        Requested On: {requested_on}
+        
+        
+        Approve: {approve_url}
+        Reject: {reject_url}
+        
+        Note : un-approved bookings will be auto-rejected in 2 days or less
+        """
+        #add more mails in the list if needed
+        #right now only one is supported 
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['567rahulm567@gmail.com'])
+        # Save the booking
     # GET: List all bookings or retrieve a specific booking
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:
@@ -190,3 +218,39 @@ class RoomSearchView(generics.ListAPIView):
         'price_per_hour', # Sort by price per hour
     ]
     ordering = ['name']  # Default sorting (alphabetical by room name)
+    
+    
+    
+def approve_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    booking.status = 'approved'
+    booking.save()
+
+    
+    # if booking.creator.role == 'student':
+    x = 'Your bill amount is : {booking.cost}'
+    # Send email to user
+    send_mail(
+        'Booking Approved',
+        f'Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.',
+        x,
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.creator.email]
+    )
+
+    return HttpResponse("Booking approved successfully!, You many close this page now")
+
+def reject_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    booking.status = 'rejected'
+    booking.save()
+
+    # Send email to user
+    send_mail(
+        'Booking Rejected',
+        f'Sorry, your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been rejected.',
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.creator.email]
+    )
+
+    return HttpResponse("Booking rejected successfully!, You may close this page now")
