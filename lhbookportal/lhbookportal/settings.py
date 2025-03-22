@@ -82,7 +82,7 @@ INSTALLED_APPS = [
     'apps.bookings',
     'apps.email_services',
     'apps.reports',
-    'django-filters',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

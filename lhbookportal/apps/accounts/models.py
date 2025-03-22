@@ -16,10 +16,10 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     # in abstract user, email is not unique by default
 
-    authority_emails = ArrayField(models.EmailField(), blank=True, default=list)
+    authority_email = models.EmailField(null = True)
     # only works with postgresql
 
-    latest_booking_request = models.ForeignKey('email_services.BookingRequestPreConfirmation', on_delete=models.SET_NULL, null=True, blank=True)
+    # latest_booking_request = models.ForeignKey('email_services.BookingRequestPreConfirmation', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.username

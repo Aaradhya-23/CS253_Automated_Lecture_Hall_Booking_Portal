@@ -35,41 +35,49 @@ class RoomSerializer(serializers.ModelSerializer):
         return value
 
 
+
 class BookingSerializer(serializers.ModelSerializer):
+    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    booking_date = serializers.DateField()
     class Meta:
         model = Booking
         fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost']  # Status should not be set directly by the user
+        read_only_fields = ['status', 'creator', 'requested_on', 'cost']  # Fields not set by the user
         depth = 1
 
     def validate(self, data):
-        """
-        Perform additional validation for the booking:
-        1. Ensure the start time is before the end time.
-        2. Ensure the booking is not in the past.
-        3. Ensure the room is available during the requested time slot.
-        """
+        
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         booking_date = data.get('booking_date')
-        room = data.get('room')
-        
+        print(booking_date)
+        room = data.get('room')  # room is already a Room object
+
+    # Combine booking_date and start_time/end_time into datetime objects
+        if isinstance(start_time, str):
+            start_time = datetime.datetime.strptime(start_time, '%H:%M:%S').time()
+        if isinstance(end_time, str):
+            end_time = datetime.datetime.strptime(end_time, '%H:%M:%S').time()
+
+        booking_start_datetime = timezone.make_aware(
+            datetime.datetime.combine(booking_date, start_time)
+        )
+        booking_end_datetime = timezone.make_aware(
+            datetime.datetime.combine(booking_date, end_time)
+        )
 
         # 1. Ensure start time is before end time
-        if (start_time > 24 or end_time > 24):
-            raise serializers.ValidationError("Start time must not be greater than 24")
-        if start_time >= end_time:
+        if booking_start_datetime >= booking_end_datetime:
             raise serializers.ValidationError("Start time must be before end time.")
-        
-        booking_datetime = datetime.datetime.combine(booking_date, start_time)
+
         # 2. Ensure the booking is not in the past
-        if booking_datetime < timezone.now():
+        if booking_start_datetime < timezone.now():
             raise serializers.ValidationError("Booking cannot be in the past.")
 
         # 3. Ensure the room is available during the requested time slot
         conflicting_bookings = Booking.objects.filter(
             room=room,
-            booking_date = booking_date,
+            booking_date=booking_date,
             start_time__lt=end_time,
             end_time__gt=start_time,
         ).exclude(status='cancelled')  # Exclude cancelled bookings
@@ -79,22 +87,10 @@ class BookingSerializer(serializers.ModelSerializer):
 
         return data
 
-    def validate_status(self, value):
-        """Ensure status is one of the valid choices."""
-        valid_statuses = [choice[0] for choice in Booking.STATUS_CHOICES]
-        if value not in valid_statuses:
-            raise serializers.ValidationError(f"Invalid status. Must be one of: {valid_statuses}")
-        return value
-
-    def validate_type(self, value):
-        valid_type = [choice[0] for choice in Booking.TYPE_CHOICES]
-        if value not in valid_type:
-            raise serializers.ValidationError(f"Invalid Type. Must be one of: {valid_type}")
     def create(self, validated_data):
         """
         Override the create method to set the creator automatically.
         """
-
         validated_data['creator'] = self.context['request'].user
         return super().create(validated_data)
 
@@ -106,5 +102,4 @@ class BookingSerializer(serializers.ModelSerializer):
         if 'status' in validated_data:
             if instance.status != 'pending':
                 raise serializers.ValidationError("Only pending bookings can be updated.")
-        return super().update(instance, validated_data)   
-
+        return super().update(instance, validated_data)
