@@ -24,6 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # Django Admin Panel
     path('accounts/', include('apps.accounts.urls')),  # Routes to apps.accounts.urls
     path('bookings/', include('apps.bookings.urls')),  # Routes to apps.bookings.urls
-    path('emails/', include('apps.email_services.urls')),  # Routes to apps.email_services.urls
+    path('status/', include('apps.email_services.urls')),  # Routes to apps.email_services.urls
     path('reports/', include('apps.reports.urls')),  # Routes to apps.reports.urls
 ]
