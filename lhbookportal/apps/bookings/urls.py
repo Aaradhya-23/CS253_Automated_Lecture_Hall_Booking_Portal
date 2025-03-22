@@ -10,5 +10,7 @@ urlpatterns = [
     path('rooms/<int:pk>/', RoomCRUDView.as_view()),  # Retrieve, update, delete a specific room
     path('booking/search/', BookingSearchView.as_view(), name='booking-search'),
     path('booking/history/', UserBookingHistoryView.as_view(), name='booking-history'),
-    path('rooms/search/', RoomSearchView.as_view(), name = 'room-search')
+    path('rooms/search/', RoomSearchView.as_view(), name = 'room-search'),
+    path('booking/approve/<int:booking_id>/', approve_booking, name='approve-booking'),
+    path('booking/reject/<int:booking_id>/', reject_booking, name='reject-booking'),
 ]

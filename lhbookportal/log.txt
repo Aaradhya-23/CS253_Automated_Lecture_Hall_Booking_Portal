@@ -1,5 +1,6 @@
 token based authentication
 remove exposed signing key during deployement
+remove gmail password during deployeement, store as env variable
 create and use environment variable stored in server instead
 store token in local storage
 include it in requests
@@ -7,3 +8,13 @@ call api/token to get access and refresh token
 view requests no authentication required
 access token expires in 30 min
 use refresh token to get new access token
+
+
+
+#########
+EMAIL 
+only one authority supported at this point
+@@@@@@@@@
+to auto reject bookings after a certain time.
+configure server to run a script periodically that do this 
+manual cleaning of database 

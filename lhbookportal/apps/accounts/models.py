@@ -15,8 +15,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     email = models.EmailField(unique=True)
     # in abstract user, email is not unique by default
-
-    authority_email = models.EmailField(null = True)
+    total_bill = models.IntegerField(default= 0 )
+    authority_email = models.EmailField(null = True, blank =  True)
     # only works with postgresql
 
     # latest_booking_request = models.ForeignKey('email_services.BookingRequestPreConfirmation', on_delete=models.SET_NULL, null=True, blank=True)

@@ -46,6 +46,7 @@ class Booking(models.Model):
     need_ac = models.BooleanField(default= False)
     need_projector = models.BooleanField(default= False)
     cost = models.PositiveBigIntegerField(default=0)
+    remarks = models.CharField(max_length= 150, null = True, blank = True)
 
     def __str__(self):
         return f"{self.creator.username} - {self.room.name} ({self.status})"

@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}  # Ensure password is write-only
         }
+        read_only = ['total_bill']
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)  # Remove password from validated_data
