@@ -1,4 +1,4 @@
-
+import os
 from django.contrib.auth import get_user_model
 from rest_framework import generics, authentication, permissions, mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,9 +15,33 @@ from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from io import BytesIO
+from rest_framework.views import APIView
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
-
-
+class DownloadBillPDF(APIView):
+    def get(self, request, booking_id):
+        # Get booking data (replace with your actual query)
+        booking = get_object_or_404(Booking, id=booking_id)
+        
+        # Create PDF buffer
+        data = {
+            "booking_ref" : str(booking.id),
+            "event_name": booking.title,
+            "date": str(booking.booking_date),
+            "time": str(booking.start_time),
+            "hall_name": booking.room.name,
+            "booked_by": booking.creator.username,
+            "charges": str(booking.cost),
+        }
+        buffer = generate_bill(data)
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
+        return response
 class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 
@@ -271,3 +295,93 @@ def reject_booking(request, token):
     )
 
     return HttpResponse("Booking rejected successfully!, You may close this page now")
+
+
+
+
+def generate_bill(data):
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # --- HEADER WITH LOGO ---
+    # Add IIT-Kanpur logo (you'll need to have the image file)
+    logo_path = "./images.png"  # Replace with actual path or ensure file exists
+    if os.path.exists(logo_path):
+        c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
+    
+    # Add "Lecture Hall Office" text beside logo
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width/2, height - 110, "Lecture Hall Office")
+    c.setFont("Helvetica", 10)
+    # c.drawString(100 + 1.6*inch, height - 110, "Indian Institute of Technology Kanpur")
+    
+    # Centered main heading
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width/2, height - 130, "BOOKING DETAILS")
+    
+    # Horizontal line below heading
+    c.setStrokeColor(colors.black)
+    c.line(100, height - 140, width - 100, height - 140)
+    
+    # --- BODY CONTENT ---
+    y_position = height - 170
+    
+    # Booking Information
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Booking Reference:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['booking_ref'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Event Name:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['event_name'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Date:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['date'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Time:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['time'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Hall:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['hall_name'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Booked By:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['booked_by'])
+    y_position -= 40
+    
+    # Charges table
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Charges:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data["charges"])
+    y_position -= 20
+    
+    
+    
+    
+    # --- FOOTER ---
+    footer_y = 50
+    c.setStrokeColor(colors.black)
+    c.line(100, footer_y + 20, width - 100, footer_y + 20)
+    
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(width/2, footer_y, "Lecture Hall Office, IIT Kanpur - Tel: 0512-259XXXX")
+    
+    c.save()
+    buffer.seek(0)
+    return buffer
