@@ -14,4 +14,5 @@ urlpatterns = [
     path('booking/approve/<str:token>/', approve_booking, name='approve-booking'),
     path('booking/reject/<str:token>/', reject_booking, name='reject-booking'),
     path('download/bill/<int:booking_id>/', DownloadBillPDF.as_view(), name='download bill'),
+    path('download/bookings/<str:date>/', download_daily_schedule_csv, name = 'download_csv'),
 ]

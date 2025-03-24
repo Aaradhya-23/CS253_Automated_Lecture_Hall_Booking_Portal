@@ -22,11 +22,15 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib import colors
+import csv
+from datetime import time, datetime, timedelta
 
 class DownloadBillPDF(APIView):
+    permission_classes = [BookingPermissions]
     def get(self, request, booking_id):
         # Get booking data (replace with your actual query)
         booking = get_object_or_404(Booking, id=booking_id)
+        
         
         # Create PDF buffer
         data = {
@@ -306,7 +310,7 @@ def generate_bill(data):
     
     # --- HEADER WITH LOGO ---
     # Add IIT-Kanpur logo (you'll need to have the image file)
-    logo_path = "./images.png"  # Replace with actual path or ensure file exists
+    logo_path = ".resources/images.png"  # Replace with actual path or ensure file exists
     if os.path.exists(logo_path):
         c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
     
@@ -385,3 +389,69 @@ def generate_bill(data):
     c.save()
     buffer.seek(0)
     return buffer
+
+
+
+
+
+def download_daily_schedule_csv(request, date):
+    # Get date from query parameters (default to today)
+    # date_str = request.GET.get('date')
+    date_str = date
+    try:
+        if date_str:
+            schedule_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        else:
+            schedule_date = datetime.now().date()
+    except ValueError:
+        return HttpResponse("Invalid date format. Use YYYY-MM-DD", status=400)
+
+    # Create the HTTP response with CSV header
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="room_schedule_{schedule_date}.csv"'
+
+    writer = csv.writer(response)
+    
+    # Generate time slots from 8:00 AM to 8:00 PM in 30-minute intervals
+    start_time = time(8, 0)
+    end_time = time(20, 0)
+    time_slots = []
+    current_time = datetime.combine(schedule_date, start_time)
+    end_datetime = datetime.combine(schedule_date, end_time)
+    
+    while current_time <= end_datetime:
+        time_slots.append(current_time.time())
+        current_time += timedelta(minutes=30)
+
+    # Get all rooms and active bookings for the day
+    rooms = Room.objects.all().order_by('name')
+    bookings = Booking.objects.filter(
+        booking_date=schedule_date,
+        status__in=['approved', 'completed']
+    )
+
+    # Write header row
+    header = ['Time Slot'] + [room.name for room in rooms]
+    writer.writerow(header)
+
+    # For each time slot, check room availability
+    for slot_start in time_slots:
+        slot_end = (datetime.combine(schedule_date, slot_start) + timedelta(minutes=30)).time()
+        row = [f"{slot_start.strftime('%H:%M')}-{slot_end.strftime('%H:%M')}"]
+        
+        for room in rooms:
+            # Check if room is booked during this time slot
+            booking = bookings.filter(
+                room=room,
+                start_time__lt=slot_end,
+                end_time__gt=slot_start
+            ).first()
+            
+            if booking:
+                row.append(f"{booking.title}")
+            else:
+                row.append("")
+        
+        writer.writerow(row)
+    # response.content = b"download will start........"
+    return response
