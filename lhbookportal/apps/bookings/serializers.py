@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from .models import Holiday
 from .models import *
 from django.utils import timezone
 import datetime
@@ -10,7 +11,7 @@ User = get_user_model()
 
 #TODO MAKE this more secure better password handling not exposing passwords, hashing passwords
 
-class Holiday(serializers.ModelSerializer):
+class HolidaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Holiday
         fields ='__all__'
@@ -65,7 +66,9 @@ class BookingSerializer(serializers.ModelSerializer):
 
 
         #holiday booking
-        if Holiday.objects.filter(date=booking_date).exists() or booking_date.weekday() == 6:
+        print(Holiday)
+        holidays = Holiday.objects.filter(date=booking_date)
+        if holidays.exists() or booking_date.weekday() == 6:
             raise serializers.ValidationError("Bookings cannot be made on holidays.")
 
 
