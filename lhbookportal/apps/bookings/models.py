@@ -43,7 +43,7 @@ class Booking(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     booking_date = models.DateField()
-    requested_on = models.DateTimeField()
+    requested_on = models.DateTimeField(auto_now_add=True)
     duration = models.PositiveSmallIntegerField(default= 0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     need_ac = models.BooleanField(default= False)
