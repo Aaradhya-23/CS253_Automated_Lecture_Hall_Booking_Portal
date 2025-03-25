@@ -254,12 +254,28 @@ class RoomSearchView(generics.ListAPIView):
 def approve_booking(request, token):
     booking = get_object_or_404(Booking, approval_token=token)
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
-    if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
-    
+    if booking.status != 'pending': return JsonResponse({"error": "This booking is not available for approval"}, status=400)
     booking.status = 'approved'
     booking.save()
+    
+    #if a pending requets is there for the same slot rooom. reject that booking
+    pending_bookings_same_slot = Booking.objects.filter(
+            Q(room=booking.room.id)&
+            Q(booking_date=booking.booking_date)&
+            (Q(start_time__lt=booking.end_time)&Q(start_time__gt=booking.start_time)) | 
+            (Q(end_time__gt=booking.start_time)&Q(end_time__lt=booking.end_time))
+    ).exclude(status='cancelled')  # Exclude cancelled bookings
 
-    # if booking.token_expiry < timezone.now():
+    if(pending_bookings_same_slot.exists()):
+        for pending in pending_bookings_same_slot:
+            pending.status = 'rejected'
+            pending.save()
+            send_mail(
+            'Booking Rejected',
+            f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
+            settings.DEFAULT_FROM_EMAIL,
+            [ pending.creator.email ],
+        )  
         
     
     # if booking.creator.role == 'student':

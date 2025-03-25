@@ -51,9 +51,17 @@ class Booking(models.Model):
     cost = models.PositiveBigIntegerField(default=0)
     remarks = models.CharField(max_length= 150, null = True, blank = True)
     
-    approval_token = models.CharField(max_length=36, unique=True, default=uuid.uuid4, editable=False)
+    approval_token = models.CharField(max_length=36, default=uuid.uuid4, unique = True, editable=False)
     token_expiry = models.DateTimeField(default=timezone.now() + timedelta(days=2))
 
     def __str__(self):
         return f"{self.creator.username} - {self.room.name} ({self.status})"
     
+    
+    
+class Holiday(models.Model):
+    date = models.DateField(unique=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"
