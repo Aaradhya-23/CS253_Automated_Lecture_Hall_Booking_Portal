@@ -46,6 +46,7 @@ class DownloadBillPDF(APIView):
         response = HttpResponse(buffer, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
         return response
+    
 class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 

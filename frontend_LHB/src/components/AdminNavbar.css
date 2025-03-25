@@ -1,0 +1,46 @@
+.admin-navbar {
+    width: 200px;
+    background-color: #EFF6FF; /* blue-50 */
+    padding: 16px;
+    height: 100vh;
+  }
+  
+  .admin-nav-item {
+    width: 100%;
+    border-radius: 9999px;
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    text-align: center;
+    background-color: #DBEAFE; /* blue-100 */
+    color: #1E3A8A; /* blue-900 */
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .admin-nav-item:hover {
+    background-color: #BFDBFE; /* blue-200 */
+  }
+  
+  .admin-nav-item.active {
+    background-color: #3B82F6; /* blue-500 */
+    color: white;
+  }
+  
+  .admin-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    font-size: 12px;
+    color: white;
+    background-color: #2563EB; /* blue-600 */
+    border-radius: 50%;
+  }
+  

@@ -1,0 +1,211 @@
+.admin-booking-main {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-date-range-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.admin-date-selector {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.admin-date-selector:hover {
+  background-color: #f0f0f0;
+}
+
+.admin-dropdown-arrow {
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.admin-date-separator {
+  margin: 0 10px;
+}
+
+.admin-filter-section {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.admin-filter-dropdown {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.admin-search-input {
+  flex: 1;
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.admin-date-header {
+  font-size: 16px;
+  color: #1a73e8;
+  margin-bottom: 15px;
+}
+
+.admin-bookings-list {
+  margin-top: 20px;
+}
+
+/* Updated booking item layout */
+.admin-booking-item {
+  display: flex;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  position: relative;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+}
+
+.admin-booking-item.highlighted {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.admin-time-indicator {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  min-width: 180px;
+}
+
+.admin-blue-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #1a73e8;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.admin-booking-item.highlighted .admin-blue-dot {
+  background-color: white;
+}
+
+.admin-time-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-duration {
+  font-size: 12px;
+  color: #666;
+}
+
+.admin-booking-item.highlighted .admin-duration {
+  color: #e0e0e0;
+}
+
+/* Split the booking details and actions */
+.admin-booking-info {
+  display: flex;
+  flex: 1;
+  padding: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-booking-item.highlighted .admin-booking-info {
+  background-color: #1a73e8;
+}
+
+.admin-room-info,
+.admin-professor-info,
+.admin-course-info {
+  flex: 1;
+  padding: 0 10px;
+}
+
+/* Improved booking actions styling */
+.admin-booking-actions {
+  padding: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-manage-btn {
+  background-color: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px 10px;
+  color: inherit;
+}
+
+/* Fixed dropdown positioning */
+.admin-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px); /* Position below the button */
+  width: 200px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000; /* High z-index to ensure it's on top */
+  color: #333; /* Reset text color for dropdown items */
+}
+
+.admin-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border: none;
+  background-color: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-dropdown-item .admin-icon {
+  margin-right: 10px;
+}
+
+.admin-dropdown-item .admin-trash {
+  color: #d32f2f;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .admin-booking-item {
+    flex-direction: column;
+  }
+  
+  .admin-booking-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-room-info,
+  .admin-professor-info,
+  .admin-course-info {
+    padding: 5px 0;
+  }
+}
