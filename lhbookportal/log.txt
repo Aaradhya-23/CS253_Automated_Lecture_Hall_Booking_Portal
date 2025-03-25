@@ -9,6 +9,7 @@ view requests no authentication required
 access token expires in 30 min
 use refresh token to get new access token
 
+resolve conflicts like 2 pending requests for the same slot
 
 
 #########

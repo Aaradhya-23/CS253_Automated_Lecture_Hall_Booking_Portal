@@ -5,11 +5,16 @@ from django.contrib.auth.password_validation import validate_password
 from .models import *
 from django.utils import timezone
 import datetime
-
+from django.db.models import Q
 User = get_user_model()
 
 #TODO MAKE this more secure better password handling not exposing passwords, hashing passwords
 
+class Holiday(serializers.ModelSerializer):
+    class Meta:
+        model = Holiday
+        fields ='__all__'
+        
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
@@ -50,8 +55,14 @@ class BookingSerializer(serializers.ModelSerializer):
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         booking_date = data.get('booking_date')
-        print(booking_date)
+        # print(booking_date)
         room = data.get('room')  # room is already a Room object
+
+
+        #holiday booking
+        if Holiday.objects.filter(date=booking_date).exists() or booking_date.weekday() == 6:
+            raise serializers.ValidationError("Bookings cannot be made on holidays.")
+
 
     # Combine booking_date and start_time/end_time into datetime objects
         if isinstance(start_time, str):
@@ -76,11 +87,13 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # 3. Ensure the room is available during the requested time slot
         conflicting_bookings = Booking.objects.filter(
-            room=room,
-            booking_date=booking_date,
-            start_time__lt=end_time,
-            end_time__gt=start_time,
+            Q(room=room)&
+            Q(booking_date=booking_date)&
+            (Q(start_time__lt=end_time)&Q(start_time__gt=start_time)) | 
+            (Q(end_time__gt=start_time)&Q(end_time__lt=end_time))
         ).exclude(status='cancelled')  # Exclude cancelled bookings
+        
+        
 
         if conflicting_bookings.exists():
             raise serializers.ValidationError("The room is already booked during this time.")
