@@ -1,20 +1,9 @@
-from django.shortcuts import render
-from django.db import models
+
 from apps.accounts.models import *
 from apps.bookings.models import *
 import os
 from django.contrib.auth import get_user_model
-from rest_framework import generics, authentication, permissions, mixins, filters, status
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import *
-from django.http import JsonResponse
-from rest_framework.permissions import IsAuthenticated
-from django.utils.timezone import now
-from rest_framework.throttling import UserRateThrottle
 User = get_user_model()
-from django.core.mail import send_mail
-from django.urls import reverse
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -26,12 +15,10 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 import csv
 from datetime import time, datetime, timedelta
-from .models import Holiday
 from apps.bookings.permissions import BookingPermissions
 
 # from datetime import timedelta, datetime
 # from django.utils import timezone
-from rest_framework.response import Response
 
 
 

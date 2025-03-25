@@ -38,11 +38,11 @@ class Booking(models.Model):
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='bookings')
     title = models.CharField(max_length=100)
     Type = models.CharField(max_length = 20, choices = TYPE_CHOICES, default = 'nonacademic')
-    room = models.ForeignKey(Room, null = True, blank = True, on_delete=models.DO_NOTHING)
+    room = models.ForeignKey(Room, on_delete=models.DO_NOTHING)
     start_time = models.TimeField()
     end_time = models.TimeField()
     booking_date = models.DateField()
-    requested_on = models.DateTimeField()
+    requested_on = models.DateTimeField(null= True, blank=  True, default= timezone.now())
     duration = models.PositiveSmallIntegerField(default = 1)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
