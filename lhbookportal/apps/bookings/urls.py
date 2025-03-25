@@ -13,7 +13,5 @@ urlpatterns = [
     path('rooms/search/', RoomSearchView.as_view(), name = 'room-search'),
     path('approve/<str:token>/', approve_booking, name='approve-booking'),
     path('reject/<str:token>/', reject_booking, name='reject-booking'),
-    path('download/bill/<int:booking_id>/', DownloadBillPDF.as_view(), name='download bill'),
-    path('download/bookings/<str:date>/', download_daily_schedule_csv, name = 'download_csv'),
     path('slots/', AvailableBookingSlotsView.as_view(), name='view_available_booking_slot'),
 ]
