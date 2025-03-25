@@ -1,6 +1,6 @@
 import os
 from django.contrib.auth import get_user_model
-from rest_framework import generics, authentication, permissions, mixins, filters
+from rest_framework import generics, authentication, permissions, mixins, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from django.http import JsonResponse
@@ -24,6 +24,95 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 import csv
 from datetime import time, datetime, timedelta
+from .models import Holiday
+
+# from datetime import timedelta, datetime
+# from django.utils import timezone
+from rest_framework.response import Response
+# from rest_framework import generics, status
+# from .models import Booking, Room
+# from .serializers import BookingSerializer
+
+class AvailableBookingSlotsView(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        booking_date = request.data.get("booking_date")  # YYYY-MM-DD
+        start_time = request.data.get("start_time")  # HH:MM
+        end_time = request.data.get("end_time")  # HH:MM
+        duration = int(request.data.get("duration", 1))  # Duration in hours
+
+        # Room preferences
+        room_id = request.data.get("room")  # Optional
+        capacity = int(request.data.get("capacity", 1))  # Minimum capacity
+        need_projector = request.data.get("need_projector", False)
+        need_blackboard = request.data.get("need_blackboard", False)
+        need_ac = request.data.get("need_ac", False)
+
+        # Validate input
+        if not booking_date or not start_time or not end_time:
+            return Response({"error": "booking_date, start_time, and end_time are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Convert times to datetime objects
+        start_time = datetime.strptime(start_time, "%H:%M").time()
+        end_time = datetime.strptime(end_time, "%H:%M").time()
+        booking_date = datetime.strptime(booking_date,"%Y-%m-%d" )
+
+        if start_time >= end_time:
+            return Response({"error": "end_time must be later than start_time."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure booking is not on a holiday (every Sunday)
+        holidays = Holiday.objects.filter(date=booking_date)
+        if booking_date.weekday() == 6 or (holidays.exists()):  # Sunday
+            return Response({"error": "Bookings cannot be made on Holidays"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get all available rooms that match the criteria
+        if room_id:
+            rooms = Room.objects.filter(id=room_id)
+        else:
+            rooms = Room.objects.filter(
+                capacity__gte=capacity,
+                has_projector=need_projector,
+                has_board=need_blackboard,
+                has_ac=need_ac,
+            )
+
+        if not rooms.exists():
+            return Response({"error": "No rooms match the given criteria."}, status=status.HTTP_400_BAD_REQUEST)
+
+        available_slots = []
+
+        # Loop through each matching room to find available slots
+        for room in rooms:
+            current_time = timezone.datetime.strptime(request.data.get("start_time"), "%H:%M")
+            end_time_limit = timezone.datetime.strptime(request.data.get("end_time"), "%H:%M")
+
+            while current_time + timedelta(hours=duration) <= end_time_limit:
+                overlapping_bookings = Booking.objects.filter(
+                    room=room,
+                    booking_date=booking_date,
+                    start_time__lt=current_time + timedelta(hours=duration),
+                    end_time__gt=current_time
+                ).exists()
+                
+                
+
+                if not overlapping_bookings:
+                    available_slots.append({
+                        "room_id": room.id,
+                        "room_name": room.name,
+                        "start_time": current_time.strftime("%H:%M"),
+                        "end_time": (current_time + timedelta(hours=duration)).strftime("%H:%M")
+                    })
+
+                # Move in 30-minute intervals to find more slots
+                current_time += timedelta(minutes=30)
+
+        if not available_slots:
+            return Response({"error": "No available slots found."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+
+
+
 
 class DownloadBillPDF(APIView):
     permission_classes = [BookingPermissions]
@@ -67,6 +156,7 @@ class BookingCRUDView(
         validated_data = serializer.validated_data
         room = validated_data['room']  # Access the room object directly
         duration = validated_data['duration']
+        
 
         # Determine Type and status based on user role
         Type = validated_data.get('Type')
@@ -262,20 +352,20 @@ def approve_booking(request, token):
     pending_bookings_same_slot = Booking.objects.filter(
             Q(room=booking.room.id)&
             Q(booking_date=booking.booking_date)&
-            (Q(start_time__lt=booking.end_time)&Q(start_time__gt=booking.start_time)) | 
-            (Q(end_time__gt=booking.start_time)&Q(end_time__lt=booking.end_time))
-    ).exclude(status='cancelled')  # Exclude cancelled bookings
+            Q(start_time__lt=booking.end_time, end_time__gt=booking.start_time) 
+    )  # Exclude cancelled bookings
 
     if(pending_bookings_same_slot.exists()):
         for pending in pending_bookings_same_slot:
-            pending.status = 'rejected'
-            pending.save()
-            send_mail(
-            'Booking Rejected',
-            f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
-            settings.DEFAULT_FROM_EMAIL,
-            [ pending.creator.email ],
-        )  
+            if pending.status == 'pending':
+                pending.status = 'rejected'
+                send_mail(
+                'Booking Rejected',
+                f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
+                settings.DEFAULT_FROM_EMAIL,
+                [ pending.creator.email ],
+            )  
+                pending.delete()
         
     
     # if booking.creator.role == 'student':
@@ -302,7 +392,6 @@ def reject_booking(request, token):
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
 
     booking.status = 'rejected'
-    booking.save()
 
     # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
     #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
@@ -314,6 +403,7 @@ def reject_booking(request, token):
         [ booking.creator.email ],
     )
 
+    booking.delete()
     return HttpResponse("Booking rejected successfully!, You may close this page now")
 
 
