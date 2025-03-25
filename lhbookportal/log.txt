@@ -11,6 +11,11 @@ use refresh token to get new access token
 
 resolve conflicts like 2 pending requests for the same slot
 
+can user request if a request is pending for that slot 
+???
+only allow requets on empty slots 
+
+
 
 #########
 EMAIL 

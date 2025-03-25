@@ -54,6 +54,11 @@ class BookingSerializer(serializers.ModelSerializer):
         
         start_time = data.get('start_time')
         end_time = data.get('end_time')
+        
+        # if(not start_time and not end_time):
+            
+        
+        
         booking_date = data.get('booking_date')
         # print(booking_date)
         room = data.get('room')  # room is already a Room object
@@ -89,8 +94,7 @@ class BookingSerializer(serializers.ModelSerializer):
         conflicting_bookings = Booking.objects.filter(
             Q(room=room)&
             Q(booking_date=booking_date)&
-            (Q(start_time__lt=end_time)&Q(start_time__gt=start_time)) | 
-            (Q(end_time__gt=start_time)&Q(end_time__lt=end_time))
+            Q(start_time__lt=end_time, end_time__gt=start_time) 
         ).exclude(status='cancelled')  # Exclude cancelled bookings
         
         
