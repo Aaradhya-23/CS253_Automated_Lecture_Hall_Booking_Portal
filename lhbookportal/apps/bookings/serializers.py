@@ -43,12 +43,15 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    room = RoomSerializer()
     booking_date = serializers.DateField()
     class Meta:
         model = Booking
-        fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token']  # Fields not set by the user
+        # fields = '__all__'
+        #ensure passwords and approval_token are not exposed 
+        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
+        exclude = ['approval_token', 'token_expiry' , 'creator']
         depth = 1
 
     def validate(self, data):
