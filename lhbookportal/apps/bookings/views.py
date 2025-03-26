@@ -96,6 +96,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
                         "slot_id" : slot_id,
                         "room_id": room.id,
                         "room_name": room.name,
+                        "room.price" : room.price_per_hour,
                         "start_time": current_time.strftime("%H:%M"),
                         "end_time": (current_time + timedelta(hours=duration)).strftime("%H:%M")
                     })
@@ -253,7 +254,7 @@ class RoomCRUDView(
 ):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = [IsAdmin]  # Restrict access to authenticated users
+    permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
 
     def perform_create(self, serializer):
