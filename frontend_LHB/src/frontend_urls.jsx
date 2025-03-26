@@ -8,6 +8,7 @@ const FRONTEND_ROUTES = {
     help: "/help",
     status: "/status",
     adminViewBooking: "/admin-view-booking",
+    viewPending: "admin/view-pending",
   };
 
 export default FRONTEND_ROUTES

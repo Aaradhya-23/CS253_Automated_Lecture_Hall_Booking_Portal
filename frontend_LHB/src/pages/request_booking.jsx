@@ -5,7 +5,7 @@
 // - Example: const [formData, setFormData] = useState({ hall: '', date: '', startTime: '', endTime: '', purpose: '', additionalEquipment: '' })
 
 // 2. API Integration Points:
-// - Import axios: import axios from 'axios'
+// - Import api: import axios from 'axios'
 // - Create API service file at: src/services/api.js with all endpoint definitions
 // - Base API URL should be configurable via environment variable
 
@@ -48,21 +48,28 @@
 // - Check user permissions before allowing submission
 // - Redirect to login if auth token is expired
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../api/api';
+import { ACCESS_TOKEN } from '../api/constants';
+
 import './Request_Booking.css';
 
 const Request_Booking = () => {
   // State for form fields
+  const [roomOptions, setRoomOptions] = useState([]);
+  const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
+  const [capacityOptions, setCapacityOptions] = useState([]);
   const [purpose, setPurpose] = useState('');
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('8:00 AM');
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('8:30 AM');
   const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
-  const [selectedHall, setSelectedHall] = useState('LH18');
+  const [selectedHall, setSelectedHall] = useState('');
   const [capacity, setCapacity] = useState('');
-  const [accessories, setAccessories] = useState([]);
-  
+  const [accessoryOptions, setAccessoryOptions] = useState([]);
+  const [selectedAccessories, setSelectedAccessories] = useState([]);
+
   // Time options for dropdowns
   const timeOptions = [
     '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
@@ -76,42 +83,203 @@ const Request_Booking = () => {
     'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
   ];
 
-  // Hall options
-  const hallOptions = ['LH18', 'LH19', 'LH20', 'LH21'];
+// fetch rooms from the database
+useEffect(() => {
+  const fetchRooms = async () => {
+    console.log("here")
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (!token) {
+      console.log("here")
+      console.error("No token found. User is not authenticated.");
+      return;
+    }
+    console.log(token)
+    try {
+      console.log("here")
+      const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      console.log("here")
+      const rooms = Array.isArray(response.data) ? response.data : response.data.rooms;
+      setRoomOptions(rooms); 
+      setFilteredRoomOptions(rooms);
+      console.log(rooms)
+      // Continue with the rest of your code
+      // try {
+        // Extract unique capacities
+        const uniqueCapacities = [];
+        for (let i = 0; i < rooms.length; i++) {
+          const capacity = rooms[i].capacity;
+          if (!uniqueCapacities.includes(capacity)) {
+            uniqueCapacities.push(capacity);
+          }
+        }
+        setCapacityOptions(uniqueCapacities.sort((a, b) => a - b));
+      
+        // Extract all accessories
+        const allAccessories = [];
+        for (let i = 0; i < rooms.length; i++) {
+          const accessories = rooms[i].accessories;
+          for (const accessory in accessories) {
+            if (accessories[accessory]) {
+              allAccessories.push(accessory);
+            }
+          }
+        }
+      
+        // Filter unique accessories
+        const uniqueAccessories = [];
+        for (let i = 0; i < allAccessories.length; i++) {
+          const accessory = allAccessories[i];
+          if (!uniqueAccessories.includes(accessory)) {
+            uniqueAccessories.push(accessory);
+          }
+        }
+      
+        setAccessoryOptions(uniqueAccessories);
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
+  };
 
-  // Capacity options
-  const capacityOptions = [
-    '30', '50', '100', '150', '200'
-  ];
+  fetchRooms();
+}, []);
 
-  // Accessories options
-  const accessoryOptions = [
-    'Projector', 'Microphone', 'Whiteboard', 'Computer', 'Speaker System'
-  ];
+  // Filter room options based on selected capacity and accessories
+  useEffect(() => {
+    const filterRooms = () => {
+      let filtered = roomOptions;
+
+      // Filter by capacity
+      if (capacity) {
+        filtered = filtered.filter((room) => room.capacity >= parseInt(capacity));
+      }
+
+      // Filter by selected accessories
+      if (selectedAccessories.length > 0) {
+        filtered = filtered.filter((room) =>
+          selectedAccessories.every((accessory) => room.accessories[accessory])
+        );
+      }
+
+      setFilteredRoomOptions(filtered);
+    };
+
+    filterRooms();
+  }, [capacity, selectedAccessories, roomOptions]);
 
   // Calculate duration between start and end time
   const calculateDuration = () => {
     if (!startTime || !endTime) return '';
-    
-    // Simple calculation for demo purposes
-    return '30 minutes';
+  
+    // Parse the time strings into Date objects
+    const parseTime = (time) => {
+      const [hours, minutes, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
+      let totalMinutes = parseInt(hours) % 12 * 60 + parseInt(minutes); // Convert hours and minutes to total minutes
+      if (period === 'PM') totalMinutes += 12 * 60; // Add 12 hours for PM times
+      return totalMinutes;
+    };
+  
+    const startMinutes = parseTime(startTime);
+    const endMinutes = parseTime(endTime);
+  
+    // Calculate the duration in minutes
+    const duration = endMinutes - startMinutes;
+  
+    // Handle cases where endTime is earlier than startTime (e.g., overnight bookings)
+    if (duration < 0) return 'Invalid time range';
+  
+    return `${duration} minutes`;
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Booking submitted!');
-    // In a real application, you would send this data to your backend
+    const formatTime = (time) => {
+      // Match time in the format of 'hh:mm AM/PM'
+      const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
+      let hours = parseInt(hour);
+      let minutes = parseInt(minute);
+    
+      // Convert 12-hour format to 24-hour format
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+    
+      // Return time in 24-hour format with seconds always set to '00'
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    };
+  
+    // Format start and end times
+    const formattedStartTime = formatTime(startTime);
+    const formattedEndTime = formatTime(endTime);
+    // Prepare the data to be sent to the backend
+    const bookingData = {
+      title: purpose,
+      booking_date: startDate,
+      start_time: formattedStartTime,
+      end_time: formattedEndTime,
+      room: selectedHall,
+      duration: Math.abs(new Date(`${endDate}T${formattedEndTime}`) - new Date(`${startDate}T${formattedStartTime}`)) / (1000 * 60 * 60),
+      Type:'academic',
+      remarks: purpose,
+      accessories: selectedAccessories.reduce((acc, accessory) => {
+        acc[accessory] = true;
+        return acc;
+      }, {}),
+    };
+    console.log("here");
+  
+    try {
+      // Make a POST request to the backend
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      if (!token) {
+        console.log("here")
+        console.error("No token found. User is not authenticated.");
+        return;
+      }
+      const response = await api.post(import.meta.env.VITE_REQUEST_BOOKING_URL, bookingData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token in the header
+          'Content-Type': 'application/json', // Ensure the server knows you're sending JSON data
+          'Accept': 'application/json', // Optional: to specify that you expect JSON in response
+        },
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        // Show success notification
+        alert('Booking successful!');
+  
+        // Clear the form
+        setPurpose('');
+        setStartDate('');
+        setStartTime('8:00 AM');
+        setEndDate('');
+        setEndTime('8:30 AM');
+        setRepeatOption('Does Not Repeat');
+        setSelectedHall('');
+        setCapacity('');
+        setSelectedAccessories([]);
+      } else {
+        // Show error notification
+        alert('Booking unsuccessful. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      // Show error notification
+      alert('Booking unsuccessful. Please try again.');
+    }
   };
 
-  // Handle add hall
-  const handleAddHall = () => {
-    alert('Feature to add another hall would be implemented here');
-  };
-
-  // Handle add accessory
-  const handleAddAccessory = () => {
-    alert('Feature to add accessories would be implemented here');
+  const handleAccessoryChange = (accessory, isChecked) => {
+    if (isChecked) {
+      // Add the accessory to the selectedAccessories array
+      setSelectedAccessories((prev) => [...prev, accessory]);
+    } else {
+      // Remove the accessory from the selectedAccessories array
+      setSelectedAccessories((prev) => prev.filter((item) => item !== accessory));
+    }
   };
 
   return (
@@ -211,20 +379,19 @@ const Request_Booking = () => {
           <div className="form-group">
             <div className="section-header">
               <label>Lecture Hall</label>
-              <span className="badge">1</span>
-              <button 
-                type="button" 
-                className="add-btn"
-                onClick={handleAddHall}
-              >
-                Add <span className="circle-icon">⊕</span>
-              </button>
             </div>
-            <div className="hall-selection">
-              <div className="selected-hall">
-                {selectedHall} <span className="info-icon">ⓘ</span>
-              </div>
-            </div>
+            <select
+              value={selectedHall}
+              onChange={(e) => setSelectedHall(e.target.value)}
+              className="form-control"
+            >
+              <option value="">Select a Lecture Hall</option>
+              {filteredRoomOptions.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name} (Capacity: {room.capacity})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
@@ -247,19 +414,26 @@ const Request_Booking = () => {
           <div className="form-group">
             <div className="section-header">
               <label>Accessories</label>
-              <span className="badge">0</span>
-              <button 
-                type="button" 
-                className="add-btn"
-                onClick={handleAddAccessory}
-              >
-                Add <span className="circle-icon">⊕</span>
-              </button>
+            </div>
+            <div className="checkbox-group">
+              {accessoryOptions.map((accessory) => (
+                <div key={accessory} className="checkbox-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      value={accessory}
+                      checked={selectedAccessories.includes(accessory)}
+                      onChange={(e) => handleAccessoryChange(e.target.value, e.target.checked)}
+                    />
+                    {accessory}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="submit-btn">SUBMIT</button>
+            <button className="submit-btn">SUBMIT</button>
           </div>
         </form>
       </div>
