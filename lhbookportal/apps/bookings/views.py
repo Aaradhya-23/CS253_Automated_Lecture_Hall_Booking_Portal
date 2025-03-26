@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from rest_framework.views import APIView
 
+# <<<<<<< HEAD
 
 from datetime import time, datetime, timedelta
 from .models import Holiday
@@ -114,6 +115,30 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
 
 
 
+# =======
+# class DownloadBillPDF(APIView):
+#     permission_classes = [BookingPermissions]
+#     def get(self, request, booking_id):
+#         # Get booking data (replace with your actual query)
+#         booking = get_object_or_404(Booking, id=booking_id)
+        
+        
+#         # Create PDF buffer
+#         data = {
+#             "booking_ref" : str(booking.id),
+#             "event_name": booking.title,
+#             "date": str(booking.booking_date),
+#             "time": str(booking.start_time),
+#             "hall_name": booking.room.name,
+#             "booked_by": booking.creator.username,
+#             "charges": str(booking.cost),
+#         }
+#         buffer = generate_bill(data)
+#         response = HttpResponse(buffer, content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
+#         return response
+    
+# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
 class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 
