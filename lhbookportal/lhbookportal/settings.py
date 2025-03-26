@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'apps.email_services',
     'apps.reports',
     'django_filters',
+    'corsheaders', # The corsheaders are basically used to tell our browser that our app is running at an origin and we want to access our backend through different origin which in our case is react frontend. 
 ]
 
 MIDDLEWARE = [
@@ -101,9 +102,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'lhbookportal.urls'
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
@@ -158,11 +161,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+    
 USE_I18N = True
 
+TIME_ZONE = 'Asia/Kolkata'  # For IST (UTC +5:30)
 USE_TZ = True
 
 
