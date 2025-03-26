@@ -42,8 +42,13 @@ class Booking(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     booking_date = models.DateField()
+# <<<<<<< HEAD
     requested_on = models.DateTimeField(null= True, blank=  True, default= timezone.now())
     duration = models.PositiveSmallIntegerField(default = 1)
+# =======
+#     requested_on = models.DateTimeField(auto_now_add=True)
+#     duration = models.PositiveSmallIntegerField(default= 0)
+# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
     need_ac = models.BooleanField(null = True, blank = True, default= False)

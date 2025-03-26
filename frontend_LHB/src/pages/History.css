@@ -1,0 +1,114 @@
+.history-container {
+    width: 100%;
+    padding: 20px;
+    background-color: #f5f8ff;
+    border-radius: 8px;
+  }
+  
+  .history-title {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+  }
+  
+  .bookings-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .bookings-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 0.5fr;
+    background-color: #6777ef;
+    color: white;
+    font-weight: 500;
+    border-radius: 4px 4px 0 0;
+  }
+  
+  .header-cell {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 0.5fr;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .cell {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  .download-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6777ef;
+  }
+  
+  .download-button:hover {
+    color: #4a5ac9;
+  }
+  
+  .total-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+    padding: 8px 15px;
+  }
+  
+  .total-section span {
+    background-color: #b7c4ff;
+    padding: 6px 15px;
+    border-radius: 15px;
+    font-weight: 500;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .table-header, .table-row {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+    
+    .header-cell.time, .cell.time,
+    .header-cell.hall, .cell.hall,
+    .header-cell.download, .cell.download {
+      display: none;
+    }
+    
+    .total-section {
+      justify-content: center;
+    }
+  }

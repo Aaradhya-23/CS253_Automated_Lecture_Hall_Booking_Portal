@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    flex-grow: 1;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 24px;
+    background-color: #F9FAFB; /* gray-50 */
+  }
+  
+  .content-card {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  
+  .toggle-button {
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    background-color: #E5E7EB; /* gray-200 */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }

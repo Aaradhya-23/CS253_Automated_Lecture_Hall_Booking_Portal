@@ -17,13 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from apps.bookings.views import BookingCRUDView
+from .views import CustomTokenObtainPairView
 
 urlpatterns = [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Login to get token
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Refresh token
-    path('admin/', admin.site.urls),  # Django Admin Panel
-    path('accounts/', include('apps.accounts.urls')),  # Routes to apps.accounts.urls
-    path('bookings/', include('apps.bookings.urls')),  # Routes to apps.bookings.urls
-    path('status/', include('apps.email_services.urls')),  # Routes to apps.email_services.urls
-    path('reports/', include('apps.reports.urls')),  # Routes to apps.reports.urls
+    path('', BookingCRUDView.as_view(), name='home'),  # Default view at '/'
+    path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('admin/', admin.site.urls),  # Admin Panel
+    path('accounts/', include('apps.accounts.urls')),  # Accounts App
+    path('bookings/', include('apps.bookings.urls')),  # Bookings App
+    path('email/', include('apps.email_services.urls')),  # Email Services App
+    path('reports/', include('apps.reports.urls')),  # Reports App
 ]

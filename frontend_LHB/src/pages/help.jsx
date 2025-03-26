@@ -1,38 +1,44 @@
-import React, { useState } from 'react';
-import './HelpPage.css';
-const HelpPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
+import React from 'react'
 
+// TODO: Backend Integration Comments:
+
+// 1. Help Content Fetching:
+// - Replace placeholder with dynamic help content
+// - Create src/api/content.js for CMS-related endpoints
+// - Fetch help articles via GET /api/content/help
+// - Support markdown or HTML content rendering
+
+// 2. Search Functionality:
+// - Implement help content search
+// - Call GET /api/content/help/search?query=...
+// - Add typeahead/autocomplete for better UX
+
+// 3. Categories and Navigation:
+// - Fetch help categories from backend
+// - Organize help content in expandable sections
+// - Add breadcrumb navigation for deep content
+
+// 4. User Context:
+// - Show personalized help based on user role
+// - Pre-filter content relevant to current user actions
+// - Track commonly accessed help topics
+
+// 5. Interactive Elements:
+// - Add FAQ section with expandable answers
+// - Implement guided tutorials/walkthroughs
+// - Include video embeds if applicable
+
+// 6. Feedback on Help Content:
+// - Add "Was this helpful?" buttons
+// - Send feedback via POST /api/content/help/{id}/feedback
+// - Track most useful/least useful articles
+
+const Help = () => {
   return (
-    <div className="help-container">
-      <h1>Help Center</h1>
-      <div className="help-content">
-        <p>Below is a PDF guide containing answers to common questions about the IIT-K Lecture Hall Booking system:</p>
-        
-        <div className="pdf-container">
-          {isLoading && <div className="loading">Loading PDF...</div>}
-          <iframe 
-            src="/path-to-your-help-document.pdf"
-            title="IIT-K Lecture Hall Booking Help Guide"
-            width="100%" 
-            height="600px"
-            onLoad={() => setIsLoading(false)}
-            style={{border: '1px solid #ccc', borderRadius: '4px'}}
-          />
-        </div>
-        
-        <div className="additional-help">
-          <h2>Quick Support</h2>
-          <p>If you can't find what you're looking for in the guide, please contact:</p>
-          <ul>
-            <li>Email: support_lhc@iitk.ac.in</li>
-            <li>Phone: (123) 456-7890</li>
-            <li>Office: Academic Building, Room 105</li>
-          </ul>
-        </div>
-      </div>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '3rem' }}>
+        Help to mujhe bhi chahiye bhai pr duniya madrchod h
     </div>
-  );
-};
+  )
+}
 
-export default HelpPage;
+export default Help
