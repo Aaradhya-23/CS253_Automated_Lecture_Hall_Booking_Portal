@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useState, useEffect } from "react";
 import {
   Route,
@@ -13,9 +12,9 @@ import CreateUser from "./pages/CreateUser";
 import LiveSchedule from "./pages/LiveSchedule";
 import Feedback from "./pages/Feedback";
 import Request_Booking from "./pages/Request_Booking";
-import Help from "./pages/Help";
+// import Help from "./pages/Help";
 import Status from "./pages/Status";
-import UserHistory from "./pages/UserHistory";
+import UserHistory from "./pages/History";
 import Adminviewbooking from "./pages/Adminviewbooking";
 
 // Import navbar components
@@ -39,6 +38,7 @@ const App = () => {
     if (token) {
       setIsLoggedIn(true);
       const role = localStorage.getItem('ROLE');
+      api.defaults.headers['Authorization'] = `Bearer ${token}`;
       if (role) {
         setUserRole(role);
       }
@@ -48,8 +48,7 @@ const App = () => {
   // Show navbar only if logged in and not on login or register pages
   const showNavbar =
     isLoggedIn &&
-    location.pathname !== FRONTEND_ROUTES.login &&
-    location.pathname !== FRONTEND_ROUTES.register;
+    location.pathname !== FRONTEND_ROUTES.login;
 
   // Function to handle login using the backend API endpoint
   const handleLogin = async (username, password) => {
@@ -58,8 +57,8 @@ const App = () => {
       console.log(import.meta.env.VITE_API_URL); // Should print "http://127.0.0.1:8000/"
       console.log(import.meta.env.VITE_LOGIN_URL); // Should print "auth/login/"
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_LOGIN_URL}`,
+      const response = await api.post(
+        import.meta.env.VITE_LOGIN_URL,
         {
           username,
           password,
@@ -156,13 +155,12 @@ const App = () => {
 
             {/* Public routes */}
             <Route path={FRONTEND_ROUTES.feedback} element={<Feedback />} />
-            <Route path={FRONTEND_ROUTES.home} element={<LiveSchedule />} />
 
             {/* Protected routes for regular users */}
             <Route
               path={FRONTEND_ROUTES.history}
               element={
-                <ProtectedRoute role="user">
+                <ProtectedRoute role={["user", "admin"]}>
                   <UserHistory />
                 </ProtectedRoute>
               }
@@ -170,19 +168,19 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.requestBooking}
               element={
-                <ProtectedRoute role="user">
+                <ProtectedRoute role={["user", "admin"]}>
                   <Request_Booking />
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path={FRONTEND_ROUTES.help}
               element={
-                <ProtectedRoute role="user">
+                <ProtectedRoute role={["user", "admin"]}>
                   <Help />
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path={FRONTEND_ROUTES.status}
               element={

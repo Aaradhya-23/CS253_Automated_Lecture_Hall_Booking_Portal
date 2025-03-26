@@ -1,14 +1,15 @@
 import React from 'react';
 import './AdminNavbar.css';
+import FRONTEND_ROUTES from '../frontend_urls';
 
 const AdminNavbar = ({ onNavigate, currentPath }) => {
   // Map of navigation items to their respective routes
   const navItems = [
-    { name: 'New', path: '/request_booking' },
-    { name: 'Live Schedule', path: '/live_schedule' },
-    { name: 'History', path: '/admin_view_booking' }, // Assuming Home page has history
-    { name: 'View Pending', path: '/pending' }, // You'll need to add this route
-    { name: 'Create New User', path: '/create_user' }, // You'll need to add this route
+    { name: 'New', path: FRONTEND_ROUTES.requestBooking },
+    { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
+    { name: 'History', path: FRONTEND_ROUTES.adminViewBooking }, // Assuming Home page has history
+    { name: 'View Pending', path: FRONTEND_ROUTES.viewPending }, // You'll need to add this route
+    { name: 'Create New User', path: FRONTEND_ROUTES.register }, // You'll need to add this route
   ];
 
   return (

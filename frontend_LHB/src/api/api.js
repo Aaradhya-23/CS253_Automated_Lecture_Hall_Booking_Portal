@@ -5,6 +5,10 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     timeout: 10000,
+    headers: {
+      'Content-Type': 'application/json',  // Ensure Content-Type is set
+      'Accept': 'application/json',       // Ensure server knows that you expect JSON responses
+    },
 });
 // Response interceptor
 api.interceptors.response.use(
