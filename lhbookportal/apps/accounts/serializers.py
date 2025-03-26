@@ -16,10 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'authority_email', 'password']
+        # fields = ['id', 'username', 'email', 'role', 'authority_email']
+        # exclude = ['password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions']
         extra_kwargs = {
             'password': {'write_only': True}  # Ensure password is write-only
         }
-        read_only = ['total_bill']
+        read_only_fields = ['total_bill']
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)  # Remove password from validated_data

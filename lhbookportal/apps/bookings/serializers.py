@@ -4,6 +4,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from .models import Holiday
 from .models import *
+from apps.accounts.serializers import UserSerializer
 from django.utils import timezone
 import datetime
 from django.db.models import Q
@@ -46,13 +47,14 @@ class BookingSerializer(serializers.ModelSerializer):
     # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
     room = RoomSerializer()
     booking_date = serializers.DateField()
+    creator = UserSerializer()
     class Meta:
         model = Booking
 
         # fields = '__all__'
         #ensure passwords and approval_token are not exposed 
         read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
-        exclude = ['approval_token', 'token_expiry' , 'creator']
+        exclude = ['approval_token', 'token_expiry' ]
 
         depth = 1
 
