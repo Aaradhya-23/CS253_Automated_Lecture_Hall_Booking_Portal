@@ -23,10 +23,6 @@ alhbp/
 .vscode/
 .idea/
 
-# Environment Variables
-.env
-.env.*
-
 # Static Files
 generatedstaticfiles/
 

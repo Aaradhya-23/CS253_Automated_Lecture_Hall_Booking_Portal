@@ -49,7 +49,7 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token']  # Fields not set by the user
+        read_only_fields = ['status', 'creator', 'requested_on', 'duration', 'cost', 'approval_token']  # Fields not set by the user
         depth = 1
 
     def validate(self, data):
