@@ -43,7 +43,8 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    room = RoomSerializer()
     booking_date = serializers.DateField()
     class Meta:
         model = Booking

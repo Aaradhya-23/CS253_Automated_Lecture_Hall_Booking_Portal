@@ -15,8 +15,6 @@ from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from rest_framework.views import APIView
-
 
 from datetime import time, datetime, timedelta
 from .models import Holiday
@@ -240,7 +238,7 @@ class UserBookingHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         """Return only the bookings of the logged-in user"""
-        return Booking.objects.filter(user=self.request.user).order_by('-requested_on')
+        return Booking.objects.filter(creator=self.request.user).order_by('-requested_on')
 
 
 class RoomCRUDView(
@@ -253,7 +251,7 @@ class RoomCRUDView(
 ):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = [IsAdmin]  # Restrict access to authenticated users
+    permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
 
     def perform_create(self, serializer):
