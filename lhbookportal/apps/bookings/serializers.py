@@ -48,10 +48,12 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_date = serializers.DateField()
     class Meta:
         model = Booking
+
         # fields = '__all__'
         #ensure passwords and approval_token are not exposed 
         read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
         exclude = ['approval_token', 'token_expiry' , 'creator']
+
         depth = 1
 
     def validate(self, data):
