@@ -272,14 +272,12 @@ useEffect(() => {
     }
   };
 
-  const handleAccessoryChange = (accessory, isChecked) => {
-    if (isChecked) {
-      // Add the accessory to the selectedAccessories array
-      setSelectedAccessories((prev) => [...prev, accessory]);
-    } else {
-      // Remove the accessory from the selectedAccessories array
-      setSelectedAccessories((prev) => prev.filter((item) => item !== accessory));
-    }
+  const handleAccessoryChange = (accessory) => {
+    setSelectedAccessories((prev) =>
+      prev.includes(accessory)
+        ? prev.filter((item) => item !== accessory) // Remove if already selected
+        : [...prev, accessory] // Add if not selected
+    );
   };
 
   return (
@@ -297,18 +295,6 @@ useEffect(() => {
               className="form-control"
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="user">user</label>
-            <input 
-              type="text" 
-              id="user" 
-              value="Pclub IITK" 
-              readOnly 
-              className="form-control"
-            />
-          </div>
-
           <div className="form-row">
             <div className="form-column">
               <label>Begin</label>
@@ -353,14 +339,6 @@ useEffect(() => {
                 </select>
               </div>
             </div>
-
-            <div className="duration-indicator">
-              {calculateDuration()}
-            </div>
-
-            <div className="availability-indicator">
-              Available
-            </div>
           </div>
 
           <div className="form-group">
@@ -377,28 +355,7 @@ useEffect(() => {
           </div>
 
           <div className="form-group">
-            <div className="section-header">
-              <label>Lecture Hall</label>
-            </div>
-            <select
-              value={selectedHall}
-              onChange={(e) => setSelectedHall(e.target.value)}
-              className="form-control"
-            >
-              <option value="">Select a Lecture Hall</option>
-              {filteredRoomOptions.map((room) => (
-                <option key={room.id} value={room.name}>
-                  {room.name} (Capacity: {room.capacity})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <div className="section-header">
               <label>Capacity</label>
-              <span className="badge">0</span>
-            </div>
             <select 
               value={capacity} 
               onChange={(e) => setCapacity(e.target.value)}
@@ -415,25 +372,58 @@ useEffect(() => {
             <div className="section-header">
               <label>Accessories</label>
             </div>
-            <div className="checkbox-group">
+            <div className="accessories-grid">
               {accessoryOptions.map((accessory) => (
-                <div key={accessory} className="checkbox-item">
-                  <label>
-                    <input
-                      type="checkbox"
-                      value={accessory}
-                      checked={selectedAccessories.includes(accessory)}
-                      onChange={(e) => handleAccessoryChange(e.target.value, e.target.checked)}
-                    />
-                    {accessory}
-                  </label>
-                </div>
+                <button
+                  key={accessory}
+                  type="button"
+                  className={`accessory-btn ${selectedAccessories.includes(accessory) ? 'selected' : ''}`}
+                  onClick={() => handleAccessoryChange(accessory)}
+                >
+                  {accessory}
+                </button>
               ))}
             </div>
           </div>
 
+          {capacity && (
+          <div className="form-group">
+            <div className="section-header">
+              <label>Lecture Hall</label>
+            </div>
+            {filteredRoomOptions.length > 0 ? (
+           <div className="halls-grid">
+            {filteredRoomOptions.map(hall => (
+              <div 
+                key={hall.id} 
+                className={`hall-card ${selectedHall === hall.id ? 'selected' : ''}`}
+                onClick={() => setSelectedHall(hall.id)}
+              >
+                <div className="hall-header">{hall.id}</div>
+                <div className="hall-details">
+                  <p>Capacity: {hall.capacity}</p>
+                  <p>Accessories: {Object.keys(hall.accessories).join(', ')}</p>
+                  <p className="hall-description">{hall.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+            ) : (
+              <div className="no-halls-available">
+                No lecture halls available matching your criteria.
+              </div>
+            )}
+          </div>
+          )}
+
           <div className="form-actions">
-            <button className="submit-btn">SUBMIT</button>
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={!selectedHall}
+            >
+              SUBMIT
+            </button>
           </div>
         </form>
       </div>
