@@ -361,20 +361,20 @@ class RoomCRUDView(
     # DELETE: Delete a room
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
-# Create your views here.
-
-
 
 
 class RoomSearchView(generics.ListAPIView):
-    queryset = Room.objects.all()
+    # queryset = Room.objects.all()
     serializer_class = RoomSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-
+    
     # Exact field filters
     filterset_fields = [
         'room_type',  # Filter by room type (tutorial or lecture_hall)
-        'capacity',   # Filter by capacity
+        'has_ac',     # Filter by AC availability
+        'has_board',  # Filter by board availability
+        'has_projector',  # Filter by projector availability
+   # Filter by capacity
         'price_per_hour',  # Filter by price per hour
     ]
 
@@ -399,7 +399,16 @@ class RoomSearchView(generics.ListAPIView):
     ]
     ordering = ['name']  # Default sorting (alphabetical by room name)
     
-    
+    def get_queryset(self):
+        queryset = Room.objects.all()
+        capacity = self.request.query_params.get('capacity', None)
+        if capacity is not None:
+            try:
+                capacity = int(capacity)
+                queryset = queryset.filter(capacity__gte=capacity)
+            except ValueError:
+                pass  # Ignore invalid capacity values
+        return queryset
     
 def approve_booking(request, token):
     booking = get_object_or_404(Booking, approval_token=token)
