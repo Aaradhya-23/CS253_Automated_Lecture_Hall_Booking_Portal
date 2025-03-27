@@ -35,6 +35,6 @@
     transition: background-color 0.2s;
   }
   
-  .logout-button:hover {
+  .button:hover {
     background-color: #2563EB; /* blue-600 */
   }

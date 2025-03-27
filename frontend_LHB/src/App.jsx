@@ -12,10 +12,13 @@ import CreateUser from "./pages/CreateUser";
 import LiveSchedule from "./pages/LiveSchedule";
 import Feedback from "./pages/Feedback";
 import Request_Booking from "./pages/Request_Booking";
-// import Help from "./pages/Help";
+import Help from "./pages/Help";
 import Status from "./pages/Status";
-import UserHistory from "./pages/History";
+import UserHistory from "./pages/UserHistory"
 import Adminviewbooking from "./pages/Adminviewbooking";
+import Viewpending from "./pages/Viewpending";
+import RoomDetails from "./pages/RoomDetails";
+import Bookingdetails from "./pages/Bookingdetails";
 
 // Import navbar components
 import UserNavbar from "./components/UserNavbar";
@@ -173,14 +176,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            {/* <Route
+            <Route
               path={FRONTEND_ROUTES.help}
               element={
                 <ProtectedRoute role={["user", "admin"]}>
                   <Help />
                 </ProtectedRoute>
               }
-            /> */}
+            />
             <Route
               path={FRONTEND_ROUTES.status}
               element={
@@ -190,14 +193,40 @@ const App = () => {
               }
             />
 
-            {/* Protected route for admin users */}
             <Route
-              path={FRONTEND_ROUTES.adminViewBooking}
+              path={FRONTEND_ROUTES.history}
               element={
-                <ProtectedRoute role="admin">
-                  <Adminviewbooking />
+                <ProtectedRoute role="user">
+                  <UserHistory />
                 </ProtectedRoute>
               }
+            />
+            <Route path={FRONTEND_ROUTES.adminViewBooking}
+             element={
+              <ProtectedRoute role="admin">
+                <Adminviewbooking />
+              </ProtectedRoute>
+            }
+            />
+            <Route path={FRONTEND_ROUTES.viewPending} element={
+              <ProtectedRoute role="admin">
+                <Viewpending />
+              </ProtectedRoute>
+            }
+            />
+            <Route path={FRONTEND_ROUTES.roomDetails} element={
+              <ProtectedRoute role={["user", "admin"]}>
+                <RoomDetails />
+              </ProtectedRoute>
+            }
+            />
+            
+            {/* This route expects a booking ID parameter - ensure navigation uses the correct format: `/booking/${bookingId}` */}
+            <Route path={FRONTEND_ROUTES.bookingDetails} element={
+              <ProtectedRoute role={["user", "admin"]}>
+                <Bookingdetails />
+              </ProtectedRoute>
+            }
             />
           </Routes>
         </div>

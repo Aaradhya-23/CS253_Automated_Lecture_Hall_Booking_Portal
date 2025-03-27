@@ -89,41 +89,41 @@ const LiveSchedule = () => {
   };
 
   return (
-    <div className="live-schedule-container">
-      <div className="date-navigator">
-        <button onClick={previousDay} className="nav-button">&lt;</button>
-        <div className="current-date">{formatDate(selectedDate)}</div>
-        <button onClick={nextDay} className="nav-button">&gt;</button>
+    <div className="ls-container">
+      <div className="ls-date-navigator">
+        <button onClick={previousDay} className="ls-nav-button">&lt;</button>
+        <div className="ls-current-date">{formatDate(selectedDate)}</div>
+        <button onClick={nextDay} className="ls-nav-button">&gt;</button>
       </div>
       
-      <div className="timetable-container">
-        <div className="timetable">
-          <div className="time-column">
+      <div className="ls-timetable-container">
+        <div className="ls-timetable">
+          <div className="ls-time-column">
             {timeSlots.map((time, index) => (
-              <div key={index} className="time-slot">{time}</div>
+              <div key={index} className="ls-time-slot">{time}</div>
             ))}
           </div>
           
-          <div className="halls-grid">
-            <div className="hall-headers">
+          <div className="ls-halls-grid">
+            <div className="ls-hall-headers">
               {lectureHalls.map((hall, index) => (
-                <div key={index} className="hall-header">{hall}</div>
+                <div key={index} className="ls-hall-header">{hall}</div>
               ))}
             </div>
             
-            <div className="bookings-grid">
+            <div className="ls-bookings-grid">
               {timeSlots.map((time, timeIndex) => (
-                <div key={timeIndex} className="time-row">
+                <div key={timeIndex} className="ls-time-row">
                   {lectureHalls.map((hall, hallIndex) => {
                     const booking = getBooking(hall, time);
                     return (
-                      <div key={hallIndex} className="booking-cell">
+                      <div key={hallIndex} className="ls-booking-cell">
                         {booking && (
-                          <div className="booking-item">
-                            <div className="booking-indicator"></div>
-                            <div className="course-code">{booking.course}</div>
+                          <div className="ls-booking-item">
+                            <div className="ls-booking-indicator"></div>
+                            <div className="ls-course-code">{booking.course}</div>
                             {booking.dropdown && (
-                              <button className="dropdown-button">▼</button>
+                              <button className="ls-dropdown-button">▼</button>
                             )}
                           </div>
                         )}

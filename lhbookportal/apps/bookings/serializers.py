@@ -53,10 +53,9 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = serializers.CharField()
+    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
-
     creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:
@@ -69,13 +68,8 @@ class BookingSerializer(serializers.ModelSerializer):
         # Extract relevant fields
         start_time = data.get('start_time')
         end_time = data.get('end_time')
-        
-        # if(not start_time and not end_time):
-            
-        
-
         booking_date = data.get('booking_date')
-        room_name = data.get('room')  # Room name is passed as a string
+        room = data.get('room')
         title = data.get('title')
         Type = data.get('Type', 'nonacademic')  # Default to 'nonacademic' if not provided
         remarks = data.get('remarks', '')
@@ -83,11 +77,11 @@ class BookingSerializer(serializers.ModelSerializer):
         duration_hrs = data.get('duration', 0)  # Ensure duration is passed or default to 0
         # cost = data.get('cost', 0)  # If cost is passed, we can check or calculate it
         # Validate room
-        try:
-            room = Room.objects.get(name=room_name)
-            data['room'] = room  # Assign the Room object to the data
-        except Room.DoesNotExist:
-            raise serializers.ValidationError(f"Room with name '{room_name}' does not exist.")
+        # try:
+        #     room = Room.objects.get(name=room_name)
+        #     data['room'] = room  # Assign the Room object to the data
+        # except Room.DoesNotExist:
+        #     raise serializers.ValidationError(f"Room with name '{room_name}' does not exist.")
 
         # Ensure accessories are valid for the room
         for accessory, value in accessories.items():

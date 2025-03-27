@@ -91,7 +91,6 @@ const CreateUser = () => {
               required
             />
           </div>
-
           <div className="form-group remarks">
             <label htmlFor="remarks">Remarks :</label>
             <input
