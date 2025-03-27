@@ -1,5 +1,6 @@
-
+from rest_framework.decorators import api_view, permission_classes
 from apps.accounts.models import *
+from rest_framework.permissions import AllowAny
 from apps.bookings.models import *
 import os
 from django.contrib.auth import get_user_model
@@ -14,6 +15,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 import csv
+from .permissions import DownloadPermissions
 from datetime import time, datetime, timedelta
 from apps.bookings.permissions import BookingPermissions
 
@@ -23,11 +25,12 @@ from apps.bookings.permissions import BookingPermissions
 
 
 class DownloadBillPDF(APIView):
-    permission_classes = [BookingPermissions]
+    queryset = Booking.objects.all()
+    permission_classes = [DownloadPermissions]
     def get(self, request, booking_id):
         # Get booking data (replace with your actual query)
         booking = get_object_or_404(Booking, id=booking_id)
-        
+        self.check_object_permissions(request, booking)
         
         # Create PDF buffer
         data = {
@@ -38,6 +41,8 @@ class DownloadBillPDF(APIView):
             "hall_name": booking.room.name,
             "booked_by": booking.creator.username,
             "charges": str(booking.cost),
+            "duration" : str(booking.duration),
+            "remarks" : (booking.remarks)
         }
         buffer = generate_bill(data)
         response = HttpResponse(buffer, content_type='application/pdf')
@@ -52,7 +57,7 @@ def generate_bill(data):
     
     # --- HEADER WITH LOGO ---
     # Add IIT-Kanpur logo (you'll need to have the image file)
-    logo_path = ".resources/images.png"  # Replace with actual path or ensure file exists
+    logo_path = "apps/reports/images.png"  # Replace with actual path or ensure file exists
     if os.path.exists(logo_path):
         c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
     
@@ -99,10 +104,22 @@ def generate_bill(data):
     y_position -= 25
     
     c.setFont("Helvetica-Bold", 12)
+    c.drawString(100, y_position, "Duration:")
+    c.setFont("Helvetica", 12)
+    c.drawString(220, y_position, data['duration'])
+    y_position -= 25
+    
+    c.setFont("Helvetica-Bold", 12)
     c.drawString(100, y_position, "Hall:")
     c.setFont("Helvetica", 12)
     c.drawString(220, y_position, data['hall_name'])
     y_position -= 25
+    
+    # c.setFont("Helvetica-Bold", 12)
+    # c.drawString(100, y_position, "Remarks:")
+    # c.setFont("Helvetica", 12)
+    # c.drawString(220, y_position, data['remarks'])
+    # y_position -= 25
     
     c.setFont("Helvetica-Bold", 12)
     c.drawString(100, y_position, "Booked By:")
@@ -135,7 +152,7 @@ def generate_bill(data):
 
 
 
-
+@permission_classes([AllowAny])
 def download_daily_schedule_csv(request, date):
     # Get date from query parameters (default to today)
     # date_str = request.GET.get('date')

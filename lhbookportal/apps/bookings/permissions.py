@@ -22,7 +22,7 @@ class IsFaculty(permissions.BasePermission):
 class IsStudent(permissions.BasePermission):
     
     def has_permission(self, request, view):
-        return request.user.role == 'Student'
+        return request.user.role in ['Student', 'student']
 
  
 class BookingPermissions(permissions.BasePermission):
