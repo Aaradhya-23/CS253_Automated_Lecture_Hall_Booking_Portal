@@ -172,6 +172,7 @@ class BookingCRUDView(
         booking_date = validated_data['booking_date']
         accessories = validated_data.get('accessories', {})
         remarks = validated_data.get('remarks', '')
+        # creator =
 
         # Validate accessories availability
         unavailable_accessories = [
@@ -224,6 +225,7 @@ class BookingCRUDView(
             accessories=accessories,
             remarks=remarks
         )
+        
 
         if user.role == 'faculty':
             return  # Skip email for faculty
