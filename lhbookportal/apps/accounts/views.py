@@ -1,6 +1,6 @@
 from .models import User
 from .serializers import UserSerializer
-from rest_framework.permissions import IsAdminUser
+from ..bookings.permissions import IsAdmin
 from rest_framework import generics
 
 #TODO : ACCOUNT CRUD only admin --> DONE
@@ -10,11 +10,11 @@ from rest_framework import generics
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsAdmin] 
 
 # admin only can update and delete users. 
 class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsAdmin] 
     serializer_class = UserSerializer
     

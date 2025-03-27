@@ -16,18 +16,40 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from rest_framework.views import APIView
-
-# <<<<<<< HEAD
-
-from datetime import time, datetime, timedelta
-from .models import Holiday
-
-# from datetime import timedelta, datetime
-# from django.utils import timezone
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import csv
 from rest_framework.response import Response
-# from rest_framework import generics, status
-# from .models import Booking, Room
-# from .serializers import BookingSerializer
+from rest_framework import status
+from datetime import time, datetime, timedelta
+
+# class DownloadBillPDF(APIView):
+#     permission_classes = [BookingPermissions]
+#     def get(self, request, booking_id):
+#         # Get booking data (replace with your actual query)
+#         booking = get_object_or_404(Booking, id=booking_id)
+#         accessories_list = [name.replace('_', ' ').title() for name, available in booking.room.accessories.items() if available]
+#         accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
+        
+#         # Create PDF buffer
+#         data = {
+#             "booking_ref" : str(booking.id),
+#             "event_name": booking.title,
+#             "date": str(booking.booking_date),
+#             "time": str(booking.start_time),
+#             "hall_name": booking.room.name,
+#             "booked_by": booking.creator.username,
+#             "charges": str(booking.cost),
+#             "accessories": accessories_str,
+#         }
+#         buffer = generate_bill(data)
+#         response = HttpResponse(buffer, content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
+#         return response
+    
+# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
@@ -113,32 +135,6 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
 
 
 
-
-
-# =======
-# class DownloadBillPDF(APIView):
-#     permission_classes = [BookingPermissions]
-#     def get(self, request, booking_id):
-#         # Get booking data (replace with your actual query)
-#         booking = get_object_or_404(Booking, id=booking_id)
-        
-        
-#         # Create PDF buffer
-#         data = {
-#             "booking_ref" : str(booking.id),
-#             "event_name": booking.title,
-#             "date": str(booking.booking_date),
-#             "time": str(booking.start_time),
-#             "hall_name": booking.room.name,
-#             "booked_by": booking.creator.username,
-#             "charges": str(booking.cost),
-#         }
-#         buffer = generate_bill(data)
-#         response = HttpResponse(buffer, content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
-#         return response
-    
-# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
 class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 
@@ -153,78 +149,123 @@ class BookingCRUDView(
     permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
     
-    def perform_create(self, serializer):
-        print(self.request.data)
-        user = self.request.user
-        # Access validated data from the serializer
-        validated_data = serializer.validated_data
-        room = validated_data['room']  # Access the room object directly
-        duration = validated_data['duration']
+    def post(self, request, *args, **kwargs):
+        print("this is post", self.request.data)
+        serializer = self.get_serializer(data=request.data)
         
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print("data", serializer.data)
+        print("Validation failed with errors:", serializer.errors)  # Add this line to debug errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def perform_create(self, serializer):
+        print("this is creation", self.request.data)
+        user = self.request.user
+        validated_data = serializer.validated_data
+        title = validated_data['title']
+        room = validated_data['room']
+        duration = validated_data['duration']
+        start_time = validated_data['start_time']
+        end_time = validated_data['end_time']
+        booking_date = validated_data['booking_date']
+        accessories = validated_data.get('accessories', {})
+        remarks = validated_data.get('remarks', '')
+
+        # Validate accessories availability
+        unavailable_accessories = [
+            accessory for accessory, selected in accessories.items()
+            if selected and not room.accessories.get(accessory, False)
+        ]
+
+        if unavailable_accessories:
+            raise serializers.ValidationError(
+                f"The following accessories are not available in {room.name}: {', '.join(unavailable_accessories)}"
+            )
 
         # Determine Type and status based on user role
-        Type = validated_data.get('Type')
+        Type = validated_data.get('Type', 'nonacademic')
         status = 'pending'
 
         if user.role != 'admin':
             Type = 'academic' if user.role == 'faculty' else 'nonacademic'
-
         status = 'approved' if user.role == 'admin' else 'pending'
 
         if Type == 'academic':
             status = 'approved'
 
         # Calculate cost
-        cost = room.price_per_hour * duration
-        user.total_bill = user.total_bill + cost
+        base_cost = room.price_per_hour * duration
+        accessory_cost = sum(
+            (room.accessories.get(accessory, 0) and 100) for accessory in accessories if accessories[accessory]
+        )
+        # price is fixed 100 for each accessory
+        total_cost = base_cost + accessory_cost
+
+        # Update user's total bill
+        user.total_bill += total_cost
         user.save()
+
         requested_on = timezone.now()
-        
+
+        # Save the booking
         booking = serializer.save(
             creator=user,
+            title=title,  # Ensure title is saved
+            room=room,
+            start_time=start_time,
+            end_time=end_time,
+            booking_date=booking_date,
             status=status,
             Type=Type,
             requested_on=requested_on,
-            cost=cost
+            cost=total_cost,
+            accessories=accessories,
+            remarks=remarks
         )
-        if(user.role == 'faculty'):return 
-        
-        #send mails only for students 
-        # approve_url = f"{settings.SITE_URL}{reverse('approve_booking', kwargs={'token': booking.approval_token})}"
-        # reject_url = f"{settings.SITE_URL}{reverse('reject_booking', kwargs={'token': booking.approval_token})}"
+
+        if user.role == 'faculty':
+            return  # Skip email for faculty
+
+        # Prepare accessory details for email
+        accessories_list = [name.replace('_', ' ').title() for name, selected in accessories.items() if selected]
+        accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
+
+        # Generate approval and rejection URLs
         approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.approval_token]))
         reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.approval_token]))
 
         # Send email to the authority
-        subject = "[LHC OFFICE]Booking Request Approval Needed"
+        subject = "[LHC OFFICE] Booking Request Approval Needed"
         message = f"""
         A new booking request has been submitted by {user.username}.
 
         Purpose :     {booking.title}
         Remarks :     {booking.remarks}
         Room:         {room.name}
+        Date:         {booking_date}
+        Time:         {start_time} - {end_time}
         Requested On: {requested_on}
-        
-        
+        Accessories:  {accessories_str}
+        Total Cost:   ₹{total_cost}
+
         Approve: {approve_url}
         Reject: {reject_url}
-        
-        Note : un-approved bookings will be auto-rejected in 2 days or less
+
+        Note: Unapproved bookings will be auto-rejected in 2 days or less.
         """
-        #add more mails in the list if needed
-        #right now only one is supported 
+
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['567rahulm567@gmail.com'])
-        # Save the booking
-    # GET: List all bookings or retrieve a specific booking
+    #add more mails in the list if needed
+                #right now only one is supported 
+                # Save the booking
+            # GET: List all bookings or retrieve a specific booking
+
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:
             return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
-
-    # POST: Create a new booking
-    def post(self, request, *args, **kwargs):
-        # print(*args)
-        return self.create(request, *args, **kwargs)
 
     # PUT/PATCH: Update an existing booking
     def put(self, request, *args, **kwargs):
@@ -284,14 +325,24 @@ class RoomCRUDView(
 
     def perform_create(self, serializer):
         """Set custom behavior before saving a new Room."""
-        serializer.save()
+        accessories_data = self.request.data.get('accessories', {})
+        validated_accessories = self.validate_accessories(accessories_data)
+        serializer.save(accessories=validated_accessories)
 
     def perform_update(self, serializer):
         """Custom logic before updating an existing Room."""
-        serializer.save()
+        accessories_data = self.request.data.get('accessories', {})
+        validated_accessories = self.validate_accessories(accessories_data)
+        serializer.save(accessories=validated_accessories)
+
+    def validate_accessories(self, accessories_data):
+        """Validate accessories to ensure correct input."""
+        valid_accessories = {key: value for key, value in accessories_data.items() if key in dict(Room.ACCESSORY_OPTIONS)}
+        return valid_accessories
 
     # GET: List all rooms or retrieve a specific room
     def get(self, request, *args, **kwargs):
+        print("this is the get part in room views ", request.headers.get('Authorization'))
         if "pk" in kwargs:
             return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
@@ -331,6 +382,14 @@ class RoomSearchView(generics.ListAPIView):
     search_fields = [
         'name',  # Search by room name
     ]
+
+    # Dynamic filtering for accessories
+    def get_queryset(self):
+        queryset = Room.objects.all()
+        for accessory in dict(Room.ACCESSORY_OPTIONS):
+            if self.request.query_params.get(accessory) == 'true':
+                queryset = queryset.filter(**{f'accessories__{accessory}': True})
+        return queryset
 
     # Sorting options
     ordering_fields = [
@@ -419,3 +478,139 @@ def reject_booking(request, token):
 
 
 
+# def generate_bill(data):
+#     buffer = BytesIO()
+#     c = canvas.Canvas(buffer, pagesize=letter)
+#     width, height = letter
+    
+#     # --- HEADER WITH LOGO ---
+#     logo_path = ".resources/images.png"  # Replace with actual path
+#     if os.path.exists(logo_path):
+#         c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
+    
+#     # Add "Lecture Hall Office" text
+#     c.setFont("Helvetica-Bold", 14)
+#     c.drawCentredString(width / 2, height - 110, "Lecture Hall Office")
+    
+#     # Centered main heading
+#     c.setFont("Helvetica-Bold", 16)
+#     c.drawCentredString(width / 2, height - 130, "BOOKING DETAILS")
+    
+#     # Horizontal line
+#     c.setStrokeColor(colors.black)
+#     c.line(100, height - 140, width - 100, height - 140)
+    
+#     # --- BODY CONTENT ---
+#     y_position = height - 170
+    
+#     def draw_row(label, value):
+#         nonlocal y_position
+#         c.setFont("Helvetica-Bold", 12)
+#         c.drawString(100, y_position, label)
+#         c.setFont("Helvetica", 12)
+#         c.drawString(220, y_position, value)
+#         y_position -= 25
+    
+#     # Booking Details
+#     draw_row("Booking Reference:", data['booking_ref'])
+#     draw_row("Event Name:", data['event_name'])
+#     draw_row("Date:", data['date'])
+#     draw_row("Time:", data['time'])
+#     draw_row("Hall:", data['hall_name'])
+#     draw_row("Booked By:", data['booked_by'])
+#     draw_row("Charges:", data['charges'])
+    
+#     # Accessories Section
+#     accessories_str = data.get('accessories', 'None')
+#     if accessories_str == 'None':
+#         accessories_display = "No Accessories"
+#     else:
+#         accessories_display = f"Accessories: {accessories_str}"
+    
+#     c.setFont("Helvetica-Bold", 12)
+#     c.drawString(100, y_position, "Accessories:")
+#     c.setFont("Helvetica", 12)
+#     c.drawString(220, y_position, accessories_display)
+#     y_position -= 40
+    
+#     # --- FOOTER ---
+#     footer_y = 50
+#     c.setStrokeColor(colors.black)
+#     c.line(100, footer_y + 20, width - 100, footer_y + 20)
+    
+#     c.setFont("Helvetica", 10)
+#     c.drawCentredString(width / 2, footer_y, "Lecture Hall Office, IIT Kanpur - Tel: 0512-259XXXX")
+    
+#     c.save()
+#     buffer.seek(0)
+#     return buffer
+
+
+
+
+# def download_daily_schedule_csv(request, date):
+#     # Get date from query parameters (default to today)
+#     date_str = date
+#     try:
+#         if date_str:
+#             schedule_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+#         else:
+#             schedule_date = datetime.now().date()
+#     except ValueError:
+#         return HttpResponse("Invalid date format. Use YYYY-MM-DD", status=400)
+
+#     # Create the HTTP response with CSV header
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = f'attachment; filename="room_schedule_{schedule_date}.csv"'
+
+#     writer = csv.writer(response)
+    
+#     # Generate time slots from 8:00 AM to 8:00 PM in 30-minute intervals
+#     start_time = time(8, 0)
+#     end_time = time(20, 0)
+#     time_slots = []
+#     current_time = datetime.combine(schedule_date, start_time)
+#     end_datetime = datetime.combine(schedule_date, end_time)
+    
+#     while current_time <= end_datetime:
+#         time_slots.append(current_time.time())
+#         current_time += timedelta(minutes=30)
+
+#     # Get all rooms and active bookings for the day
+#     rooms = Room.objects.all().order_by('name')
+#     bookings = Booking.objects.filter(
+#         booking_date=schedule_date,
+#         status__in=['approved', 'completed']
+#     )
+
+#     # Write header row with accessories information
+#     accessory_headers = [f"{room.name} (Accessories)" for room in rooms]
+#     header = ['Time Slot'] + [room.name for room in rooms] + accessory_headers
+#     writer.writerow(header)
+
+#     # For each time slot, check room availability
+#     for slot_start in time_slots:
+#         slot_end = (datetime.combine(schedule_date, slot_start) + timedelta(minutes=30)).time()
+#         row = [f"{slot_start.strftime('%H:%M')}-{slot_end.strftime('%H:%M')}"]
+        
+#         for room in rooms:
+#             # Check if room is booked during this time slot
+#             booking = bookings.filter(
+#                 room=room,
+#                 start_time__lt=slot_end,
+#                 end_time__gt=slot_start
+#             ).first()
+            
+#             if booking:
+#                 row.append(f"{booking.title}")
+#             else:
+#                 row.append("")
+        
+#         # Append accessories information
+#         for room in rooms:
+#             accessories_list = [name.replace('_', ' ').title() for name, available in room.accessories.items() if available]
+#             row.append(", ".join(accessories_list) if accessories_list else "None")
+        
+#         writer.writerow(row)
+
+#     return response

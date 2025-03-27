@@ -15,9 +15,7 @@ auth not woking
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'authority_email', 'password']
-        # fields = ['id', 'username', 'email', 'role', 'authority_email']
-        # exclude = ['password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions']
+        fields = ['username', 'email', 'role', 'authority_email', 'password']
         extra_kwargs = {
             'password': {'write_only': True}  # Ensure password is write-only
         }
