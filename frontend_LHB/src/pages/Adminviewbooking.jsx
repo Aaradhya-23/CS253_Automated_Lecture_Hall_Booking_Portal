@@ -41,14 +41,16 @@
 
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Adminviewbooking.css';
 
-const Adminviewbooking = () => {
+function Adminviewbooking (){
   const [dateRange, setDateRange] = useState({
     start: 'TUESDAY, JANUARY 21, 2025',
     end: 'FRIDAY, MARCH 14, 2025'
   });
   
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   
@@ -106,6 +108,8 @@ const Adminviewbooking = () => {
 
   const handleViewDetails = (id) => {
     console.log(`View/edit details for booking ${id}`);
+    // Navigate to booking details page with the ID parameter
+    navigate(`/booking/${id}`);
     setOpenDropdownId(null);
   };
 

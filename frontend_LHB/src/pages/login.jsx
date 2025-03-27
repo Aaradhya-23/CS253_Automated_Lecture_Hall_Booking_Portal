@@ -69,7 +69,6 @@ const Login = ({ onLogin }) => {
         >
           {/* The background image is set via inline style now */}
         </div>
-
         <div className="login-form-container">
           <div className="login-header">
             <div className="logo-container">
