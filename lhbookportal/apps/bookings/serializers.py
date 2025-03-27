@@ -53,10 +53,12 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    room = RoomSerializer()
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
-    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    # creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    creator = UserSerializer()
     
     class Meta:
         model = Booking
@@ -88,7 +90,7 @@ class BookingSerializer(serializers.ModelSerializer):
             if accessory not in room.accessories or not room.accessories[accessory]:
                 raise serializers.ValidationError(f"{accessory} is not available in {room.name}.")
 
-        print(Holiday)
+        # print(Holiday)
         holidays = Holiday.objects.filter(date=booking_date)
         if holidays.exists() or booking_date.weekday() == 6:
             raise serializers.ValidationError("Bookings cannot be made on holidays.")
