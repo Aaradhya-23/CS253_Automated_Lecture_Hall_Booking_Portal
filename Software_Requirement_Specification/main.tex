@@ -118,7 +118,7 @@
 \section{Introduction} \label{sec:intro}
 \subsection{Product Scope} \label{subsec:product_scope}
 Our product, an \textbf{``Automated Lecture Hall Booking Portal''} is designed to streamline and simplify the process of booking lecture halls for various purposes in IIT Kanpur. It allows faculties, administrators and other authorized personnel to efficiently manage Lecture Hall bookings. This system drastically reduces manual efforts in lecture hall bookings, also addressing issues such as manual error, double bookings and scheduling conflicts. Users can view real-time availability of a lecture hall for all the time slots, request bookings and receive quick confirmation.
-The system provides integration with institutional calendars enabling seamless coordination of lectures, events etc. Scope extends to features such as role-based access, user authentication and advanced search options for filtering lecture halls based on capacity, equipment and other features.
+ The system's scope extends to features such as role-based access, user authentication and advanced search options for filtering lecture halls based on capacity, equipment and other features.
 
 
 \subsection{Intended Audience and Document Overview} \label{subsec:intended_audience}
@@ -314,7 +314,6 @@ The interface should be accessible and responsive on both desktop and mobile dev
 \subsubsection{Assumptions}
     \begin{itemize}
         \item \textbf{Database Availability:} The relational database (e.g., MySQL, PostgreSQL) will remain operational with minimal downtime and will scale to handle data growth as the system expands.
-        \item \textbf{Authentication Systems:} Institutional authentication systems will function reliably to verify user roles (e.g., office staff, authorities) without errors or delays.
         \item \textbf{Email Services:} IITK webmail or another configured SMTP service will handle notification requests efficiently, even during periods of high traffic. Configuration changes will be minimal and well-documented.
         \item \textbf{Valid Input Data:} Users will input data in the correct format, reducing validation errors during report generation and ensuring smooth operation.
         \item \textbf{Network Stability:} The system assumes stable and reliable network connectivity to facilitate interactions between the database, SMTP service, and user interface components.
@@ -546,12 +545,11 @@ The application will \textbf{primarily} be a \textbf{web application}, with the 
 \begin{itemize} 
     \item The system shall provide users with an interface to select a date, time, LH, and capacity for booking.
     \item The system shall automatically identify user role based on their unique id and provide them with special permission and options. For example. A club coordinator shall not be able to book a LH for a Course Quiz or Exam.
-    \item The system shall enable users to select the type of activity for which the hall will be booked. These activity types, such as a Quiz, Placement Session, Club Workshop, etc., will be predefined within the system. This functionality will assist the LHC staff in preparing and managing the event appropriately
     \item The system shall allow users to select additional equipment such as projectors, microphones, and blackboards.
     \item The system should automatically validate the availability of the selected hall and equipment before confirming the booking.
     \item Once requested, the system shall automatically send authentication mail to all required authorities for approval. Each authority shall receive a unique link to approve or reject the booking.
     \item The action of approving and rejecting requests shall be done by clicking on the link.
-    \item All pending requests shall be auto-rejected after a specified time frame.
+    \item All pending requests shall be auto-rejected after a specified time frame of 48 hours.
     \item The user should be able to select and request multiple rooms at once.
     \item The system shall notify the user of the approval/rejection status via mail once all authorities respond.
 \end{itemize}
@@ -676,7 +674,7 @@ The system shall provide an admin interface for the LHC office staff to:
 \newpage
  \subsubsection{Use Case \#3: User Login (U3)}
 \textbf{Author} – Atharv, Devansh \\\\
-\textbf{Purpose} - To allow users to submit a request through the web or mobile application. The request will be stored in the database and sent to authorities for verification. \\\\
+\textbf{Purpose} - To allow users to request login to the portal on the web or a mobile application to access the portal. Login be granted based on valid credentials.  \\\\
 \textbf{Requirements Traceability} – 
 \begin{itemize} 
     \item R7: Users must log in using valid credentials.
@@ -789,7 +787,6 @@ R10: Reports must be role-specific (e.g., user-specific, overall statistics).
 \textbf{Notes/Issues} - 
 \begin{itemize} 
     \item Ensure the feedback form is simple and intuitive.
-    \item Implement spam detection mechanisms to prevent misuse.
     \item Classify feedback based on priority (e.g., bug reports, suggestions, general feedback).
 \end{itemize}
 \newpage
@@ -830,8 +827,7 @@ R10: Reports must be role-specific (e.g., user-specific, overall statistics).
 \textbf{Notes/Issues} - 
 \begin{itemize} 
     \item Ensure email templates are clear and user-friendly.
-    \item Provide fallback mechanisms for failed notifications, such as retries or alternative contact methods.
-    \item Implement notification tracking to verify successful delivery.
+   
 \end{itemize}
 \begin{figure}[h!]
     \centering
@@ -862,7 +858,6 @@ The booking confirmation can be confirmed or rejected by authority within \textb
 \begin{itemize}
     \item \textbf{User Education:} All users of the software must authenticate themselves using unique credentials (username and password) before accessing the system.
     \item \textbf{Session Management:} User sessions should automatically time out after 15 minutes of inactivity to prevent unauthorized access from unattended devices ensuring secure session handling to prevent session hijacking.
-    \item \textbf{Audit Logs:} Maintain detailed logs of all critical actions, such as bookings, cancellations, or system changes, for auditing purposes. Logs must include timestamps, user identifiers, and the actions performed, and should be tamper-proof.
     \item \textbf{Safety Features:} Provide a confirmation step before finalizing any booking, cancellation, or deletion to prevent accidental actions. Include mechanisms to prevent double booking of lecture halls.
     \item \textbf{Security Warnings:} Notify administrators of any suspicious activities, such as multiple failed login attempts or attempts to access restricted areas of the system.
     \item \textbf{Access Control:}Sensitive administrative functions, such as editing or deleting bookings, should be restricted to authorized personnel.

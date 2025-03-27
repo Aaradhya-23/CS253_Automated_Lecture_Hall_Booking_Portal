@@ -8,10 +8,7 @@ from django.utils import timezone
 # User = get_user_model()
 # from rest_framework import serializers
 # from .models import User  # Adjust the import according to your app structure
-"""  password not getting saved as hash
-auth not woking
 
-"""
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

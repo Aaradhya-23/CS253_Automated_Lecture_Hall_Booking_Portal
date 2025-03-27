@@ -90,7 +90,7 @@ class BookingSerializer(serializers.ModelSerializer):
             if accessory not in room.accessories or not room.accessories[accessory]:
                 raise serializers.ValidationError(f"{accessory} is not available in {room.name}.")
 
-        print(Holiday)
+        # print(Holiday)
         holidays = Holiday.objects.filter(date=booking_date)
         if holidays.exists() or booking_date.weekday() == 6:
             raise serializers.ValidationError("Bookings cannot be made on holidays.")
