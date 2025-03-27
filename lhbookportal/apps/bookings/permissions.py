@@ -9,7 +9,7 @@ class Issameuser(permissions.BasePermission):
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        print("user role is ", request.user)
+        print("user role is ", request.user.role)
         if not request.user.is_authenticated:
             return False
         

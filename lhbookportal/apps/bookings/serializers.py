@@ -57,16 +57,13 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
 
-    creator = UserSerializer()
+    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
     class Meta:
         model = Booking
-
-        fields = '__all__'
-        #ensure passwords and approval_token are not exposed 
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
-        exclude = ['approval_token', 'token_expiry' ]
-
-        depth = 1
+        exclude = ['approval_token', 'token_expiry']  # Exclude sensitive fields
+        read_only_fields = ['status', 'requested_on', 'cost']  # Fields not set by the user
+        depth = 1 
 
     def validate(self, data):
         # Extract relevant fields
@@ -76,10 +73,7 @@ class BookingSerializer(serializers.ModelSerializer):
         # if(not start_time and not end_time):
             
         
-        print(Holiday)
-        holidays = Holiday.objects.filter(date=booking_date)
-        if holidays.exists() or booking_date.weekday() == 6:
-            raise serializers.ValidationError("Bookings cannot be made on holidays.")
+
         booking_date = data.get('booking_date')
         room_name = data.get('room')  # Room name is passed as a string
         title = data.get('title')
@@ -99,6 +93,11 @@ class BookingSerializer(serializers.ModelSerializer):
         for accessory, value in accessories.items():
             if accessory not in room.accessories or not room.accessories[accessory]:
                 raise serializers.ValidationError(f"{accessory} is not available in {room.name}.")
+
+        print(Holiday)
+        holidays = Holiday.objects.filter(date=booking_date)
+        if holidays.exists() or booking_date.weekday() == 6:
+            raise serializers.ValidationError("Bookings cannot be made on holidays.")
 
         # # Convert to time objects if they are strings
         if isinstance(start_time, str):

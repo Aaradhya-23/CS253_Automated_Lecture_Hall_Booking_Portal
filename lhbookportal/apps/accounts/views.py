@@ -1,6 +1,5 @@
 from .models import User
 from .serializers import UserSerializer
-# from rest_framework.permissions import IsAdminUser
 from ..bookings.permissions import IsAdmin
 from rest_framework import generics
 
