@@ -32,7 +32,7 @@ class BookingPermissions(permissions.BasePermission):
             return True
         
         
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and request.user.role == "admin":
             return True
 
         else: return False
