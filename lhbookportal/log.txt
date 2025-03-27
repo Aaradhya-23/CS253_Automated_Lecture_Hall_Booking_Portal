@@ -17,10 +17,8 @@ only allow requets on empty slots
 
 
 
-#########
 EMAIL 
 only one authority supported at this point
-@@@@@@@@@
 to auto reject bookings after a certain time.
 configure server to run a script periodically that do this 
 manual cleaning of database 
