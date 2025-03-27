@@ -8,6 +8,7 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
     { name: 'Live Schedule', path: '/live_schedule' },
     { name: 'History', path: '/history' }, // Changed from '/' to '/history'
     { name: 'Status', path: '/status' },
+    { name: 'RoomDetails', path: '/room_details' },
     { name: 'Feedback', path: '/feedback' },
     { name: 'Help', path: '/help' },
   ];
