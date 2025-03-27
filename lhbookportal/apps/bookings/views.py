@@ -1,6 +1,6 @@
 import os
 from django.contrib.auth import get_user_model
-from rest_framework import generics, authentication, permissions, mixins, filters
+from rest_framework import generics, mixins, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from django.http import JsonResponse
@@ -15,8 +15,6 @@ from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from reportlab.pdfgen import canvas
-from io import BytesIO
 from rest_framework.views import APIView
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -27,30 +25,116 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import time, datetime, timedelta
 
-class DownloadBillPDF(APIView):
-    permission_classes = [BookingPermissions]
-    def get(self, request, booking_id):
-        # Get booking data (replace with your actual query)
-        booking = get_object_or_404(Booking, id=booking_id)
-        accessories_list = [name.replace('_', ' ').title() for name, available in booking.room.accessories.items() if available]
-        accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
+# class DownloadBillPDF(APIView):
+#     permission_classes = [BookingPermissions]
+#     def get(self, request, booking_id):
+#         # Get booking data (replace with your actual query)
+#         booking = get_object_or_404(Booking, id=booking_id)
+#         accessories_list = [name.replace('_', ' ').title() for name, available in booking.room.accessories.items() if available]
+#         accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
         
-        # Create PDF buffer
-        data = {
-            "booking_ref" : str(booking.id),
-            "event_name": booking.title,
-            "date": str(booking.booking_date),
-            "time": str(booking.start_time),
-            "hall_name": booking.room.name,
-            "booked_by": booking.creator.username,
-            "charges": str(booking.cost),
-            "accessories": accessories_str,
-        }
-        buffer = generate_bill(data)
-        response = HttpResponse(buffer, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
-        return response
+#         # Create PDF buffer
+#         data = {
+#             "booking_ref" : str(booking.id),
+#             "event_name": booking.title,
+#             "date": str(booking.booking_date),
+#             "time": str(booking.start_time),
+#             "hall_name": booking.room.name,
+#             "booked_by": booking.creator.username,
+#             "charges": str(booking.cost),
+#             "accessories": accessories_str,
+#         }
+#         buffer = generate_bill(data)
+#         response = HttpResponse(buffer, content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
+#         return response
     
+# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
+
+class AvailableBookingSlotsView(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        booking_date = request.data.get("booking_date")  # YYYY-MM-DD
+        start_time = request.data.get("start_time")  # HH:MM
+        end_time = request.data.get("end_time")  # HH:MM
+        duration = int(request.data.get("duration", 1))  # Duration in hours
+
+        # Room preferences
+        room_id = request.data.get("room")  # Optional
+        capacity = int(request.data.get("capacity", 1))  # Minimum capacity
+        need_projector = request.data.get("need_projector", False)
+        need_blackboard = request.data.get("need_blackboard", False)
+        need_ac = request.data.get("need_ac", False)
+
+        # Validate input
+        if not booking_date or not start_time or not end_time:
+            return Response({"error": "booking_date, start_time, and end_time are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Convert times to datetime objects
+        start_time = datetime.strptime(start_time, "%H:%M").time()
+        end_time = datetime.strptime(end_time, "%H:%M").time()
+        booking_date = datetime.strptime(booking_date,"%Y-%m-%d" )
+
+        if start_time >= end_time:
+            return Response({"error": "end_time must be later than start_time."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure booking is not on a holiday (every Sunday)
+        holidays = Holiday.objects.filter(date=booking_date)
+        if booking_date.weekday() == 6 or (holidays.exists()):  # Sunday
+            return Response({"error": "Bookings cannot be made on Holidays"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get all available rooms that match the criteria
+        if room_id:
+            rooms = Room.objects.filter(id=room_id)
+        else:
+            rooms = Room.objects.filter(
+                capacity__gte=capacity,
+                has_projector=need_projector,
+                has_board=need_blackboard,
+                has_ac=need_ac,
+            )
+
+        if not rooms.exists():
+            return Response({"error": "No rooms match the given criteria."}, status=status.HTTP_400_BAD_REQUEST)
+
+        available_slots = []
+
+        # Loop through each matching room to find available slots
+        slot_id = 1
+        for room in rooms:
+            current_time = timezone.datetime.strptime(request.data.get("start_time"), "%H:%M")
+            end_time_limit = timezone.datetime.strptime(request.data.get("end_time"), "%H:%M")
+
+            while current_time + timedelta(hours=duration) <= end_time_limit:
+                overlapping_bookings = Booking.objects.filter(
+                    room=room,
+                    booking_date=booking_date,
+                    start_time__lt=current_time + timedelta(hours=duration),
+                    end_time__gt=current_time
+                ).exists()
+                
+                
+
+                if not overlapping_bookings:
+                    available_slots.append({
+                        "slot_id" : slot_id,
+                        "room_id": room.id,
+                        "room_name": room.name,
+                        "room.price" : room.price_per_hour,
+                        "start_time": current_time.strftime("%H:%M"),
+                        "end_time": (current_time + timedelta(hours=duration)).strftime("%H:%M")
+                    })
+                    slot_id = slot_id + 1
+
+                # Move in 30-minute intervals to find more slots
+                current_time += timedelta(minutes=30)
+
+        if not available_slots:
+            return Response({"error": "No available slots found."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+
+
+
 class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 
@@ -223,7 +307,7 @@ class UserBookingHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         """Return only the bookings of the logged-in user"""
-        return Booking.objects.filter(user=self.request.user).order_by('-requested_on')
+        return Booking.objects.filter(creator=self.request.user).order_by('-requested_on')
 
 
 class RoomCRUDView(
@@ -236,7 +320,7 @@ class RoomCRUDView(
 ):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = [IsAdmin]  # Restrict access to authenticated users
+    permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
 
     def perform_create(self, serializer):
@@ -320,12 +404,28 @@ class RoomSearchView(generics.ListAPIView):
 def approve_booking(request, token):
     booking = get_object_or_404(Booking, approval_token=token)
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
-    if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
-    
+    if booking.status != 'pending': return JsonResponse({"error": "This booking is not available for approval"}, status=400)
     booking.status = 'approved'
     booking.save()
+    
+    #if a pending requets is there for the same slot rooom. reject that booking
+    pending_bookings_same_slot = Booking.objects.filter(
+            Q(room=booking.room.id)&
+            Q(booking_date=booking.booking_date)&
+            Q(start_time__lt=booking.end_time, end_time__gt=booking.start_time) 
+    )  # Exclude cancelled bookings
 
-    # if booking.token_expiry < timezone.now():
+    if(pending_bookings_same_slot.exists()):
+        for pending in pending_bookings_same_slot:
+            if pending.status == 'pending':
+                pending.status = 'rejected'
+                send_mail(
+                'Booking Rejected',
+                f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
+                settings.DEFAULT_FROM_EMAIL,
+                [ pending.creator.email ],
+            )  
+                pending.delete()
         
     
     # if booking.creator.role == 'student':
@@ -352,7 +452,6 @@ def reject_booking(request, token):
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
 
     booking.status = 'rejected'
-    booking.save()
 
     # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
     #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
@@ -364,144 +463,145 @@ def reject_booking(request, token):
         [ booking.creator.email ],
     )
 
+    booking.delete()
     return HttpResponse("Booking rejected successfully!, You may close this page now")
 
 
 
 
-def generate_bill(data):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+# def generate_bill(data):
+#     buffer = BytesIO()
+#     c = canvas.Canvas(buffer, pagesize=letter)
+#     width, height = letter
     
-    # --- HEADER WITH LOGO ---
-    logo_path = ".resources/images.png"  # Replace with actual path
-    if os.path.exists(logo_path):
-        c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
+#     # --- HEADER WITH LOGO ---
+#     logo_path = ".resources/images.png"  # Replace with actual path
+#     if os.path.exists(logo_path):
+#         c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
     
-    # Add "Lecture Hall Office" text
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(width / 2, height - 110, "Lecture Hall Office")
+#     # Add "Lecture Hall Office" text
+#     c.setFont("Helvetica-Bold", 14)
+#     c.drawCentredString(width / 2, height - 110, "Lecture Hall Office")
     
-    # Centered main heading
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, height - 130, "BOOKING DETAILS")
+#     # Centered main heading
+#     c.setFont("Helvetica-Bold", 16)
+#     c.drawCentredString(width / 2, height - 130, "BOOKING DETAILS")
     
-    # Horizontal line
-    c.setStrokeColor(colors.black)
-    c.line(100, height - 140, width - 100, height - 140)
+#     # Horizontal line
+#     c.setStrokeColor(colors.black)
+#     c.line(100, height - 140, width - 100, height - 140)
     
-    # --- BODY CONTENT ---
-    y_position = height - 170
+#     # --- BODY CONTENT ---
+#     y_position = height - 170
     
-    def draw_row(label, value):
-        nonlocal y_position
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(100, y_position, label)
-        c.setFont("Helvetica", 12)
-        c.drawString(220, y_position, value)
-        y_position -= 25
+#     def draw_row(label, value):
+#         nonlocal y_position
+#         c.setFont("Helvetica-Bold", 12)
+#         c.drawString(100, y_position, label)
+#         c.setFont("Helvetica", 12)
+#         c.drawString(220, y_position, value)
+#         y_position -= 25
     
-    # Booking Details
-    draw_row("Booking Reference:", data['booking_ref'])
-    draw_row("Event Name:", data['event_name'])
-    draw_row("Date:", data['date'])
-    draw_row("Time:", data['time'])
-    draw_row("Hall:", data['hall_name'])
-    draw_row("Booked By:", data['booked_by'])
-    draw_row("Charges:", data['charges'])
+#     # Booking Details
+#     draw_row("Booking Reference:", data['booking_ref'])
+#     draw_row("Event Name:", data['event_name'])
+#     draw_row("Date:", data['date'])
+#     draw_row("Time:", data['time'])
+#     draw_row("Hall:", data['hall_name'])
+#     draw_row("Booked By:", data['booked_by'])
+#     draw_row("Charges:", data['charges'])
     
-    # Accessories Section
-    accessories_str = data.get('accessories', 'None')
-    if accessories_str == 'None':
-        accessories_display = "No Accessories"
-    else:
-        accessories_display = f"Accessories: {accessories_str}"
+#     # Accessories Section
+#     accessories_str = data.get('accessories', 'None')
+#     if accessories_str == 'None':
+#         accessories_display = "No Accessories"
+#     else:
+#         accessories_display = f"Accessories: {accessories_str}"
     
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(100, y_position, "Accessories:")
-    c.setFont("Helvetica", 12)
-    c.drawString(220, y_position, accessories_display)
-    y_position -= 40
+#     c.setFont("Helvetica-Bold", 12)
+#     c.drawString(100, y_position, "Accessories:")
+#     c.setFont("Helvetica", 12)
+#     c.drawString(220, y_position, accessories_display)
+#     y_position -= 40
     
-    # --- FOOTER ---
-    footer_y = 50
-    c.setStrokeColor(colors.black)
-    c.line(100, footer_y + 20, width - 100, footer_y + 20)
+#     # --- FOOTER ---
+#     footer_y = 50
+#     c.setStrokeColor(colors.black)
+#     c.line(100, footer_y + 20, width - 100, footer_y + 20)
     
-    c.setFont("Helvetica", 10)
-    c.drawCentredString(width / 2, footer_y, "Lecture Hall Office, IIT Kanpur - Tel: 0512-259XXXX")
+#     c.setFont("Helvetica", 10)
+#     c.drawCentredString(width / 2, footer_y, "Lecture Hall Office, IIT Kanpur - Tel: 0512-259XXXX")
     
-    c.save()
-    buffer.seek(0)
-    return buffer
+#     c.save()
+#     buffer.seek(0)
+#     return buffer
 
 
 
 
-def download_daily_schedule_csv(request, date):
-    # Get date from query parameters (default to today)
-    date_str = date
-    try:
-        if date_str:
-            schedule_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        else:
-            schedule_date = datetime.now().date()
-    except ValueError:
-        return HttpResponse("Invalid date format. Use YYYY-MM-DD", status=400)
+# def download_daily_schedule_csv(request, date):
+#     # Get date from query parameters (default to today)
+#     date_str = date
+#     try:
+#         if date_str:
+#             schedule_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+#         else:
+#             schedule_date = datetime.now().date()
+#     except ValueError:
+#         return HttpResponse("Invalid date format. Use YYYY-MM-DD", status=400)
 
-    # Create the HTTP response with CSV header
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="room_schedule_{schedule_date}.csv"'
+#     # Create the HTTP response with CSV header
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = f'attachment; filename="room_schedule_{schedule_date}.csv"'
 
-    writer = csv.writer(response)
+#     writer = csv.writer(response)
     
-    # Generate time slots from 8:00 AM to 8:00 PM in 30-minute intervals
-    start_time = time(8, 0)
-    end_time = time(20, 0)
-    time_slots = []
-    current_time = datetime.combine(schedule_date, start_time)
-    end_datetime = datetime.combine(schedule_date, end_time)
+#     # Generate time slots from 8:00 AM to 8:00 PM in 30-minute intervals
+#     start_time = time(8, 0)
+#     end_time = time(20, 0)
+#     time_slots = []
+#     current_time = datetime.combine(schedule_date, start_time)
+#     end_datetime = datetime.combine(schedule_date, end_time)
     
-    while current_time <= end_datetime:
-        time_slots.append(current_time.time())
-        current_time += timedelta(minutes=30)
+#     while current_time <= end_datetime:
+#         time_slots.append(current_time.time())
+#         current_time += timedelta(minutes=30)
 
-    # Get all rooms and active bookings for the day
-    rooms = Room.objects.all().order_by('name')
-    bookings = Booking.objects.filter(
-        booking_date=schedule_date,
-        status__in=['approved', 'completed']
-    )
+#     # Get all rooms and active bookings for the day
+#     rooms = Room.objects.all().order_by('name')
+#     bookings = Booking.objects.filter(
+#         booking_date=schedule_date,
+#         status__in=['approved', 'completed']
+#     )
 
-    # Write header row with accessories information
-    accessory_headers = [f"{room.name} (Accessories)" for room in rooms]
-    header = ['Time Slot'] + [room.name for room in rooms] + accessory_headers
-    writer.writerow(header)
+#     # Write header row with accessories information
+#     accessory_headers = [f"{room.name} (Accessories)" for room in rooms]
+#     header = ['Time Slot'] + [room.name for room in rooms] + accessory_headers
+#     writer.writerow(header)
 
-    # For each time slot, check room availability
-    for slot_start in time_slots:
-        slot_end = (datetime.combine(schedule_date, slot_start) + timedelta(minutes=30)).time()
-        row = [f"{slot_start.strftime('%H:%M')}-{slot_end.strftime('%H:%M')}"]
+#     # For each time slot, check room availability
+#     for slot_start in time_slots:
+#         slot_end = (datetime.combine(schedule_date, slot_start) + timedelta(minutes=30)).time()
+#         row = [f"{slot_start.strftime('%H:%M')}-{slot_end.strftime('%H:%M')}"]
         
-        for room in rooms:
-            # Check if room is booked during this time slot
-            booking = bookings.filter(
-                room=room,
-                start_time__lt=slot_end,
-                end_time__gt=slot_start
-            ).first()
+#         for room in rooms:
+#             # Check if room is booked during this time slot
+#             booking = bookings.filter(
+#                 room=room,
+#                 start_time__lt=slot_end,
+#                 end_time__gt=slot_start
+#             ).first()
             
-            if booking:
-                row.append(f"{booking.title}")
-            else:
-                row.append("")
+#             if booking:
+#                 row.append(f"{booking.title}")
+#             else:
+#                 row.append("")
         
-        # Append accessories information
-        for room in rooms:
-            accessories_list = [name.replace('_', ' ').title() for name, available in room.accessories.items() if available]
-            row.append(", ".join(accessories_list) if accessories_list else "None")
+#         # Append accessories information
+#         for room in rooms:
+#             accessories_list = [name.replace('_', ' ').title() for name, available in room.accessories.items() if available]
+#             row.append(", ".join(accessories_list) if accessories_list else "None")
         
-        writer.writerow(row)
+#         writer.writerow(row)
 
-    return response
+#     return response

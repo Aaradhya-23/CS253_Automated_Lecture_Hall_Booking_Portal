@@ -2,14 +2,21 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from .models import Holiday
 from .models import *
+from apps.accounts.serializers import UserSerializer
 from django.utils import timezone
 import datetime
-
+from django.db.models import Q
 User = get_user_model()
 
 #TODO MAKE this more secure better password handling not exposing passwords, hashing passwords
 
+class HolidaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Holiday
+        fields ='__all__'
+        
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
@@ -50,16 +57,29 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
 
+    creator = UserSerializer()
     class Meta:
         model = Booking
+
         fields = '__all__'
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token']
+        #ensure passwords and approval_token are not exposed 
+        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
+        exclude = ['approval_token', 'token_expiry' ]
+
         depth = 1
 
     def validate(self, data):
         # Extract relevant fields
         start_time = data.get('start_time')
         end_time = data.get('end_time')
+        
+        # if(not start_time and not end_time):
+            
+        
+        print(Holiday)
+        holidays = Holiday.objects.filter(date=booking_date)
+        if holidays.exists() or booking_date.weekday() == 6:
+            raise serializers.ValidationError("Bookings cannot be made on holidays.")
         booking_date = data.get('booking_date')
         room_name = data.get('room')  # Room name is passed as a string
         title = data.get('title')
@@ -104,11 +124,12 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # 3. Ensure the room is available during the requested time slot
         conflicting_bookings = Booking.objects.filter(
-            room=room,
-            booking_date=booking_date,
-            start_time__lt=end_time,
-            end_time__gt=start_time,
-        ).exclude(status='cancelled')
+            Q(room=room)&
+            Q(booking_date=booking_date)&
+            Q(start_time__lt=end_time, end_time__gt=start_time) 
+        ).exclude(status='cancelled')  # Exclude cancelled bookings
+        
+        
 
         if conflicting_bookings.exists():
             raise serializers.ValidationError("The room is already booked during this time.")
