@@ -50,6 +50,25 @@ from datetime import time, datetime, timedelta
 #         return response
     
 # >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
+def send_rejection_mail(request, booking_id):
+    booking = get_object_or_404(Booking, id = booking_id)
+    booking.status = 'rejected'
+    remarks = request.data.get('remark')
+    
+    send_mail(
+        'Booking Rejected',
+        f"""Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION
+        Remarks: {remarks}
+        
+        """,
+        
+        settings.DEFAULT_FROM_EMAIL,
+        [ booking.creator.email ],
+    )
+
+    booking.delete()
+    return Response({"message": "Deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
