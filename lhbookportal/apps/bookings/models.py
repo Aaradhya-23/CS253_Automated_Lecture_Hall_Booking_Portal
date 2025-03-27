@@ -11,17 +11,22 @@ class Room(models.Model):
         ('lecture_hall', 'Lecture Hall Room'),
     ]
 
-    name = models.CharField(max_length= 20, unique=True)
+    ACCESSORY_OPTIONS = [
+        ('projector', 'Projector'),
+        ('microphone', 'Microphone'),
+        ('whiteboard', 'Whiteboard'),
+        ('computer', 'Computer'),
+        ('speaker_system', 'Speaker System'),
+    ]
+
+    name = models.CharField(max_length=20, unique=True)
     capacity = models.IntegerField()
     room_type = models.CharField(max_length=20, choices=ROOM_TYPES)  # Stores whether it's a tutorial room or a lecture room
-    has_ac = models.BooleanField(default= False)
-    has_board = models.BooleanField(default= False)
-    has_projector = models.BooleanField(default= False)
+    accessories = models.JSONField(default=dict)  # Store accessories as a dictionary (e.g., {"projector": True, "microphone": False})
     price_per_hour = models.IntegerField()
 
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
-
 
 class Booking(models.Model):
     #DONT DELETE BOOKINGS WHEN USER DELETED
@@ -42,23 +47,14 @@ class Booking(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     booking_date = models.DateField()
-# <<<<<<< HEAD
-    requested_on = models.DateTimeField(null= True, blank=  True, default= timezone.now())
-    duration = models.PositiveSmallIntegerField(default = 1)
-# =======
-#     requested_on = models.DateTimeField(auto_now_add=True)
-#     duration = models.PositiveSmallIntegerField(default= 0)
-# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
+    requested_on = models.DateTimeField(auto_now_add=True)
+    duration = models.FloatField(default= 0.0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
-    need_ac = models.BooleanField(null = True, blank = True, default= False)
-    need_projector = models.BooleanField(null = True, blank = True, default= False)
-    
+    accessories = models.JSONField(default=dict, blank=True)
     cost = models.PositiveBigIntegerField(default=0)
     
     remarks = models.CharField(max_length= 150, null = True, blank = True)
-    
-    approval_token = models.CharField(max_length=36, default=uuid.uuid4, unique = True, editable=False)
+    approval_token = models.CharField(max_length=36, unique=True, default=uuid.uuid4, editable=False)
     token_expiry = models.DateTimeField(default=timezone.now() + timedelta(days=2))
 
     def __str__(self):

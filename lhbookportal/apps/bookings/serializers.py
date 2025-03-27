@@ -40,51 +40,72 @@ class RoomSerializer(serializers.ModelSerializer):
         if value not in valid_room_types:
             raise serializers.ValidationError(f"Invalid room type. Must be one of: {valid_room_types}")
         return value
-
+    
+    def validate_accessories(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Accessories must be a dictionary.")
+        for accessory, available in value.items():
+            if accessory not in dict(Room.ACCESSORY_OPTIONS):
+                raise serializers.ValidationError(f"Invalid accessory: {accessory}")
+            if not isinstance(available, bool):
+                raise serializers.ValidationError(f"Accessory availability for {accessory} must be a boolean.")
+        return value
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
-    room = RoomSerializer()
+    room = serializers.CharField()
     booking_date = serializers.DateField()
-    creator = UserSerializer()
+    accessories = serializers.JSONField() # Allow accessories data to be handled
+
+    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
     class Meta:
         model = Booking
-
-        # fields = '__all__'
-        #ensure passwords and approval_token are not exposed 
-        read_only_fields = ['status', 'creator', 'requested_on', 'cost', 'approval_token', 'token_expiry']  # Fields not set by the user
-        exclude = ['approval_token', 'token_expiry' ]
-
-        depth = 1
+        exclude = ['approval_token', 'token_expiry']  # Exclude sensitive fields
+        read_only_fields = ['status', 'requested_on', 'cost']  # Fields not set by the user
+        depth = 1 
 
     def validate(self, data):
-        
+        # Extract relevant fields
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         
         # if(not start_time and not end_time):
             
         
-        
+
         booking_date = data.get('booking_date')
-        # print(booking_date)
-        room = data.get('room')  # room is already a Room object
+        room_name = data.get('room')  # Room name is passed as a string
+        title = data.get('title')
+        Type = data.get('Type', 'nonacademic')  # Default to 'nonacademic' if not provided
+        remarks = data.get('remarks', '')
+        accessories = data.get('accessories', {})
+        duration_hrs = data.get('duration', 0)  # Ensure duration is passed or default to 0
+        # cost = data.get('cost', 0)  # If cost is passed, we can check or calculate it
+        # Validate room
+        try:
+            room = Room.objects.get(name=room_name)
+            data['room'] = room  # Assign the Room object to the data
+        except Room.DoesNotExist:
+            raise serializers.ValidationError(f"Room with name '{room_name}' does not exist.")
 
+        # Ensure accessories are valid for the room
+        for accessory, value in accessories.items():
+            if accessory not in room.accessories or not room.accessories[accessory]:
+                raise serializers.ValidationError(f"{accessory} is not available in {room.name}.")
 
-        #holiday booking
         print(Holiday)
         holidays = Holiday.objects.filter(date=booking_date)
         if holidays.exists() or booking_date.weekday() == 6:
             raise serializers.ValidationError("Bookings cannot be made on holidays.")
 
-
-    # Combine booking_date and start_time/end_time into datetime objects
+        # # Convert to time objects if they are strings
         if isinstance(start_time, str):
             start_time = datetime.datetime.strptime(start_time, '%H:%M:%S').time()
         if isinstance(end_time, str):
             end_time = datetime.datetime.strptime(end_time, '%H:%M:%S').time()
 
+        # Combine booking_date and start_time/end_time into datetime objects
         booking_start_datetime = timezone.make_aware(
             datetime.datetime.combine(booking_date, start_time)
         )
@@ -92,7 +113,7 @@ class BookingSerializer(serializers.ModelSerializer):
             datetime.datetime.combine(booking_date, end_time)
         )
 
-        # 1. Ensure start time is before end time
+        # # 1. Ensure start time is before end time
         if booking_start_datetime >= booking_end_datetime:
             raise serializers.ValidationError("Start time must be before end time.")
 
@@ -112,22 +133,23 @@ class BookingSerializer(serializers.ModelSerializer):
         if conflicting_bookings.exists():
             raise serializers.ValidationError("The room is already booked during this time.")
 
+        # Additional validations based on 'Type' (academic/nonacademic)
+        if Type not in ['academic', 'nonacademic']:
+            raise serializers.ValidationError(f"Invalid Type '{Type}'. Valid options are 'academic' or 'nonacademic'.")
+
+        # Additional logic for `remarks` can go here if needed, e.g., length validation.
+
+        # Return the validated data
         return data
 
     def create(self, validated_data):
-        """
-        Override the create method to set the creator automatically.
-        """
-      
         validated_data['creator'] = self.context['request'].user
+        validated_data['duration'] = (datetime.datetime.combine(validated_data['booking_date'], validated_data['end_time']) -
+                                       datetime.datetime.combine(validated_data['booking_date'], validated_data['start_time'])).seconds / 3600
+        validated_data['cost'] = validated_data['room'].price_per_hour * validated_data['duration']
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        """
-        Override the update method to handle status changes.
-        Only allow status updates for pending bookings.
-        """
-        if 'status' in validated_data:
-            if instance.status != 'pending':
-                raise serializers.ValidationError("Only pending bookings can be updated.")
+        if 'status' in validated_data and instance.status != 'pending':
+            raise serializers.ValidationError("Only pending bookings can be updated.")
         return super().update(instance, validated_data)
