@@ -51,11 +51,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
-
+// import { ROLE } from '../api/constants';
 import './Request_Booking.css';
 
 const Request_Booking = () => {
-  // State for form fields
+  const role = localStorage.getItem('ROLE');
+  const token = localStorage.getItem(ACCESS_TOKEN);
+  console.log(role);
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
@@ -70,6 +72,44 @@ const Request_Booking = () => {
   const [accessoryOptions, setAccessoryOptions] = useState([]);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
 
+  const [users, setUsers] = useState([]); 
+  const [selectedUser, setSelectedUser] = useState(""); 
+  const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
+
+  useEffect(() => {
+    if (role !== 'admin') {
+      setSelectedUser('INVALID'); // Set user to null if the role is not admin
+    }
+  }, [role]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get(VITE_USER_LIST_CREATE_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        console.log("API Response:", response.data); // Debugging step
+  
+        // Ensure the API response is an array before setting state
+        if (Array.isArray(response.data)) {
+          setUsers(response.data);
+        } else {
+          console.error("Unexpected API response format:", response.data);
+          setUsers([]); // Prevent crash
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setUsers([]);
+      }
+    };
+  
+    if (role === "admin") {
+      fetchUsers();
+    }
+  }, [role]);
   // Time options for dropdowns
   const timeOptions = [
     '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
@@ -87,7 +127,6 @@ const Request_Booking = () => {
 useEffect(() => {
   const fetchRooms = async () => {
     console.log("here")
-    const token = localStorage.getItem(ACCESS_TOKEN);
     if (!token) {
       console.log("here")
       console.error("No token found. User is not authenticated.");
@@ -101,7 +140,8 @@ useEffect(() => {
           Authorization: `Bearer ${token}`,
         }
       });
-      console.log("here")
+      console.log("here");
+      console.log(response.data);
       const rooms = Array.isArray(response.data) ? response.data : response.data.rooms;
       setRoomOptions(rooms); 
       setFilteredRoomOptions(rooms);
@@ -216,6 +256,7 @@ useEffect(() => {
     const formattedEndTime = formatTime(endTime);
     // Prepare the data to be sent to the backend
     const bookingData = {
+      user: selectedUser,
       title: purpose,
       booking_date: startDate,
       start_time: formattedStartTime,
@@ -284,17 +325,39 @@ useEffect(() => {
     <div className="main-content-wrapper">
       <div className="booking-form-container">
         <form className="booking-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="purpose">Purpose</label>
-            <input 
-              type="text" 
-              id="purpose" 
-              value={purpose} 
-              onChange={(e) => setPurpose(e.target.value)} 
-              placeholder="Linux Session Y-24"
+        <div className="form-group">
+          {role === "admin" && (
+          <>
+            <label htmlFor="user">User</label>
+            <select
+              id="user"
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
               className="form-control"
-            />
-          </div>
+            >
+              <option value="">Select User</option>
+              {users.length > 0 ? (
+                users.map((u) => (
+                  <option key={u.email} value={u.username}>
+                    {u.username}
+                  </option>
+                ))
+              ) : (
+                <option disabled>Loading users...</option>
+              )}
+            </select>
+          </>
+        )}
+          <label htmlFor="purpose">Purpose</label>
+          <input
+            type="text"
+            id="purpose"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            placeholder="Linux Session Y-24"
+            className="form-control"
+          />
+        </div>
           <div className="form-row">
             <div className="form-column">
               <label>Begin</label>
