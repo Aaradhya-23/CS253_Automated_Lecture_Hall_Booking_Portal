@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, mixins, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
+import json
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
@@ -12,6 +13,7 @@ from rest_framework.throttling import UserRateThrottle
 User = get_user_model()
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -24,6 +26,7 @@ import csv
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import time, datetime, timedelta
+from rest_framework.permissions import AllowAny
 
 # class DownloadBillPDF(APIView):
 #     permission_classes = [BookingPermissions]
@@ -50,6 +53,41 @@ from datetime import time, datetime, timedelta
 #         return response
     
 # >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
+@csrf_exempt
+def send_rejection_mail(request, booking_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    
+    try:
+        data = json.loads(request.body)  # Parse the request body to get JSON data
+        remarks = data.get("remark", "")  # Get remarks from request
+
+        if not remarks:
+            return JsonResponse({"error": "Remarks are required"}, status=400)
+
+        # Get the booking object
+        booking = get_object_or_404(Booking, id=booking_id)
+        booking.status = 'rejected'
+
+        # Send rejection email
+        send_mail(
+            'Booking Rejected',
+            f"""Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION.
+            Remarks: {remarks}
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.creator.email],
+        )
+
+        # Delete the booking
+        booking.delete()
+        return JsonResponse({"message": "Deleted successfully"}, status=204)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
@@ -146,8 +184,9 @@ class BookingCRUDView(
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     # authentication_classes = []
-    permission_classes = [BookingPermissions]  # Restrict access to authenticated users
+    permission_classes = [IsAuthenticated]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
+    
     
     def post(self, request, *args, **kwargs):
         print("this is post", self.request.data)
@@ -162,8 +201,16 @@ class BookingCRUDView(
     
     def perform_create(self, serializer):
         print("this is creation", self.request.data)
-        user = self.request.user
-        validated_data = serializer.validated_data
+        validated_data = serializer.validated_data  
+        print("Validated Data:", validated_data)  # Debugging step
+
+        user = self.request.user  # Default to the logged-in user
+
+        # Check if 'user' exists in request.data (before validation)
+        if 'user' in self.request.data and self.request.data['user'] != 'INVALID':
+            user = get_object_or_404(User, username=self.request.data['user'])
+
+        serializer.save(creator=user)  # Ensure user is saved
         title = validated_data['title']
         room = validated_data['room']
         duration = validated_data['duration']
@@ -172,6 +219,7 @@ class BookingCRUDView(
         booking_date = validated_data['booking_date']
         accessories = validated_data.get('accessories', {})
         remarks = validated_data.get('remarks', '')
+        # creator =
 
         # Validate accessories availability
         unavailable_accessories = [
@@ -224,6 +272,7 @@ class BookingCRUDView(
             accessories=accessories,
             remarks=remarks
         )
+        
 
         if user.role == 'faculty':
             return  # Skip email for faculty
@@ -289,10 +338,11 @@ class BookingCRUDView(
 class BookingSearchView(generics.ListAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Exact field filters
-    filterset_fields = ['status', 'Type', 'room', 'creator']
+    filterset_fields = ['status', 'Type', 'room', 'creator', 'booking_date']
 
     # Full-text search fields
     search_fields = ['title', 'room__name', 'creator__username']

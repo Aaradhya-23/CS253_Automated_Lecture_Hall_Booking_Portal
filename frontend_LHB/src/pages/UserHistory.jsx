@@ -1,43 +1,95 @@
 //import React, { useState, useEffect } from 'react';
 import './History.css';
 
-// TODO: Backend Integration Comments:
-
-// 1. History Data Fetching:
-// - Replace sample data with API calls
-// - Create src/api/bookings.js with history endpoints
-// - Call GET /api/bookings/history?month={month}&year={year} 
-// - Add pagination if the number of bookings is large
-
-// 2. Data Structure:
-// - Adapt component to match backend data structure
-// - Expected response: { bookings: [...], totalAmount: number }
-// - Handle empty response gracefully
-
-// 3. Download Functionality:
-// - Implement booking receipt/invoice download
-// - Call GET /api/bookings/{id}/receipt with proper authorization
-// - Support multiple formats (PDF, CSV) if needed
-
-// 4. Cancellation/Modification:
-// - Add ability to cancel bookings if status allows
-// - Implement POST /api/bookings/{id}/cancel
-// - Add modification functionality where applicable
-
-// 5. Date Navigation:
-// - Send month/year parameters to backend when navigation changes
-// - Optimize to prevent unnecessary API calls
-// - Add loading states during data fetching
-
-// 6. Error Handling:
-// - Display user-friendly error messages
-// - Implement retry mechanism for failed requests
-// - Log errors to monitoring service
-
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import api from '../api/api';
-import { ACCESS_TOKEN, ROLE, USERNAME } from "../api/constants";
+const UserHistory = () => {
+  // Sample booking history data organized by month 
+  // Just to check and show the working of the navigation button
+  const allBookings = {
+    // January data
+    '0-2025': [
+      {
+        id: 1,
+        purpose: 'Intro Session ML',
+        date: '12-01-25',
+        time: '9:00 AM - 11:00 AM',
+        lectureHall: 'LH07',
+        amount: 6000,
+        approval_status: 'Pending'
+      },
+      {
+        id: 2,
+        purpose: 'Contest',
+        date: '03-01-25',
+        time: '5:00 PM - 7:00 PM',
+        lectureHall: 'LH03',
+        amount: 6000,
+        approval_status: 'Approved'
+      },
+      {
+        id: 3,
+        purpose: 'Workshop Web-development',
+        date: '07-01-25',
+        time: '6:00 PM - 7:00 PM',
+        lectureHall: 'LH07',
+        amount: 3500,
+        approval_status: 'Rejected'
+      }
+    ],
+    // February data
+    '1-2025': [
+      {
+        id: 4,
+        purpose: 'AI Workshop',
+        date: '05-02-25',
+        time: '2:00 PM - 4:00 PM',
+        lectureHall: 'LH01',
+        amount: 4500,
+        approval_status: 'Approved'
+      },
+      {
+        id: 5,
+        purpose: 'Hackathon Intro',
+        date: '14-02-25',
+        time: '10:00 AM - 12:00 PM',
+        lectureHall: 'LH05',
+        amount: 5000,
+        approval_status: 'Pending'
+      }
+    ],
+    // March data
+    '2-2025': [
+      {
+        id: 6,
+        purpose: 'Project Showcase',
+        date: '10-03-25',
+        time: '3:00 PM - 5:00 PM',
+        lectureHall: 'LH02',
+        amount: 7000,
+        approval_status: 'Approved'
+      },
+      {
+        id: 7,
+        purpose: 'Guest Lecture',
+        date: '22-03-25',
+        time: '1:00 PM - 3:00 PM',
+        lectureHall: 'LH08',
+        amount: 8500,
+        approval_status: 'Rejected'
+      }
+    ],
+    // April data
+    '3-2025': [
+      {
+        id: 8,
+        purpose: 'Web3 Workshop',
+        date: '08-04-25',
+        time: '4:00 PM - 6:00 PM',
+        lectureHall: 'LH06',
+        amount: 5500,
+        approval_status: 'Pending'
+      }
+    ]
+  };
 
 const UserHistory = () => {
   const [bookings, setBookings] = useState([]);
