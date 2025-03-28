@@ -26,6 +26,7 @@ import csv
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import time, datetime, timedelta
+from rest_framework.permissions import AllowAny
 
 # class DownloadBillPDF(APIView):
 #     permission_classes = [BookingPermissions]
@@ -337,6 +338,7 @@ class BookingCRUDView(
 class BookingSearchView(generics.ListAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Exact field filters
