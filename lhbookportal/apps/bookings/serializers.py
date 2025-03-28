@@ -53,11 +53,13 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    room = RoomSerializer()
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
-    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
+    # creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    creator = UserSerializer()
+
     class Meta:
         model = Booking
         exclude = ['approval_token', 'token_expiry']  # Exclude sensitive fields
