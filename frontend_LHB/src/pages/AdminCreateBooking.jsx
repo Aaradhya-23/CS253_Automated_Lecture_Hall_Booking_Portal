@@ -276,6 +276,7 @@ import './AdminCreateBooking.css';
 
 const AdminCreateBooking = () => {
   // State for form fields
+  const [user, setUser] = useState('');
   const [purpose, setPurpose] = useState('');
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('8:00 AM');
@@ -406,6 +407,15 @@ const AdminCreateBooking = () => {
       <div className="booking-form-container">
         <form className="booking-form" onSubmit={handleSubmit}>
           <div className="form-group">
+            <label htmlFor="User">User</label>
+            <input 
+              type="text" 
+              id="user" 
+              value={user} 
+              onChange={(e) => setUser(e.target.value)} 
+              placeholder="P Club IITK"
+              className="form-control"
+            />
             <label htmlFor="purpose">Purpose</label>
             <input 
               type="text" 

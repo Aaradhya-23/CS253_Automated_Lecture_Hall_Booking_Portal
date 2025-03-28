@@ -1,41 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LiveSchedule.css';
-
-// TODO: Backend Integration Comments:
-
-// 1. Data Fetching:
-// - Replace mock data with API calls
-// - Create src/api/schedule.js for schedule-related endpoints
-// - Call GET /api/schedule?date=YYYY-MM-DD to get bookings for a specific date
-// - Add useEffect hook to fetch data when component mounts or date changes
-
-// 2. Loading States:
-// - Add loading indicators while fetching data
-// - Implement error handling for failed API calls
-// - Add empty state UI for days with no bookings
-
-// 3. Booking Details:
-// - Add modal/popup for viewing booking details
-// - Fetch detailed information via GET /api/bookings/{bookingId}
-// - Consider caching frequently accessed data
-
-// 4. Real-time Updates:
-// - Implement WebSocket connection for live schedule updates
-// - Update UI when new bookings are made or existing ones are changed
-// - Consider a polling fallback if WebSockets aren't available
-
-// 5. Filtering and Search:
-// - Add backend-driven filters (by hall, time, department)
-// - Implement search functionality via GET /api/schedule/search?query=...
-
-// 6. Date Navigation:
-// - Keep selected date in URL for shareable links
-// - Optimize API calls to avoid unnecessary data fetching
 
 const LiveSchedule = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Format date to display as "TUESDAY, JANUARY 21, 2025"
   const formatDate = (date) => {
     return date.toLocaleString('en-US', { 
       weekday: 'long', 
@@ -45,47 +16,44 @@ const LiveSchedule = () => {
     }).toUpperCase();
   };
 
-  // Navigate to previous day
+  const fetchBookings = async (date) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`http://127.0.0.1:8000/bookings/search?date=${date.toISOString().split('T')[0]}`);
+      const data = response.data; // Access the data directly
+      setBookings(data);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings(selectedDate);
+  }, [selectedDate]);
+
   const previousDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() - 1);
     setSelectedDate(newDate);
   };
 
-  // Navigate to next day
   const nextDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + 1);
     setSelectedDate(newDate);
   };
 
-  // Mock data for lecture halls
-  const lectureHalls = ['LH1', 'LH2', 'LH3', 'LH5', 'LH6', 'LH7', 'LH8', 'LH9'];
-  
-  // Mock data for time slots
-  const timeSlots = [
-    '8:00 AM',
-    '9:00 AM',
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '1:00 PM',
-    '2:00 PM'
-  ];
+  const lectureHalls = ['L-1', 'LH2', 'LH3', 'LH5', 'LH6', 'LH7', 'LH8', 'LH9'];
+  const timeSlots = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM'];
 
-  // Mock data for bookings
-  const bookings = [
-    { hall: 'LH1', time: '10:00 AM', course: 'CS202', dropdown: true },
-    { hall: 'LH2', time: '10:00 AM', course: 'CS202', dropdown: true },
-    { hall: 'LH3', time: '11:00 AM', course: 'MTH112 QUIZ', dropdown: true },
-    { hall: 'LH5', time: '9:00 AM', course: 'PCLUB SESSION', dropdown: true },
-    { hall: 'LH7', time: '11:00 AM', course: 'CS771', dropdown: true },
-    { hall: 'LH1', time: '12:00 PM', course: 'CS253', dropdown: true },
-  ];
-
-  // Get booking for a specific hall and time
   const getBooking = (hall, time) => {
-    return bookings.find(booking => booking.hall === hall && booking.time === time);
+    return bookings.find(booking => 
+      booking.room.name === hall && 
+      booking.start_time === time
+    );
   };
 
   return (
@@ -95,7 +63,10 @@ const LiveSchedule = () => {
         <div className="ls-current-date">{formatDate(selectedDate)}</div>
         <button onClick={nextDay} className="ls-nav-button">&gt;</button>
       </div>
-      
+
+      {loading && <p>Loading...</p>}
+      {error && <p className="error">{error}</p>}
+
       <div className="ls-timetable-container">
         <div className="ls-timetable">
           <div className="ls-time-column">
@@ -121,10 +92,7 @@ const LiveSchedule = () => {
                         {booking && (
                           <div className="ls-booking-item">
                             <div className="ls-booking-indicator"></div>
-                            <div className="ls-course-code">{booking.course}</div>
-                            {booking.dropdown && (
-                              <button className="ls-dropdown-button">▼</button>
-                            )}
+                            <div className="ls-course-code">{booking.title}</div>
                           </div>
                         )}
                       </div>
