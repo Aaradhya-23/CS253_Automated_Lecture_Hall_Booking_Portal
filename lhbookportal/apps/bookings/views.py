@@ -313,7 +313,7 @@ class BookingSearchView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Exact field filters
-    filterset_fields = ['status', 'Type', 'room', 'creator']
+    filterset_fields = ['status', 'Type', 'room', 'creator', 'booking_date']
 
     # Full-text search fields
     search_fields = ['title', 'room__name', 'creator__username']
