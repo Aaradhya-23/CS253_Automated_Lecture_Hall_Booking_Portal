@@ -10,6 +10,7 @@ const AdminNavbar = ({ onNavigate, currentPath }) => {
     { name: 'History', path: FRONTEND_ROUTES.adminViewBooking }, // Assuming Home page has history
     { name: 'View Pending', path: FRONTEND_ROUTES.viewPending }, // You'll need to add this route
     { name: 'Create New User', path: FRONTEND_ROUTES.register }, // You'll need to add this route
+    { name: 'Feedback', path: FRONTEND_ROUTES.feedback },
   ];
 
   return (

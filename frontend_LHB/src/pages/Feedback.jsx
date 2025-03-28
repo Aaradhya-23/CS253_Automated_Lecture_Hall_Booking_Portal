@@ -35,16 +35,56 @@ import React from 'react'
 // - Implement POST /api/admin/feedback/{id}/respond
 // - Add status indicators for responded/unresponded feedback
 
-const Feedback = () => {
-  return (
-    <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', padding: '20px', backgroundColor: '#f0f8ff', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
-        <h1 style={{ color: '#4CAF50' }}>I hope you enjoy our software, if not ,
-            kindly humbly mera mu me lelein</h1>
-        <p style={{ fontSize: '18px', color: '#555' }}>
-            Maa chuda le bhai merko pata h website acchi h mera la*da le feedback 
-        </p>
-    </div>
-  )
-}
+import { useState } from 'react';
+import './Feedback.css';
 
-export default Feedback
+const Feedback = () => {
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [wordCount, setWordCount] = useState(0);
+
+  const handleStarClick = (star) => {
+    setRating(star);
+  };
+
+  const handleFeedbackChange = (event) => {
+    const text = event.target.value;
+    setFeedback(text);
+    setWordCount(text.split(/\s+/).filter(Boolean).length);
+  };
+
+  const handleSubmit = () => {
+    if (wordCount > 100) {
+      alert('Feedback must be under 100 words.');
+      return;
+    }
+    alert(`Thank you for your feedback!\nRating: ${rating} stars\nFeedback: ${feedback}`);
+  };
+
+  return (
+    <div className="feedback-container">
+      <h2>Rate Your Experience</h2>
+      <div className="stars">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`star ${star <= rating ? 'active' : ''}`}
+            onClick={() => handleStarClick(star)}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <h2>Your Feedback</h2>
+      <textarea
+        placeholder="Enter your feedback (max 100 words)"
+        value={feedback}
+        onChange={handleFeedbackChange}
+      />
+      <p>{wordCount} / 100 words</p>
+      <button onClick={handleSubmit}>Submit Feedback</button>
+    </div>
+  );
+};
+
+export default Feedback;
