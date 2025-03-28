@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Clock, X, AlertCircle, UserCheck, UserCog, BookUser } from 'lucide-react';
 import './Status.css';
-
+import api from '../api/api';
 // Status icon component
 const StatusIcon = ({ status }) => {
   const iconMap = {
-    'Approved': <Check className="st-status-icon st-approved" />,
-    'Pending': <Clock className="st-status-icon st-pending" />,
-    'Rejected': <X className="st-status-icon st-rejected" />,
-    'Not Submitted': <AlertCircle className="st-status-icon st-not-submitted" />
+    'approved': <Check className="st-status-icon st-approved" />,
+    'pending': <Clock className="st-status-icon st-pending" />,
+    'rejected': <X className="st-status-icon st-rejected" />,
+    'notsubmitted': <AlertCircle className="st-status-icon st-not-submitted" />
   };
 
   return iconMap[status] || null;
@@ -17,51 +17,114 @@ const StatusIcon = ({ status }) => {
 function Status() {
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
+  // const [authorities, setAuthorities] = useState([
+  //   {
+  //     name: 'Faculty Advisor',
+  //     role: 'Academic Approval',
+  //     icon: <BookUser />,
+  //     status: 'Approved'
+  //   },
+  //   {
+  //     name: 'DOAA',
+  //     role: 'Department Approval',
+  //     icon: <UserCog />,
+  //     status: 'Pending'
+  //   },
+  //   {
+  //     name: 'Gen Sec',
+  //     role: 'Administrative Approval',
+  //     icon: <UserCheck />,
+  //     status: 'Not Submitted'
+  //   }
+  // ]);
   const [authorities, setAuthorities] = useState([
     {
-      name: 'Faculty Advisor',
-      role: 'Academic Approval',
-      icon: <BookUser />,
-      status: 'Approved'
-    },
-    {
-      name: 'DOAA',
-      role: 'Department Approval',
-      icon: <UserCog />,
-      status: 'Pending'
-    },
-    {
-      name: 'Gen Sec',
-      role: 'Administrative Approval',
-      icon: <UserCheck />,
-      status: 'Not Submitted'
+      name: 'Current Authority',
+      role: "Primary Authority Verifier",
     }
-  ]);
+  ])
+
+  const convertTo12HourFormat = (time) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
+  };
 
   useEffect(() => {
     // Simulated data fetch
-    const mockData = {
-      id: 'ECO111-2025',
-      title: 'Economics 101 Lecture',
-      room: 'LHC - L101',
-      date: 'Wednesday, 05 February 2025',
-      time: '12:00 PM - 01:00 PM',
-      duration: '1 hour',
-      type: 'Academic',
-      createdBy: 'Prof. Smith',
-      overallStatus: 'Partially Approved'
+
+    const fetchBooking = async () => {
+      const token = localStorage.getItem('ACCESS_TOKEN');
+      const username = localStorage.getItem('USERNAME')
+      if (!token) {
+        console.error("No ACCESS_TOKEN found in localStorage.");
+        setError("User not authenticated. Please log in.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const url = `${import.meta.env.VITE_BOOKING_SEARCH_URL}?creator__username=${username}&status=pending`;       
+         const response = await api.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        });
+
+        console.log("Fetched Bookings:", response.data[0]);
+        const latestBooking = response.data[0];
+        setBookingData({
+          id: latestBooking.id,
+          title: latestBooking.title,
+          room: latestBooking.room_details.name,
+          date: latestBooking.booking_date, // change for easy readability
+          time: `${convertTo12HourFormat(latestBooking.start_time)} - ${convertTo12HourFormat(latestBooking.end_time)}`, 
+          duration: `${latestBooking.duration} hour`,
+          type: latestBooking.Type,
+          createdBy: latestBooking.creator.username,
+          overallStatus: latestBooking.status
+        }); // Assuming the response is an array
+        console.log("booking data: ", bookingData)
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setBookingData(mockData);
-    setLoading(false);
+    fetchBooking();
   }, []);
 
-  if (loading) {
-    return <div className="st-loading-container">Loading...</div>;
-  }
+
+  //   const mockData = {
+  //     id: 'ECO111-2025',
+  //     title: 'Economics 101 Lecture',
+  //     room: 'LHC - L101',
+  //     date: 'Wednesday, 05 February 2025',
+  //     time: '12:00 PM - 01:00 PM',
+  //     duration: '1 hour',
+  //     type: 'Academic',
+  //     createdBy: 'Prof. Smith',
+  //     overallStatus: 'Partially Approved'
+  //   };
+
+  //   setBookingData(mockData);
+  //   setLoading(false);
+  // }, []);
 
   return (
     <div className="st-booking-details-container">
+      {loading ? (
+      <div className="st-loading-message">Loading...</div>
+    ) : !bookingData ? (
+      <div className="st-no-data-message">
+        <h2>No active pending requests</h2>
+        <p>Please request some bookings to view their status.</p>
+      </div>
+    ) : (
+      <>
       <div className="st-booking-header">
         <h1 className="st-booking-title">Booking Details</h1>
         <div className="st-booking-status-badge">
@@ -113,9 +176,9 @@ function Status() {
                   </div>
                 </div>
                 <div className="st-authority-status">
-                  <StatusIcon status={authority.status} />
-                  <span className={`st-status-text st-${authority.status.toLowerCase().replace(' ', '-')}`}>
-                    {authority.status}
+                  <StatusIcon status={bookingData.overallStatus} />
+                  <span className={`st-status-text st-${bookingData.overallStatus}`}>
+                    {bookingData.overallStatus}
                   </span>
                 </div>
               </div>
@@ -128,6 +191,8 @@ function Status() {
         <button className="st-action-button st-edit-button">Edit Booking</button>
         <button className="st-action-button st-cancel-button">Cancel Booking</button>
       </div>
+      </>
+    )}
     </div>
   );
 }
