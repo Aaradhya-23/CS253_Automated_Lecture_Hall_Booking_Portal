@@ -1,0 +1,227 @@
+/* BookingDetailsStatus.css */
+.st-booking-details-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 50px;
+    background-color: #f4f6f9;
+    border-radius: 12px;
+  }
+  
+  .st-booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .st-booking-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  
+  .st-booking-status-badge {
+    background-color: #3498db;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  
+  .st-booking-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+  
+  .st-booking-detail-card,
+  .st-approval-workflow-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px; /* Increased from 10px */
+    margin-bottom: 20px;
+    min-height: 400px; /* Set minimum height */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .st-card-title {
+    font-size: 20px; /* Increased from 18px */
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px; /* Increased from 15px */
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 15px; /* Increased from 10px */
+  }
+  
+  .st-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; /* Increased from 15px */
+    flex-grow: 1;
+  }
+  
+  .st-detail-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px; /* Added margin */
+  }
+  
+  .st-detail-label {
+    font-size: 15px; /* Increased from 14px */
+    color: #7f8c8d;
+    margin-bottom: 8px; /* Increased from 5px */
+  }
+  
+  .st-detail-value {
+    font-size: 16px; /* Increased from 15px */
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .st-authorities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Increased from 15px */
+    flex-grow: 1;
+  }
+  
+  .st-authority-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 20px; /* Increased from 15px */
+    border-radius: 8px;
+  }
+  
+  .st-authority-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .st-authority-icon {
+    background-color: #e9ecef;
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .st-authority-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .st-authority-name {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .st-authority-role {
+    font-size: 13px;
+    color: #7f8c8d;
+  }
+  
+  .st-authority-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .st-status-text {
+    font-weight: 500;
+  }
+  
+  .st-status-text.st-approved {
+    color: #2ecc71;
+  }
+  
+  .st-status-text.st-pending {
+    color: #f39c12;
+  }
+  
+  .st-status-text.st-rejected {
+    color: #e74c3c;
+  }
+  
+  .st-status-text.st-not-submitted {
+    color: #95a5a6;
+  }
+  
+  .st-status-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .st-status-icon.st-approved {
+    color: #2ecc71;
+  }
+  
+  .st-status-icon.st-pending {
+    color: #f39c12;
+  }
+  
+  .st-status-icon.st-rejected {
+    color: #e74c3c;
+  }
+  
+  .st-status-icon.st-not-submitted {
+    color: #95a5a6;
+  }
+  
+  .st-booking-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .st-action-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .st-edit-button {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .st-edit-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .st-cancel-button {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .st-cancel-button:hover {
+    background-color: #c0392b;
+  }
+  
+  .st-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 20px;
+    color: #3498db;
+  }
+  
+  @media (max-width: 768px) {
+    .st-booking-details-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .st-detail-grid {
+      grid-template-columns: 1fr;
+    }
+  }

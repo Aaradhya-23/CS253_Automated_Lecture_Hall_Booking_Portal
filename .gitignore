@@ -6,6 +6,7 @@ __pycache__/
 
 # Virtual Environment
 alhbp/
+poop/
 # baaki log isme apne venv ka naam daal dena taaki galti se vo push na kar do github pe.
 
 # Django/Migrations
@@ -54,3 +55,4 @@ dist-ssr
 *.sw?
 
 poop
+db.sqlite3

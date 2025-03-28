@@ -75,6 +75,7 @@ const App = () => {
       localStorage.setItem('ACCESS_TOKEN', access);
       localStorage.setItem('REFRESH_TOKEN', refresh);
       localStorage.setItem('ROLE', role);
+      localStorage.setItem('USERNAME', username);
       setUserRole(role);
       setIsLoggedIn(true);
       navigate(FRONTEND_ROUTES.home)
@@ -163,7 +164,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.history}
               element={
-                <ProtectedRoute role={["user", "admin"]}>
+                <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                   <UserHistory />
                 </ProtectedRoute>
               }
@@ -171,7 +172,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.requestBooking}
               element={
-                <ProtectedRoute role={["user", "admin"]}>
+                <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                   <Request_Booking />
                 </ProtectedRoute>
               }
@@ -179,7 +180,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.help}
               element={
-                <ProtectedRoute role={["user", "admin"]}>
+                <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                   <Help />
                 </ProtectedRoute>
               }
@@ -187,7 +188,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.status}
               element={
-                <ProtectedRoute role="user">
+                <ProtectedRoute role={["student", "Student", "faculty"]}>
                   <Status />
                 </ProtectedRoute>
               }
@@ -196,7 +197,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.history}
               element={
-                <ProtectedRoute role="user">
+                <ProtectedRoute role={["student", "Student", "faculty"]}>
                   <UserHistory />
                 </ProtectedRoute>
               }
@@ -215,7 +216,7 @@ const App = () => {
             }
             />
             <Route path={FRONTEND_ROUTES.roomDetails} element={
-              <ProtectedRoute role={["user", "admin"]}>
+              <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                 <RoomDetails />
               </ProtectedRoute>
             }
@@ -223,7 +224,7 @@ const App = () => {
             
             {/* This route expects a booking ID parameter - ensure navigation uses the correct format: `/booking/${bookingId}` */}
             <Route path={FRONTEND_ROUTES.bookingDetails} element={
-              <ProtectedRoute role={["user", "admin"]}>
+              <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                 <Bookingdetails />
               </ProtectedRoute>
             }

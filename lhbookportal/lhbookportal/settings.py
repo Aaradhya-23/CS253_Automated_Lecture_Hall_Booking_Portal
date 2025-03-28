@@ -64,7 +64,7 @@ REST_FRAMEWORK = {
 
 # JWT Token Expiry Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Token expires in 30 minutes
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token expires in 30 minutes
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Refresh token expires in 1 day
     'ROTATE_REFRESH_TOKENS': True,  # Issue new refresh token on refresh
     'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old refresh token
