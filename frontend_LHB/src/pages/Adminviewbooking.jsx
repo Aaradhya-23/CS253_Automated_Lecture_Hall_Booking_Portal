@@ -57,7 +57,6 @@ function Adminviewbooking() {
       }
 
       try {
-        
         const response = await api.get(`${HISTORY_URL}?status=approved/`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -239,26 +238,27 @@ function Adminviewbooking() {
       </div>
 
       <div className="admin-bookings-list">
-        <h2 className="admin-date-header">{new Date(dateRange.start).toDateString()}</h2>
+        {/* <h2 className="admin-date-header">{new Date(dateRange.start).toDateString()}</h2> */}
         <div className="admin-booking-item highlighted">
           <div className="admin-time-indicator">
-            <div className="admin-blue-dot"></div>
+            {/* <div className="admin-blue-dot"></div> */}
             <div className="admin-time-text">
               <span>Time <slot></slot></span>
-              <span className="admin-duration">duration</span>
+              <span className="admin-duration">(duration)</span>
             </div>
           </div>
 
           <div className="admin-booking-info">
-            <div className="admin-room-info">BookingDate</div>
-            <div className="admin-room-info">LectureHall</div>
-            <div className="admin-professor-info">UserName</div>
+            <div className="admin-room-info">Booking Date</div>
+            <div className="admin-room-info">Lecture Hall</div>
+            <div className="admin-professor-info">Username</div>
             <div className="admin-course-info">Purpose</div>
+
             {/* <div className="admin-booking-date">📅 2025-03-28</div> */}
           </div>
 
           <div className="admin-booking-actions">
-            <button className="admin-manage-btn">Action <span className="admin-dropdown-arrow">▼</span></button>
+            <div className="admin-course-info">Action</div>
           </div>
         </div>
 
@@ -266,7 +266,7 @@ function Adminviewbooking() {
 
           <div key={booking.id} className={`admin-booking-item `}>
             <div className="admin-time-indicator">
-              <div className="admin-blue-dot"></div>
+              {/* <div className="admin-blue-dot"></div> */}
               <div className="admin-time-text">
                 <span>{booking.time}</span>
                 <span className="admin-duration">{booking.duration}</span>
@@ -291,7 +291,7 @@ function Adminviewbooking() {
               {openDropdownId === booking.id && (
                 <div className="admin-dropdown-menu">
                   <button onClick={() => handleViewDetails(booking.id)} className="admin-dropdown-item">
-                    <span className="admin-icon">✎</span> View/edit details
+                    <span className="admin-icon">✎</span> View
                   </button>
                   <button onClick={() => handleRemoveBooking(booking.id)} className="admin-dropdown-item">
                     <span className="admin-icon admin-trash">🗑</span> Remove booking
