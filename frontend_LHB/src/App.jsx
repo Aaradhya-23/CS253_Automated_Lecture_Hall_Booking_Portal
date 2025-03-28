@@ -75,6 +75,7 @@ const App = () => {
       localStorage.setItem('ACCESS_TOKEN', access);
       localStorage.setItem('REFRESH_TOKEN', refresh);
       localStorage.setItem('ROLE', role);
+      localStorage.setItem('USERNAME', username);
       setUserRole(role);
       setIsLoggedIn(true);
       navigate(FRONTEND_ROUTES.home)

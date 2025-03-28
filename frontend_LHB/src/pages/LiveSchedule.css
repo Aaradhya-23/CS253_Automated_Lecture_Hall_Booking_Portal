@@ -1,4 +1,4 @@
-/* LiveSchedule.css */
+***LiveSchedule.css
 .ls-container {
     width: 100%;
     max-width: 100%;
@@ -102,7 +102,19 @@
     border: 1px solid #2c3e50; /* Makes the border bolder and darker */
     box-shadow: 0 2px 4px rgba(13, 9, 9, 0.1);
   }
-  
+  .date-picker-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.date-input {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
   .ls-booking-indicator {
     position: absolute;
     left: 0;
@@ -134,4 +146,65 @@
     .ls-timetable {
       min-width: 600px;
     }
-  }
+  } ***
+  /* General container */
+div {
+  font-family: Arial, sans-serif;
+}
+
+/* Header styling */
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Date Picker */
+.react-datepicker-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Room headers */
+.room-header {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+}
+
+/* Time column styling */
+div[style*="position: absolute"][style*="left: 0"] {
+  font-size: 14px;
+  color: #666;
+  padding: 5px;
+}
+
+/* Grid container */
+div[style*="position: relative"] {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+/* Booking Box */
+.booking-box {
+  background-color: #007bff;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect */
+.booking-box:hover {
+  transform: scale(1.05);
+  background-color: #0056b3;
+}
