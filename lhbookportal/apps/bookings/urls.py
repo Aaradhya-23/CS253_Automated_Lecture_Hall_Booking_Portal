@@ -17,6 +17,6 @@ urlpatterns = [
     path('history/', UserBookingHistoryView.as_view(), name='booking-history'),
     path('rooms/search/', RoomSearchView.as_view(), name = 'room-search'),
     path('slots/', AvailableBookingSlotsView.as_view(), name='view_available_booking_slot'),
-    path('send-rejected-main/<int:booking_id>/', send_rejection_mail(), name = "delete_and_reject")
+    path('send-rejected-mail/<int:booking_id>/', send_rejection_mail, name = "delete_and_reject")
 ]
 

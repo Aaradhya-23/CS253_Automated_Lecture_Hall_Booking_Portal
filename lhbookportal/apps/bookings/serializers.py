@@ -54,11 +54,20 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     # room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
-    room = RoomSerializer()
+    
     booking_date = serializers.DateField()
     accessories = serializers.JSONField() # Allow accessories data to be handled
-    # creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    creator = UserSerializer()
+    
+    room = serializers.PrimaryKeyRelatedField(
+        queryset=Room.objects.all(), write_only=True  # For POST requests (accepts ID)
+    )
+    
+    # Custom room field for GET requests
+    room_details = RoomSerializer(read_only=True, source="room")
+    # room_obj = RoomSerializer(read_only=True)
+
+    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    creator = UserSerializer(read_only=True)
     
     class Meta:
         model = Booking
