@@ -1,45 +1,3 @@
-// import React, { useState } from 'react';
-// import './Adminviewbooking.css';
-
-// // TODO: Backend Integration Comments:
-
-// // 1. Admin Data Fetching:
-// // - Replace mock data with admin API endpoints
-// // - Create src/api/admin.js for admin-specific functions
-// // - Call GET /api/admin/bookings with date range parameters
-// // - Implement proper pagination and filtering
-
-// // 2. Booking Management:
-// // - Implement view/edit functionality:
-// //   a) GET /api/admin/bookings/{id} for detailed view
-// //   b) PUT /api/admin/bookings/{id} for updates
-// // - Implement deletion with DELETE /api/admin/bookings/{id}
-// // - Add confirmation dialogs for destructive actions
-
-// // 3. Date Range Selection:
-// // - Send selected date range to backend
-// // - Format dates according to API requirements
-// // - Implement calendar UI for date selection
-
-// // 4. Search and Filtering:
-// // - Implement server-side search via query parameters
-// // - Add filters for status, hall, user, etc.
-// // - Make filtering options dynamic based on available data
-
-// // 5. Bulk Actions:
-// // - Add functionality for bulk approve/reject/delete
-// // - Implement POST /api/admin/bookings/bulk with action and IDs
-
-// // 6. Access Control:
-// // - Verify admin permissions before rendering component
-// // - Disable actions based on user permissions
-// // - Handle unauthorized access attempts
-
-// // 7. Audit Logging:
-// // - Log all admin actions for accountability
-// // - Display who made changes and when
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
@@ -99,7 +57,8 @@ function Adminviewbooking() {
       }
 
       try {
-        const response = await api.get(HISTORY_URL, {
+        
+        const response = await api.get(`${HISTORY_URL}?status=approved/`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

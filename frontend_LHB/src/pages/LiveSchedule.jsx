@@ -1,44 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './LiveSchedule.css';
 import api from '../api/api';
-import { ACCESS_TOKEN } from '../api/constants';
 import axios from 'axios';
-
-// TODO: Backend Integration Comments:
-
-// 1. Data Fetching:
-// - Replace mock data with API calls
-// - Create src/api/schedule.js for schedule-related endpoints
-// - Call GET /api/schedule?date=YYYY-MM-DD to get bookings for a specific date
-// - Add useEffect hook to fetch data when component mounts or date changes
-
-// 2. Loading States:
-// - Add loading indicators while fetching data
-// - Implement error handling for failed API calls
-// - Add empty state UI for days with no bookings
-
-// 3. Booking Details:
-// - Add modal/popup for viewing booking details
-// - Fetch detailed information via GET /api/bookings/{bookingId}
-// - Consider caching frequently accessed data
-
-// 4. Real-time Updates:
-// - Implement WebSocket connection for live schedule updates
-// - Update UI when new bookings are made or existing ones are changed
-// - Consider a polling fallback if WebSockets aren't available
-
-// 5. Filtering and Search:
-// - Add backend-driven filters (by hall, time, department)
-// - Implement search functionality via GET /api/schedule/search?query=...
-
-// 6. Date Navigation:
-// - Keep selected date in URL for shareable links
-// - Optimize API calls to avoid unnecessary data fetching
 
 const LiveSchedule = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lectureHalls, setRoomOptions] = useState([]);
+  
 
   const formatDate = (date) => {
     return date.toLocaleString('en-US', { 
@@ -55,11 +25,8 @@ const LiveSchedule = () => {
     console.log(formattedDate)
     console.log(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?booking_date=${formattedDate}`)
     try {
-      const token = localStorage.getItem(ACCESS_TOKEN); // Retrieve the token from localStorage
-      console.log(token)
       const response = await axios.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?booking_date=${formattedDate}`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
           'Content-Type': 'application/json', // Specify the content type as JSON
           Accept: 'application/json', // Specify that the response should be in JSON format
         },
@@ -90,14 +57,55 @@ const LiveSchedule = () => {
     setSelectedDate(newDate);
   };
 
-  const lectureHalls = ['L-1', 'LH2', 'LH3', 'LH5', 'LH6', 'LH7', 'LH8', 'LH9'];
+  // const lectureHalls = ['L-1', 'LH2', 'LH3', 'LH5', 'LH6', 'LH7', 'LH8', 'LH9'];
   const timeSlots = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM'];
 
+  const convertTo24Hour = (time) => {
+    const [hourMinute, period] = time.split(" ");
+    let [hours, minutes] = hourMinute.split(":").map(Number);
+  
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+  
+    // Convert to HH:MM:SS format
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+  };
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
+        });
+        console.log(response.data);
+        const rooms = Array.isArray(response.data) ? response.data : response.data.rooms;
+        setRoomOptions(rooms); 
+        console.log(rooms)
+        } catch (error) {
+          console.error("Error fetching rooms:", error);
+        }
+    };
+  
+    fetchRooms();
+  }, []);
+
   const getBooking = (hall, time) => {
+    const formattedTime = convertTo24Hour(time);
     return bookings.find(booking => 
-      booking.room.name === hall && 
-      booking.start_time === time
+      booking.room_details.name === hall.name && 
+      booking.start_time === formattedTime
     );
+  };
+
+  const timeToMinutes = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+  
+  // Calculate n as number of 30-minute intervals
+  const calculateIntervals = (start_time, end_time) => {
+    const startMinutes = timeToMinutes(start_time);
+    const endMinutes = timeToMinutes(end_time);
+    return Math.max(1, Math.ceil((endMinutes - startMinutes) / 30)); // Ensure at least one interval
   };
 
   return (
@@ -107,8 +115,6 @@ const LiveSchedule = () => {
         <div className="ls-current-date">{formatDate(selectedDate)}</div>
         <button onClick={nextDay} className="ls-nav-button">&gt;</button>
       </div>
-
-      {loading && <p>Loading...</p>}
 
       <div className="ls-timetable-container">
         <div className="ls-timetable">
@@ -121,15 +127,16 @@ const LiveSchedule = () => {
           <div className="ls-halls-grid">
             <div className="ls-hall-headers">
               {lectureHalls.map((hall, index) => (
-                <div key={index} className="ls-hall-header">{hall}</div>
+                <div key={index} className="ls-hall-header">{hall.name}</div>
               ))}
             </div>
             
-            <div className="ls-bookings-grid">
-              {timeSlots.map((time, timeIndex) => (
+            {/* <div className="ls-bookings-grid">
+              {timeSlots.map((time, timeIndex) => {
                 <div key={timeIndex} className="ls-time-row">
                   {lectureHalls.map((hall, hallIndex) => {
                     const booking = getBooking(hall, time);
+                    console.log(booking)
                     return (
                       <div key={hallIndex} className="ls-booking-cell">
                         {booking && (
@@ -142,8 +149,62 @@ const LiveSchedule = () => {
                     );
                   })}
                 </div>
+              })}
+            </div> */}
+            {/* <div className="ls-bookings-grid">
+              {lectureHalls.map((hall, hallIndex) => (
+                <div key={hallIndex} className="ls-time-column">
+                  <div className="ls-hall-header">{hall.name}</div>
+                  {timeSlots.map((time, timeIndex) => {
+                    const booking = getBooking(hall, time);
+                    console.log(booking)
+                    return (
+                      <div key={timeIndex} className="ls-time-row">
+                        {booking && (
+                          <>
+                            {Array.from({ length: calculateIntervals(booking.start_time, booking.end_time) }).map((_, loopIndex) => {
+                              const adjustedTimeIndex = timeIndex + loopIndex;
+                              <div key={loopIndex} className="ls-booking-item">
+                                <div className="ls-booking-indicator"></div>
+                                <div className="ls-course-code">{booking.title}</div>
+                              </div>
+                              timeIndex = timeIndex + 1;
+                            })}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div> */}
+            <div className="ls-bookings-grid">
+              {lectureHalls.map((hall, hallIndex) => (
+                <div key={hallIndex} className="ls-time-column">
+                  {/* <div className="ls-hall-header">{hall.name}</div> */}
+                  {timeSlots.map((time, timeIndex) => {
+                    const booking = getBooking(hall, time);
+                    console.log(booking);
+
+                    return (
+                      <div key={timeIndex} className="ls-time-row">
+                        {booking &&
+                          Array.from({ length: calculateIntervals(booking.start_time, booking.end_time) }).map((_, loopIndex) => {
+                            const adjustedTimeIndex = timeIndex + loopIndex;
+                            return (
+                              <div key={loopIndex} className="ls-booking-item">
+                                <div className="ls-booking-indicator"></div>
+                                <div className="ls-course-code">{booking.title}</div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    );
+                  })}
+                </div>
               ))}
             </div>
+
           </div>
         </div>
       </div>

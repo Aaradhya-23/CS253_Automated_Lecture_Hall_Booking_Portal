@@ -1,95 +1,115 @@
-/* BookingDetails.css */
+.bd-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
 
-/* Container for the entire page */
-.booking-details-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 16px;
-    background-color: #fff;
+.bd-back-button {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bd-back-button:hover {
+  background-color: #2563eb;
+}
+
+.bd-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #111827;
+}
+
+.bd-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.bd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.bd-detail-item {
+  margin-bottom: 1rem;
+}
+
+.bd-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.bd-value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.bd-status {
+  color: #10b981; 
+}
+
+.bd-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.bd-delete-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bd-edit-button {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.bd-edit-button:hover {
+  background-color: #2563eb;
+}
+
+.bd-delete-button {
+  background-color: #ef4444;
+  color: white;
+}
+
+.bd-delete-button:hover {
+  background-color: #dc2626;
+}
+
+.bd-loading {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.bd-loading-text {
+  color: #6b7280;
+}
+
+@media (max-width: 640px) {
+  .bd-grid {
+    grid-template-columns: 1fr;
   }
   
-  /* Header section with title and buttons */
-  .booking-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+  .bd-actions {
+    flex-direction: column;
   }
-  
-  .booking-title {
-    font-size: 1.5rem;
-    margin: 0;
-  }
-  
-  /* Buttons container */
-  .booking-buttons {
-    display: flex;
-    gap: 8px;
-  }
-  
-  /* Edit/Delete buttons */
-  .edit-btn,
-  .delete-btn {
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-weight: 500;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-  }
-  
-  /* Edit button styling (blue) */
-  .edit-btn {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  .edit-btn:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Delete button styling (red) */
-  .delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-  }
-  
-  .delete-btn:hover {
-    background-color: #c82333;
-  }
-  
-  /* Main content layout */
-  .booking-main-content {
-    display: flex;
-    flex-wrap: wrap; /* allows wrapping on smaller screens */
-    gap: 16px;
-  }
-  
-  /* Left column for textual info */
-  .booking-info {
-    flex: 1;
-    min-width: 300px;
-    color: #333;
-    font-size: 0.95rem;
-  }
-  
-  .booking-info p {
-    margin: 6px 0;
-  }
-  
-  /* Right column for the hall image */
-  .booking-image {
-    flex: 1;
-    min-width: 300px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Actual hall image styling */
-  .hall-image {
-    max-width: 100%;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
+}
