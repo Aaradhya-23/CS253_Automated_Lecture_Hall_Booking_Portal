@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './LiveSchedule.css';
-
+import api from '../api/api';
+import { ACCESS_TOKEN } from '../api/constants';
+import axios from 'axios';
 
 // TODO: Backend Integration Comments:
 
@@ -37,7 +39,6 @@ const LiveSchedule = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const formatDate = (date) => {
     return date.toLocaleString('en-US', { 
@@ -50,18 +51,24 @@ const LiveSchedule = () => {
 
   const fetchBookings = async (date) => {
     setLoading(true);
-    setError(null);
+    const formattedDate = date.toISOString().split('T')[0];
+    console.log(formattedDate)
+    console.log(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?booking_date=${formattedDate}`)
     try {
-      const response = await api.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?date=${date.toISOString().split('T')[0]}`, {
+      const token = localStorage.getItem(ACCESS_TOKEN); // Retrieve the token from localStorage
+      console.log(token)
+      const response = await axios.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?booking_date=${formattedDate}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        }
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          'Content-Type': 'application/json', // Specify the content type as JSON
+          Accept: 'application/json', // Specify that the response should be in JSON format
+        },
       });
       const data = response.data; // Access the data directly
       console.log("bookings = ", data)
       setBookings(data);
     } catch (err) {
-      setError(err.message || 'Failed to fetch bookings');
+      console.error('Error fetching bookings:', err.message || err);    
     } finally {
       setLoading(false);
     }
@@ -102,7 +109,6 @@ const LiveSchedule = () => {
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p className="error">{error}</p>}
 
       <div className="ls-timetable-container">
         <div className="ls-timetable">
