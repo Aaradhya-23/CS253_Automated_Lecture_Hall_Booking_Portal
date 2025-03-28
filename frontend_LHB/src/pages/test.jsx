@@ -61,7 +61,7 @@ const transformBookings = (fetchedBookings) => {
     date: booking.booking_date, // Added for filtering
     time: `${convertTo12HourFormat(booking.start_time)}–${convertTo12HourFormat(booking.end_time)}`,
     duration: `(${booking.duration}h)`,
-    room: booking.room.name,
+    room: booking.room_datails.name,
     professor: booking.creator.username,
     course: booking.title
   }));
@@ -99,7 +99,7 @@ function Adminviewbooking() {
       }
 
       try {
-        const response = await api.get(`${HISTORY_URL}?status=approved/`, {
+        const response = await api.get(HISTORY_URL, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -291,7 +291,7 @@ function Adminviewbooking() {
           </div>
 
           <div class="admin-booking-info">
-            <div class="admin-room-info">BookingDate</div>
+            <div class="admin-booking-date">BookingDate</div>
             <div class="admin-room-info">LectureHall</div>
             <div class="admin-professor-info">UserName</div>
             <div class="admin-course-info">Purpose</div>
@@ -315,7 +315,7 @@ function Adminviewbooking() {
             </div>
 
             <div className="admin-booking-info">
-              <div class="admin-room-info">{booking.date}</div>
+              <div class="admin-booking-date">{booking.date}</div>
               <div className="admin-room-info">{booking.room}</div>
               <div className="admin-professor-info">{booking.professor}</div>
               <div className="admin-course-info">{booking.course}</div>
