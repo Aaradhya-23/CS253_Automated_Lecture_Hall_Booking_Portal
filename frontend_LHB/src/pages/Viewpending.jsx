@@ -1,56 +1,55 @@
-import React, { useState } from 'react'
-import './Viewpending.css' // Import the CSS file
+import React, { useState, useEffect } from 'react';
+import './Viewpending.css'; // Import the CSS file
+import api from '../api/api';
+import { ACCESS_TOKEN } from '../api/constants';
 
 const Viewpending = () => {
-    // Combine bookings with requested dates
-    const pendingBookings = [
-        { 
-            id: 1, 
-            time: '9:30 AM–11:00 AM', 
-            duration: '(1h 30m)', 
-            room: 'L-20',
-            user: 'Eclub',
-            course: 'Intro to Signal Processing',
-            requestedDay: 'Monday', 
-            requestedDate: '12/07/2021', 
-            requestedTime: '10:00 AM'
-        },
-        { 
-            id: 2, 
-            time: '7:00 PM–8:00 PM', 
-            duration: '(1h)', 
-            room: 'L-7',
-            user: 'Prof. Sandeep Shukla',
-            course: 'CS202',
-            requestedDay: 'Tuesday', 
-            requestedDate: '13/07/2021', 
-            requestedTime: '11:00 AM'
-        },
-        { 
-            id: 3, 
-            time: '2:00 AM–4:00 AM', 
-            duration: '(2 h)', 
-            room: 'L-18',
-            user: 'Prof. DB Roy',
-            course: 'Computer Hardware',
-            requestedDay: 'Wednesday', 
-            requestedDate: '14/07/2021', 
-            requestedTime: '12:00 PM'
-        },
-    ];
-
-    // State to manage rejection remarks
+    const [pendingBookings, setPendingBookings] = useState([]);
     const [rejectionRemarks, setRejectionRemarks] = useState({});
+    const token = localStorage.getItem(ACCESS_TOKEN); 
 
-    // Handler for approving a booking
-    const handleApprove = (bookingId) => {
-        // TODO: Implement backend approval logic
-        console.log(`Booking ${bookingId} approved`);
+    const transformBookings = (bookings) => {
+        return bookings.map((booking) => ({
+            id: booking.id,
+            time: `${booking.start_time}–${booking.end_time}`,
+            duration: `(${booking.duration}h)`,
+            room: booking.room_details.name,
+            user: booking.creator.username,
+            course: booking.title,
+            requestedDay: new Date(booking.requested_on).toLocaleDateString("en-US", { weekday: "long" }),
+            requestedDate: new Date(booking.requested_on).toLocaleDateString("en-US"),
+            requestedTime: booking.requested_on.split("T")[1].split("+")[0],
+        }));
     };
+
+    useEffect(() => {
+        const requestBooking = async () => {
+            try {
+                const response = await api.get(
+                    `${import.meta.env.VITE_BOOKING_SEARCH_URL}?status=pending`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                    }
+                );
+                const transformedData = transformBookings(response.data);
+                setPendingBookings(transformedData);
+                console.log("Transformed Booking Data:", transformedData);
+            } catch (error) {
+                console.error("Error fetching booking data:", error);
+            }
+        };
+
+        if (token) {
+            requestBooking();
+        }
+    }, [token]);
 
     // Handler for rejecting a booking
     const handleReject = (bookingId) => {
-        // Open remarks input for this specific booking
         setRejectionRemarks(prev => ({
             ...prev,
             [bookingId]: true
@@ -58,17 +57,40 @@ const Viewpending = () => {
     };
 
     // Handler for submitting rejection remarks
-    const handleSubmitRejection = (bookingId) => {
+    const handleSubmitRejection = async (bookingId) => {
         const remarks = rejectionRemarks[bookingId] || '';
-        
-        // TODO: Send rejection to backend with remarks
-        console.log(`Booking ${bookingId} rejected with remarks: ${remarks}`);
 
-        // Close the remarks input
-        setRejectionRemarks(prev => ({
-            ...prev,
-            [bookingId]: false
-        }));
+        if (!remarks.trim()) {
+            alert("Please enter rejection remarks.");
+            return;
+        }
+
+        try {
+            await api.post(
+                `${import.meta.env.VITE_API_BASE_URL}bookings/send-rejected-mail/${bookingId}/`,
+                { remark: remarks },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }
+            );
+            console.log(`Rejection email sent for booking ${bookingId}.`);
+
+            alert("Booking rejected, email sent.");
+
+            // Hide input field after successful submission
+            setRejectionRemarks(prev => ({
+                ...prev,
+                [bookingId]: false
+            }));
+
+        } catch (error) {
+            console.error("Error processing rejection:", error);
+            alert("Error rejecting booking. Please try again.");
+        }
     };
 
     return (
@@ -76,10 +98,7 @@ const Viewpending = () => {
             <h2>Pending Bookings</h2>
             <div>
                 {pendingBookings.map((booking) => (
-                    <div 
-                        key={booking.id} 
-                        className="pending-booking-item"
-                    >
+                    <div key={booking.id} className="pending-booking-item">
                         <div className="pending-booking-content">
                             <div className="pending-booking-details">
                                 <div className="pending-booking-course">{booking.course}</div>
@@ -92,7 +111,6 @@ const Viewpending = () => {
                             </div>
                             <div className="pending-booking-actions">
                                 <button 
-                                    onClick={() => handleApprove(booking.id)}
                                     className="pending-action-btn pending-approve-btn"
                                     title="Approve"
                                 >

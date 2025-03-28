@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
+import FRONTEND_ROUTES from "../frontend_urls";
 
 
 const api = axios.create({
@@ -30,7 +31,7 @@ api.interceptors.response.use(
           }
           
           const response = await axios.post(
-            VITE_REFRESH_TOKEN_URL, 
+            import.meta.env.VITE_REFRESH_TOKEN_URL, 
             { refreshToken }
           );
           
@@ -41,9 +42,11 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         } catch (refreshError) {
+          const e = refreshError;
           // Redirect to login on refresh failure
           localStorage.clear();
-          window.location.href = import.meta.env.VITE_LOGIN_URL;
+          // window.location.href = FRONTEND_ROUTES.login;
+          console.log(e);
           return Promise.reject(refreshError);
         }
       }

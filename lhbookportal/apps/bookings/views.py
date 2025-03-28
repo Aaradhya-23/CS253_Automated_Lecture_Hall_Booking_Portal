@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, mixins, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
+import json
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
@@ -12,6 +13,7 @@ from rest_framework.throttling import UserRateThrottle
 User = get_user_model()
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -50,24 +52,40 @@ from datetime import time, datetime, timedelta
 #         return response
     
 # >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
+@csrf_exempt
 def send_rejection_mail(request, booking_id):
-    booking = get_object_or_404(Booking, id = booking_id)
-    booking.status = 'rejected'
-    remarks = request.data.get('remark')
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
     
-    send_mail(
-        'Booking Rejected',
-        f"""Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION
-        Remarks: {remarks}
-        
-        """,
-        
-        settings.DEFAULT_FROM_EMAIL,
-        [ booking.creator.email ],
-    )
+    try:
+        data = json.loads(request.body)  # Parse the request body to get JSON data
+        remarks = data.get("remark", "")  # Get remarks from request
 
-    booking.delete()
-    return Response({"message": "Deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        if not remarks:
+            return JsonResponse({"error": "Remarks are required"}, status=400)
+
+        # Get the booking object
+        booking = get_object_or_404(Booking, id=booking_id)
+        booking.status = 'rejected'
+
+        # Send rejection email
+        send_mail(
+            'Booking Rejected',
+            f"""Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION.
+            Remarks: {remarks}
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.creator.email],
+        )
+
+        # Delete the booking
+        booking.delete()
+        return JsonResponse({"message": "Deleted successfully"}, status=204)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
     
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
@@ -167,6 +185,7 @@ class BookingCRUDView(
     # authentication_classes = []
     permission_classes = [BookingPermissions]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
+    
     
     def post(self, request, *args, **kwargs):
         print("this is post", self.request.data)
