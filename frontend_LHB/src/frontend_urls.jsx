@@ -11,6 +11,8 @@ const FRONTEND_ROUTES = {
     viewPending: "/admin-view-pending",
     roomDetails: "/room-details",
     bookingDetails: "/booking/:id",
+    userhelp: "/help-user",
+    adminhelp: "/help-admin",
   };
 
 export default FRONTEND_ROUTES

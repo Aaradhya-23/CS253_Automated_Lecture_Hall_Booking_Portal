@@ -9,9 +9,9 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
     { name: 'History', path: FRONTEND_ROUTES.history }, // Changed from '/' to '/history'
     { name: 'Status', path: FRONTEND_ROUTES.status },
-    { name: 'RoomDetails', path: FRONTEND_ROUTES.roomDetails },
+    { name: 'Room Details', path: FRONTEND_ROUTES.roomDetails },
     { name: 'Feedback', path: FRONTEND_ROUTES.feedback },
-    { name: 'Help', path: FRONTEND_ROUTES.help },
+    { name: 'Help', path: FRONTEND_ROUTES.userhelp },
   ];
 
   return (

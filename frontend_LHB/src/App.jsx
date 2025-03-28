@@ -12,7 +12,8 @@ import CreateUser from "./pages/CreateUser";
 import LiveSchedule from "./pages/LiveSchedule";
 import Feedback from "./pages/Feedback";
 import Request_Booking from "./pages/Request_Booking";
-import Help from "./pages/Help";
+import AdminHelp from "./pages/AdminHelp"
+import UserHelp from "./pages/UserHelp"
 import Status from "./pages/Status";
 import UserHistory from "./pages/UserHistory"
 import Adminviewbooking from "./pages/Adminviewbooking";
@@ -178,14 +179,6 @@ const App = () => {
               }
             />
             <Route
-              path={FRONTEND_ROUTES.help}
-              element={
-                <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
-                  <Help />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path={FRONTEND_ROUTES.status}
               element={
                 <ProtectedRoute role={["student", "Student", "faculty"]}>
@@ -229,6 +222,21 @@ const App = () => {
               </ProtectedRoute>
             }
             />
+
+            <Route path={FRONTEND_ROUTES.userhelp} element={
+              <ProtectedRoute role={["student", "Student", "faculty"]}>
+                <UserHelp />
+              </ProtectedRoute>
+            }
+            />
+
+            <Route path={FRONTEND_ROUTES.adminhelp} element={
+              <ProtectedRoute role={["admin"]}>
+                <AdminHelp />
+              </ProtectedRoute>
+            }
+            />
+
           </Routes>
         </div>
       </div>
