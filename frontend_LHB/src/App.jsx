@@ -172,7 +172,7 @@ const App = () => {
             <Route
               path={FRONTEND_ROUTES.requestBooking}
               element={
-                <ProtectedRoute role={["user", "admin"]}>
+                <ProtectedRoute role={["student","Student", "faculty", "admin"]}>
                   <Request_Booking />
                 </ProtectedRoute>
               }
@@ -216,7 +216,7 @@ const App = () => {
             }
             />
             <Route path={FRONTEND_ROUTES.roomDetails} element={
-              <ProtectedRoute role={["user", "admin"]}>
+              <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
                 <RoomDetails />
               </ProtectedRoute>
             }

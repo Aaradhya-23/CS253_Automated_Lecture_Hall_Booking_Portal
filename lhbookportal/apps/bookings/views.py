@@ -183,7 +183,7 @@ class BookingCRUDView(
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     # authentication_classes = []
-    permission_classes = [BookingPermissions]  # Restrict access to authenticated users
+    permission_classes = [IsAuthenticated]  # Restrict access to authenticated users
     throttle_classes  = [UserRateThrottle]
     
     
@@ -200,8 +200,16 @@ class BookingCRUDView(
     
     def perform_create(self, serializer):
         print("this is creation", self.request.data)
-        user = self.request.user
-        validated_data = serializer.validated_data
+        validated_data = serializer.validated_data  
+        print("Validated Data:", validated_data)  # Debugging step
+
+        user = self.request.user  # Default to the logged-in user
+
+        # Check if 'user' exists in request.data (before validation)
+        if 'user' in self.request.data and self.request.data['user'] != 'INVALID':
+            user = get_object_or_404(User, username=self.request.data['user'])
+
+        serializer.save(creator=user)  # Ensure user is saved
         title = validated_data['title']
         room = validated_data['room']
         duration = validated_data['duration']
