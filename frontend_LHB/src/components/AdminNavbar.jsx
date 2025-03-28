@@ -11,7 +11,7 @@ const AdminNavbar = ({ onNavigate, currentPath }) => {
     { name: 'View Pending', path: FRONTEND_ROUTES.viewPending }, // You'll need to add this route
     { name: 'Create New User', path: FRONTEND_ROUTES.register }, // You'll need to add this route
     { name: 'Feedback', path: FRONTEND_ROUTES.feedback },
-    { name: 'Help', path: FRONTEND_ROUTES.help },
+    { name: 'Help', path: FRONTEND_ROUTES.adminhelp },
   ];
 
   return (

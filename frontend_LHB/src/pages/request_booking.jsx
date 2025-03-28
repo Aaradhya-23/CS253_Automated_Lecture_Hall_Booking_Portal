@@ -1,53 +1,3 @@
-// TODO: Backend Integration Comments:
-
-// 1. State Management:
-// - Add useState hooks to manage form state for all booking details
-// - Example: const [formData, setFormData] = useState({ hall: '', date: '', startTime: '', endTime: '', purpose: '', additionalEquipment: '' })
-
-// 2. API Integration Points:
-// - Import api: import axios from 'axios'
-// - Create API service file at: src/services/api.js with all endpoint definitions
-// - Base API URL should be configurable via environment variable
-
-// 3. Required API Endpoints:
-// - GET /api/halls - Fetch available lecture halls
-// - GET /api/halls/{hallId}/availability?date={date} - Check hall availability for specific date
-// - POST /api/bookings - Submit a new booking request
-// - GET /api/user/profile - Get user details for pre-filling the form
-
-// 4. Form Submission:
-// - Create handleSubmit function to:
-//   a) Validate all required fields
-//   b) Format data in the structure expected by backend
-//   c) Make POST request to /api/bookings
-//   d) Handle success/error responses
-//   e) Show appropriate user feedback
-
-// 5. Form Validation:
-// - Add client-side validation before submission
-// - Check for required fields, date/time format, conflicts
-// - Show validation errors next to respective fields
-
-// 6. Loading States:
-// - Add loading states for initial data fetch
-// - Show spinner during form submission
-// - Disable submit button while processing
-
-// 7. Error Handling:
-// - Try/catch blocks around all API calls
-// - Display user-friendly error messages
-// - Log detailed errors for debugging
-
-// 8. Success Handling:
-// - Redirect to status page after successful booking
-// - Or show success message with booking ID
-// - Provide option to create another booking
-
-// 9. Authentication:
-// - Include authentication headers in all API requests
-// - Check user permissions before allowing submission
-// - Redirect to login if auth token is expired
-
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
@@ -312,7 +262,11 @@ useEffect(() => {
       alert('Booking unsuccessful. Please try again.');
     }
   };
-
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+    setStartDate(value);
+    setEndDate(value);
+  };
   const handleAccessoryChange = (accessory) => {
     setSelectedAccessories((prev) =>
       prev.includes(accessory)
@@ -360,15 +314,21 @@ useEffect(() => {
         </div>
           <div className="form-row">
             <div className="form-column">
-              <label>Begin</label>
+              <label>Date</label>
               <div className="date-time-controls">
                 <input 
                   type="date" 
                   value={startDate} 
-                  onChange={(e) => setStartDate(e.target.value)} 
+                  onChange={handleDateChange} 
                   className="date-input"
                   placeholder="dd-mm-yyyy"
                 />
+              </div>
+            </div>
+            <div className="form-column">
+              {/* <label>End</label> */}
+              <label>Start</label>
+              <div className="date-time-controls">
                 <select 
                   value={startTime} 
                   onChange={(e) => setStartTime(e.target.value)}
@@ -380,18 +340,11 @@ useEffect(() => {
                 </select>
               </div>
             </div>
-
             <div className="form-column">
+              {/* <label>End</label> */}
               <label>End</label>
               <div className="date-time-controls">
-                <input 
-                  type="date" 
-                  value={endDate} 
-                  onChange={(e) => setEndDate(e.target.value)} 
-                  className="date-input"
-                  placeholder="dd-mm-yyyy"
-                />
-                <select 
+              <select 
                   value={endTime} 
                   onChange={(e) => setEndTime(e.target.value)}
                   className="time-select"
@@ -399,12 +352,13 @@ useEffect(() => {
                   {timeOptions.map(time => (
                     <option key={`end-${time}`} value={time}>{time}</option>
                   ))}
-                </select>
+              </select>
               </div>
             </div>
+            
           </div>
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Repeat</label>
             <select 
               value={repeatOption} 
@@ -415,7 +369,7 @@ useEffect(() => {
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className="form-group">
               <label>Capacity</label>

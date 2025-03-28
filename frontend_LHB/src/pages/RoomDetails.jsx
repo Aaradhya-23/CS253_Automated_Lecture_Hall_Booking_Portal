@@ -7,40 +7,6 @@ import { assets } from '../assets/assets';
 import { ACCESS_TOKEN } from '../api/constants';
 import api from '../api/api';
 
-// const transformRoomData = (room) => ({
-//   id: `L${room.id}`,  // Prefix 'L' before the ID
-//   name: `Lecture Hall ${room.name}`, // Add 'Lecture Hall' prefix
-//   capacity: room.capacity, // Keep capacity as it is
-//   image: assets[`L${room.id}`], // Map image dynamically
-//   accessories: Object.keys(room.accessories).filter(acc => room.accessories[acc]), // Extract only true accessories
-// });
-
-// useEffect(() => {
-//   const fetchRooms = async () => {
-//     console.log("here")
-//     if (!token) {
-//       console.log("here")
-//       console.error("No token found. User is not authenticated.");
-//       return;
-//     }
-//     console.log(token)
-//     try {
-//       console.log("here")
-//       const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         }
-//       });
-//       console.log("here")
-//       const rooms = response.data.rooms.map(transformRoomData);
-//       console.log("here")
-//       setLectureHallData(rooms.filter(room => room.type === 'Lecture Hall'));
-//       setTutorialBlockData(rooms.filter(room => room.type === 'Tutorial Block'));
-//     } catch (error) { 
-//       console.error("Error fetching rooms:", error.response?.data?.detail || error.message);
-//     }
-//   };
-
 const accessoryIcons = {
   'Projector': Projector,
   'Computer': Computer,
@@ -48,110 +14,6 @@ const accessoryIcons = {
   'Speaker System': Speaker,
   'Whiteboard': Presentation
 };
-
-// const lectureHallData = [
-//   {
-//     id: 'L1',
-//     name: 'Lecture Hall L1',
-//     capacity: 250,
-//     image: assets.L1,
-//     accessories: ['Projector', 'Microphone', 'Whiteboard']
-//   },
-//   {
-//     id: 'L2',
-//     name: 'Lecture Hall L2',
-//     capacity: 100,
-//     image: assets.L2,
-//     accessories: ['Computer', 'Speaker System']
-//   },
-//   {
-//     id: 'L3',
-//     name: 'Lecture Hall L3',
-//     capacity: 100,
-//     image: assets.L3,
-//     accessories: ['Projector', 'Whiteboard']
-//   },
-//   {
-//     id: 'L4',
-//     name: 'Lecture Hall L4',
-//     capacity: 100,
-//     image: assets.L4,
-//     accessories: ['Microphone', 'Computer']
-//   },
-//   {
-//     id: 'L5',
-//     name: 'Lecture Hall L5',
-//     capacity: 100,
-//     image: assets.L5,
-//     accessories: ['Speaker System', 'Projector']
-//   },
-//   {
-//     id: 'L6',
-//     name: 'Lecture Hall L6',
-//     capacity: 400,
-//     image: assets.L6,
-//     accessories: ['Projector', 'Microphone', 'Computer']
-//   },
-//   {
-//     id: 'L7',
-//     name: 'Lecture Hall L7',
-//     capacity: 400,
-//     image: assets.L7,
-//     accessories: ['Whiteboard', 'Speaker System']
-//   },
-//   {
-//     id: 'L8',
-//     name: 'Lecture Hall L8',
-//     capacity: 400,
-//     image: assets.L8,
-//     accessories: ['Projector', 'Computer']
-//   },
-//   {
-//     id: 'L9',
-//     name: 'Lecture Hall L9',
-//     capacity: 400,
-//     image: assets.L9,
-//     accessories: ['Microphone', 'Whiteboard']
-//   }
-// ];
-
-// const tutorialBlockData = [
-//   {
-//     id: 'T1',
-//     name: 'Tutorial Block 1',
-//     capacity: 50,
-//     image: assets.TB1,
-//     accessories: ['Whiteboard']
-//   },
-//   {
-//     id: 'T2',
-//     name: 'Tutorial Block 2',
-//     capacity: 50,
-//     image: assets.TB2,
-//     accessories: ['Computer']
-//   },
-//   {
-//     id: 'T3',
-//     name: 'Tutorial Block 3',
-//     capacity: 50,
-//     image: assets.TB3,
-//     accessories: ['Projector']
-//   },
-//   {
-//     id: 'T4',
-//     name: 'Tutorial Block 4',
-//     capacity: 50,
-//     image: assets.TB4,
-//     accessories: ['Microphone']
-//   },
-//   {
-//     id: 'T5',
-//     name: 'Tutorial Block 5',
-//     capacity: 50,
-//     image: assets.TB5,
-//     accessories: ['Speaker System']
-//   }
-// ];
 
 const RoomDetails = () => {
   const [lectureHallData, setLectureHallData] = useState([]);
@@ -246,8 +108,13 @@ const RoomDetails = () => {
               <div className="room-card-accessories">
                 {item.accessories.slice(0, 3).map((accessory) => {
                   const AccessoryIcon = accessoryIcons[accessory];
+                  if (!AccessoryIcon) {
+                    // Skip rendering if the accessory icon is not defined
+                    console.warn(`No icon found for accessory: ${accessory}`);
+                    return null;
+                  }
                   return (
-                    <AccessoryIcon 
+                    <AccessoryIcon
                       key={accessory}
                       className="room-card-accessory-icon"
                       size={20}
@@ -284,6 +151,17 @@ const RoomDetails = () => {
                   <div className="modal-accessories-grid">
                     {selectedItem.accessories.map((accessory) => {
                       const AccessoryIcon = accessoryIcons[accessory];
+                      if (!AccessoryIcon) {
+                        // Skip rendering if the accessory icon is not defined
+                        console.warn(`No icon found for accessory: ${accessory}`);
+                        return (
+                          <div key={accessory} className="modal-accessory-item">
+                            <span className="modal-accessory-label">
+                              {accessory} (No Icon)
+                            </span>
+                          </div>
+                        );
+                      }
                       return (
                         <div 
                           key={accessory} 
