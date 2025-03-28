@@ -52,8 +52,13 @@ const LiveSchedule = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get(`http://127.0.0.1:8000/bookings/search?date=${date.toISOString().split('T')[0]}`);
+      const response = await api.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?date=${date.toISOString().split('T')[0]}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
       const data = response.data; // Access the data directly
+      console.log("bookings = ", data)
       setBookings(data);
     } catch (err) {
       setError(err.message || 'Failed to fetch bookings');
