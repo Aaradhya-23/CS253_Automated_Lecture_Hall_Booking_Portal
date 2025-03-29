@@ -16,6 +16,7 @@ const Viewpending = () => {
             room: booking.room_details.name,
             user: booking.creator.username,
             course: booking.title,
+            date: booking.booking_date,
             requestedDay: new Date(booking.requested_on).toLocaleDateString("en-US", { weekday: "long" }),
             requestedDate: new Date(booking.requested_on).toLocaleDateString("en-US"),
             requestedTime: booking.requested_on.split("T")[1].split("+")[0],
@@ -104,18 +105,19 @@ const Viewpending = () => {
                                 <div className="pending-booking-course">{booking.course}</div>
                                 <div className="pending-booking-info">User: {booking.user}</div>
                                 <div className="pending-booking-info">Room: {booking.room}</div>
+                                <div className='pending-booking-info'>Date of booking: {booking.date}</div>
                                 <div className="pending-booking-info">Time: {booking.time} {booking.duration}</div>
                                 <div className="pending-booking-requested">
                                     Requested on: {booking.requestedDay}, {booking.requestedDate} at {booking.requestedTime}
                                 </div>
                             </div>
                             <div className="pending-booking-actions">
-                                <button 
+                                {/* <button 
                                     className="pending-action-btn pending-approve-btn"
                                     title="Approve"
                                 >
                                     ✓
-                                </button>
+                                </button> */}
                                 <button 
                                     onClick={() => handleReject(booking.id)}
                                     className="pending-action-btn pending-reject-btn"

@@ -225,3 +225,20 @@
       grid-template-columns: 1fr;
     }
   }
+
+  .st-no-data-message {
+    text-align: center;
+    margin-top: 50px;
+    color: #555;
+  }
+  
+  .st-no-data-message h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .st-no-data-message p {
+    font-size: 16px;
+    color: #777;
+  }

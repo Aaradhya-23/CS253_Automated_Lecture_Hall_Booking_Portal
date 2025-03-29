@@ -1,0 +1,145 @@
+.user-help-page {
+    background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Arial', sans-serif;
+}
+  
+.user-help-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+  
+.user-help-header {
+    background-color: #2c5282;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+  
+.user-help-title {
+    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+  
+.header-icon {
+    color: white;
+    width: 36px;
+    height: 36px;
+}
+  
+.user-help-subtitle {
+    color: #a3bffa;
+    font-size: 1rem;
+}
+  
+.user-help-sections {
+    padding: 2rem;
+    display: grid;
+    gap: 1.5rem;
+}
+  
+.user-help-section {
+    border-left: 5px solid;
+    padding: 1.5rem;
+    border-radius: 0 8px 8px 0;
+    transition: all 0.3s ease;
+}
+  
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+  
+.section-icon {
+    width: 24px;
+    height: 24px;
+}
+  
+.section-list {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    color: #4a5568;
+}
+  
+.section-list li {
+    margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
+}
+  
+.section-list li:hover {
+    color: #2c5282;
+}
+  
+.booking-section {
+    background-color: #ebf8ff;
+    border-left-color: #3182ce;
+}
+  
+.schedule-section {
+    background-color: #f0fff4;
+    border-left-color: #48bb78;
+}
+  
+.history-section {
+    background-color: #faf5ff;
+    border-left-color: #805ad5;
+}
+  
+.status-section {
+    background-color: #fffaf0;
+    border-left-color: #ed8936;
+}
+  
+.room-section {
+    background-color: #f7fafc;
+    border-left-color: #4299e1;
+}
+
+.contact-section {
+    background-color: #edf2f7;
+    border-left-color: #4fd1c5;
+    text-align: center;
+}
+  
+.contact-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #3182ce;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+  
+.contact-button:hover {
+    background-color: #2c5282;
+}
+  
+@media (max-width: 768px) {
+    .user-help-title {
+      font-size: 2rem;
+    }
+  
+    .user-help-sections {
+      padding: 1rem;
+      gap: 1rem;
+    }
+  
+    .user-help-section {
+      padding: 1rem;
+    }
+}
