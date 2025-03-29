@@ -149,7 +149,7 @@
   align-items: center;
 }
 
-.admin-manage-btn {
+.admin-manage-btn .admin-manage-actions {
   background-color: transparent;
   border: none;
   display: flex;

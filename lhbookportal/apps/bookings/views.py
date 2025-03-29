@@ -305,7 +305,7 @@ class BookingCRUDView(
         Note: Unapproved bookings will be auto-rejected in 2 days or less.
         """
 
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['567rahulm567@gmail.com'])
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['chaudharidivyesh7384@gmail.com'])
     #add more mails in the list if needed
                 #right now only one is supported 
                 # Save the booking
