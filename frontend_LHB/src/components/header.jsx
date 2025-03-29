@@ -13,7 +13,9 @@ const Header = ({ isLoggedIn, userRole, handleLogout }) => {
     <div className="header">
       <div className="logo-container">
         <img src={iitk_logo} alt="IIT-K Logo" className="logo" />
-        <h1 className="title">IITK Lecture Hall Booking</h1>
+        <h1 className="title" onClick={() => navigate(FRONTEND_ROUTES.home)} style={{ cursor: 'pointer' }}>
+          IITK Lecture Hall Booking
+        </h1>
       </div>
 
       <div>
