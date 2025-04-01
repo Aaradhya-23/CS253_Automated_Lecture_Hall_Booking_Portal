@@ -28,31 +28,6 @@ from rest_framework import status
 from datetime import time, datetime, timedelta
 from rest_framework.permissions import AllowAny
 
-# class DownloadBillPDF(APIView):
-#     permission_classes = [BookingPermissions]
-#     def get(self, request, booking_id):
-#         # Get booking data (replace with your actual query)
-#         booking = get_object_or_404(Booking, id=booking_id)
-#         accessories_list = [name.replace('_', ' ').title() for name, available in booking.room.accessories.items() if available]
-#         accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
-        
-#         # Create PDF buffer
-#         data = {
-#             "booking_ref" : str(booking.id),
-#             "event_name": booking.title,
-#             "date": str(booking.booking_date),
-#             "time": str(booking.start_time),
-#             "hall_name": booking.room.name,
-#             "booked_by": booking.creator.username,
-#             "charges": str(booking.cost),
-#             "accessories": accessories_str,
-#         }
-#         buffer = generate_bill(data)
-#         response = HttpResponse(buffer, content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="bill_booking_{booking.id}.pdf"'
-#         return response
-    
-# >>>>>>> 98fb2e50128397a925b7dd759eaafdfdcb8d3d1b
 @csrf_exempt
 def send_rejection_mail(request, booking_id):
     if request.method != "POST":
