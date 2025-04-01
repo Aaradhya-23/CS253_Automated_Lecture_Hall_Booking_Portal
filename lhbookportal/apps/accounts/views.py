@@ -69,7 +69,7 @@ class ChangePasswordView(APIView):
             user.set_password(serializer.validated_data['newpassword'])
             user.save()
             send_mail(
-                '[LHC Office] Password Change Request',
+                '[LHC Office] Password Updated Successfully',
                 f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
                 
             """,
