@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 
+#added by divyesh 
+class Authority(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    # address = models.TextField()
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"
 
 
 #TODO : make this better or use groups 
@@ -16,13 +24,33 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     # in abstract user, email is not unique by default
     total_bill = models.IntegerField(default= 0 )
-    authority_email = models.EmailField(null = True, blank =  True)
+    # authority_email = models.EmailField(null = True, blank =  True)
+    #added by divyesh     
+    # Many-to-Many relationship with Authority
+    authorities = models.ManyToManyField('Authority',through="UserAuthority", blank=True)
     # only works with postgresql
 
     # latest_booking_request = models.ForeignKey('email_services.BookingRequestPreConfirmation', on_delete=models.SET_NULL, null=True, blank=True)
-
+    def get_ordered_authorities(self):
+        return self.userauthority_set.order_by("order")
+    
     def __str__(self):
-        return self.username
+        # Get authorities related to this user
+        authorities = self.authorities.all()
+        authorities_list = ", ".join([authority.name for authority in authorities]) if authorities.exists() else "No authorities assigned"
 
+        return f"User: {self.username}, Email: {self.email}, Role: {self.role}, Total Bill: {self.total_bill}, Authorities: {authorities_list}"
 
+class UserAuthority(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    authority = models.ForeignKey(Authority, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0)  # Order of authority
+
+    class Meta:
+        unique_together = ("user", "authority")  # Prevent duplicate authorities
+        ordering = ["order"]  # Ensures authorities are retrieved in order
+
+    def _str_(self):
+        return f"{self.user.username} → {self.authority.name} (Order: {self.order})"
 # Create your models here.

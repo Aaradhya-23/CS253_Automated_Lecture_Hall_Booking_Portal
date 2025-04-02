@@ -12,11 +12,7 @@ class Room(models.Model):
     ]
 
     ACCESSORY_OPTIONS = [
-        ('projector', 'Projector'),
-        ('microphone', 'Microphone'),
-        ('whiteboard', 'Whiteboard'),
-        ('computer', 'Computer'),
-        ('speaker_system', 'Speaker System'),
+        4,
     ]
 
     name = models.CharField(max_length=20, unique=True)
@@ -52,10 +48,13 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     accessories = models.JSONField(default=dict, blank=True)
     cost = models.PositiveBigIntegerField(default=0)
-    
     remarks = models.CharField(max_length= 150, null = True, blank = True)
-    approval_token = models.CharField(max_length=36, unique=True, default=uuid.uuid4, editable=False)
+    booking_token = models.CharField(max_length=36, unique=True, default=uuid.uuid4, editable=False)
     token_expiry = models.DateTimeField(default=timezone.now() + timedelta(days=2))
+
+    #for mulitple authorities
+    approvals_pending = models.JSONField(default=dict)
+    authority_tokens = models.JSONField(default=dict)
 
     def __str__(self):
         return f"{self.creator.username} - {self.room.name} ({self.status})"
