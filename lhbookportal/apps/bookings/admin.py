@@ -8,5 +8,4 @@ admin.site.register(Room)
 admin.site.register(Holiday)
 
 
-
 # Register your models here.

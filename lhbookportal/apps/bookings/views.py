@@ -170,7 +170,52 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
             return Response({"error": "No available slots found."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+def send_approval_email(authority_email, booking):
+    # Get specific authority token for the booking
+    print(booking.authority_tokens)
+    authority_token = booking.authority_tokens.get(authority_email)  
+    print(authority_token)
+    if not authority_token:
+        return  # Safety check
 
+    print("----------------------------------------------------------------------------------------------------------------------------")
+    print(authority_email)
+    print("----------------------------------------------------------------------------------------------------------------------------")
+    # Process accessories
+    accessories_list = [name.replace('_', ' ').title() for name, selected in booking.accessories.items() if selected]
+    accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
+
+    # Build approval and rejection links
+    approval_link = f"http://127.0.0.1:8000/bookings/approve/?booking_token={booking.booking_token}&authority_token={authority_token}"
+    rejection_link = f"http://127.0.0.1:8000/bookings/reject/?booking_token={booking.booking_token}&authority_token={authority_token}"
+
+    # Build time slots string (if needed)
+    # time_slots = ", ".join(f"{ts.start_time} - {ts.end_time}" for ts in booking.time_slots.all())
+    user = booking.creator
+
+    # Send the email using send_mail
+    send_mail(
+        subject="[LHC OFFICE] Booking Request Approval Needed",
+        message=f"""
+A new booking request has been submitted by {user.username}.
+
+Purpose    : {booking.title}
+Remarks    : {booking.remarks}
+Room       : {booking.room.name}
+Date       : {booking.booking_date}
+Time       : {booking.start_time} - {booking.end_time}
+Requested On: {booking.requested_on}
+Accessories: {accessories_str}
+Total Cost : ₹{booking.cost}
+
+Approve: {approval_link}
+Reject:  {rejection_link}
+
+Note: Unapproved bookings will be auto-rejected in 2 days or less.
+        """,
+        from_email="no-reply@yourdomain.com",
+        recipient_list=[authority_email],
+    )
 
 
 class BookingCRUDView(
@@ -210,6 +255,8 @@ class BookingCRUDView(
         if 'user' in self.request.data and self.request.data['user'] != 'INVALID':
             user = get_object_or_404(User, username=self.request.data['user'])
 
+        print("Validated Data:after changing user", validated_data)    
+        print(user)  
         serializer.save(creator=user)  # Ensure user is saved
         title = validated_data['title']
         room = validated_data['room']
@@ -256,8 +303,39 @@ class BookingCRUDView(
         user.save()
 
         requested_on = timezone.now()
-
+        # booking_token = {auth.email: str(uuid.uuid4())}
         # Save the booking
+        if user.role == 'faculty':
+            booking = serializer.save(
+                creator=user,
+                title=title,  # Ensure title is saved
+                room=room,
+                start_time=start_time,
+                end_time=end_time,
+                booking_date=booking_date,
+                booking_token = str(uuid.uuid4()),
+                status=status,
+                Type=Type,
+                requested_on=requested_on,
+                cost=total_cost,
+                accessories=accessories,
+                remarks=remarks,
+            )  
+
+            return  # Skip email for faculty
+        
+        print("----------------------------------------------------------------------------------------------------------------------------")
+        print(1)
+        print("----------------------------------------------------------------------------------------------------------------------------")
+        # multiple authority email
+        authorities = user.authorities.order_by('userauthority__order')
+        approvals_pending = {auth.email: False for auth in authorities}
+        authority_tokens = {auth.email: str(uuid.uuid4()) for auth in authorities}
+        
+        print(user)
+        print(authorities)
+        print(approvals_pending)
+        print(authority_tokens)
         booking = serializer.save(
             creator=user,
             title=title,  # Ensure title is saved
@@ -267,49 +345,61 @@ class BookingCRUDView(
             booking_date=booking_date,
             status=status,
             Type=Type,
+            booking_token = str(uuid.uuid4()),
+            authority_tokens = authority_tokens,
             requested_on=requested_on,
             cost=total_cost,
             accessories=accessories,
-            remarks=remarks
+            approvals_pending=approvals_pending,
+            remarks=remarks,
         )
+        first_authority_email = next(iter(booking.approvals_pending.keys()), None)
+        print(first_authority_email)
+        print("----------------------------------------------------------------------------------------------------------------------------")
+        print(2)
+        print("----------------------------------------------------------------------------------------------------------------------------")
         
+        print()
+        if first_authority_email:
+            print("----------------------------------------------------------------------------------------------------------------------------")
+            print(3)
+            print("----------------------------------------------------------------------------------------------------------------------------")
+            send_approval_email(first_authority_email, booking)
 
-        if user.role == 'faculty':
-            return  # Skip email for faculty
-
+        return HttpResponse("Booking approved successfully!, You many close this page now")
         # Prepare accessory details for email
-        accessories_list = [name.replace('_', ' ').title() for name, selected in accessories.items() if selected]
-        accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
+        # accessories_list = [name.replace('_', ' ').title() for name, selected in accessories.items() if selected]
+        # accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
 
         # Generate approval and rejection URLs
-        approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.approval_token]))
-        reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.approval_token]))
+    #     approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.approval_token]))
+    #     reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.approval_token]))
 
-        # Send email to the authority
-        subject = "[LHC OFFICE] Booking Request Approval Needed"
-        message = f"""
-        A new booking request has been submitted by {user.username}.
+    #     # Send email to the authority
+    #     subject = "[LHC OFFICE] Booking Request Approval Needed"
+    #     message = f"""
+    #     A new booking request has been submitted by {user.username}.
 
-        Purpose :     {booking.title}
-        Remarks :     {booking.remarks}
-        Room:         {room.name}
-        Date:         {booking_date}
-        Time:         {start_time} - {end_time}
-        Requested On: {requested_on}
-        Accessories:  {accessories_str}
-        Total Cost:   ₹{total_cost}
+    #     Purpose :     {booking.title}
+    #     Remarks :     {booking.remarks}
+    #     Room:         {room.name}
+    #     Date:         {booking_date}
+    #     Time:         {start_time} - {end_time}
+    #     Requested On: {requested_on}
+    #     Accessories:  {accessories_str}
+    #     Total Cost:   ₹{total_cost}
 
-        Approve: {approve_url}
-        Reject: {reject_url}
+    #     Approve: {approve_url}
+    #     Reject: {reject_url}
 
-        Note: Unapproved bookings will be auto-rejected in 2 days or less.
-        """
+    #     Note: Unapproved bookings will be auto-rejected in 2 days or less.
+    #     """
 
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['chaudharidivyesh7384@gmail.com'])
-    #add more mails in the list if needed
-                #right now only one is supported 
-                # Save the booking
-            # GET: List all bookings or retrieve a specific booking
+    #     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['chaudharidivyesh7384@gmail.com'])
+    # #add more mails in the list if needed
+    #             #right now only one is supported 
+    #             # Save the booking
+    #         # GET: List all bookings or retrieve a specific booking
 
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:
@@ -460,13 +550,88 @@ class RoomSearchView(generics.ListAPIView):
                 pass  # Ignore invalid capacity values
         return queryset
     
-def approve_booking(request, token):
-    booking = get_object_or_404(Booking, approval_token=token)
+# def approve_booking(request, token):
+#     booking = get_object_or_404(Booking, approval_token=token)
+#     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
+#     if booking.status != 'pending': return JsonResponse({"error": "This booking is not available for approval"}, status=400)
+#     booking.status = 'approved'
+#     booking.save()
+    
+#     #if a pending requets is there for the same slot rooom. reject that booking
+#     pending_bookings_same_slot = Booking.objects.filter(
+#             Q(room=booking.room.id)&
+#             Q(booking_date=booking.booking_date)&
+#             Q(start_time__lt=booking.end_time, end_time__gt=booking.start_time) 
+#     )  # Exclude cancelled bookings
+
+#     if(pending_bookings_same_slot.exists()):
+#         for pending in pending_bookings_same_slot:
+#             if pending.status == 'pending':
+#                 pending.status = 'rejected'
+#                 send_mail(
+#                 'Booking Rejected',
+#                 f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
+#                 settings.DEFAULT_FROM_EMAIL,
+#                 [ pending.creator.email ],
+#             )  
+#                 pending.delete()
+        
+    
+#     # if booking.creator.role == 'student':
+#     x = f'Your bill amount is : {booking.cost}'
+#     # print(type([booking.creator.email]))
+#     # Send email to user
+#     send_mail(
+#         'Booking Approved',
+#         f"""
+#         Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
+#         {x}
+#         """
+#         ,
+#         settings.DEFAULT_FROM_EMAIL,
+#         [booking.creator.email]
+#     )
+
+#     return HttpResponse("Booking approved successfully!, You many close this page now")
+
+# def reject_booking(request, token):
+#     booking = get_object_or_404(Booking, approval_token = token)
+#     if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
+
+#     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
+
+#     booking.status = 'rejected'
+
+#     # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
+#     #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
+#     # Send email to user
+#     send_mail(
+#         'Booking Rejected',
+#         f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
+#         settings.DEFAULT_FROM_EMAIL,
+#         [ booking.creator.email ],
+#     )
+
+#     booking.delete()
+#     return HttpResponse("Booking rejected successfully!, You may close this page now")
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def approve_booking(request):
+    
+    booking_token = request.GET.get("booking_token")
+    authority_token = request.GET.get("authority_token")
+
+    if not booking_token or not authority_token:
+        return HttpResponse("❌ Invalid or missing approval token.", status=400)
+
+    booking = get_object_or_404(Booking, booking_token=booking_token)
+    #added 
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
     if booking.status != 'pending': return JsonResponse({"error": "This booking is not available for approval"}, status=400)
-    booking.status = 'approved'
-    booking.save()
-    
+
+
     #if a pending requets is there for the same slot rooom. reject that booking
     pending_bookings_same_slot = Booking.objects.filter(
             Q(room=booking.room.id)&
@@ -485,36 +650,73 @@ def approve_booking(request, token):
                 [ pending.creator.email ],
             )  
                 pending.delete()
-        
-    
-    # if booking.creator.role == 'student':
-    x = f'Your bill amount is : {booking.cost}'
-    # print(type([booking.creator.email]))
-    # Send email to user
-    send_mail(
-        'Booking Approved',
-        f"""
-        Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
-        {x}
-        """
-        ,
-        settings.DEFAULT_FROM_EMAIL,
-        [booking.creator.email]
+
+    authority_email = next(
+        (email for email, token in booking.authority_tokens.items() if token == authority_token),
+        None
     )
 
-    return HttpResponse("Booking approved successfully!, You many close this page now")
+    if not authority_email or booking.status in ["Approved", "Rejected"]:
+        return HttpResponse(f"⚠ Booking is already {booking.status}. No further action needed.", status=400)
 
-def reject_booking(request, token):
-    booking = get_object_or_404(Booking, approval_token = token)
+    if booking.approvals_pending.get(authority_email, False):
+        return HttpResponse("✅ You have already approved this booking.", status=400)
+
+    # Mark the approval
+    booking.approvals_pending[authority_email] = True
+    booking.save()
+
+    if all(booking.approvals_pending.values()):
+        booking.status = "Approved"
+        booking.decision_time = timezone.now()
+        booking.save()
+
+        x = f'Your bill amount is : {booking.cost}'
+        # print(type([booking.creator.email]))
+        # Send email to user
+        send_mail(
+            'Booking Approved',
+            f"""
+            Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
+            {x}
+            """
+            ,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.creator.email]
+        )
+
+        return HttpResponse("✅ Booking approved successfully!, You many close this page now")
+
+    next_approver_email = next((email for email, approved in booking.approvals_pending.items() if not approved), None)
+    if next_approver_email:
+        send_approval_email(next_approver_email, booking)
+
+    return HttpResponse("✅ Approval recorded. Waiting for next authority.", status=200)
+
+
+def reject_booking(request):
+    booking_token = request.GET.get("booking_token")
+    authority_token = request.GET.get("authority_token")
+
+    if not booking_token or not authority_token:
+        return HttpResponse("❌ Invalid or missing rejection token.", status=400)
+
+    booking = get_object_or_404(Booking, booking_token=booking_token)
     if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
-
     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
 
-    booking.status = 'rejected'
+    authority_name = next(
+        (name for name, token in booking.authority_tokens.items() if token == authority_token),
+        None
+    )
 
-    # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
-    #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
-    # Send email to user
+    if booking.status in ["Approved", "Rejected"]:
+        return HttpResponse(f"⚠ Booking is already {booking.status}. No further action needed.", status=400)
+
+    booking.status = "Rejected"
+    booking.approvals_pending = {}
+    booking.save()
+
     send_mail(
         'Booking Rejected',
         f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
@@ -524,8 +726,6 @@ def reject_booking(request, token):
 
     booking.delete()
     return HttpResponse("Booking rejected successfully!, You may close this page now")
-
-
 
 
 # def generate_bill(data):

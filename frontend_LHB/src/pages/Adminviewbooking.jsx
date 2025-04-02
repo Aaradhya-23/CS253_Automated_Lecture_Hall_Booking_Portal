@@ -32,7 +32,7 @@ function Adminviewbooking() {
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0],
-    end: new Date().toISOString().split("T")[0]
+    end: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split("T")[0]
   });
   const [editingDate, setEditingDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
