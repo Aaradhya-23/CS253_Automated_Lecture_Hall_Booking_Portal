@@ -1,143 +1,186 @@
-import React, { useState } from 'react';
-import './LiveSchedule.css';
-
-// TODO: Backend Integration Comments:
-
-// 1. Data Fetching:
-// - Replace mock data with API calls
-// - Create src/api/schedule.js for schedule-related endpoints
-// - Call GET /api/schedule?date=YYYY-MM-DD to get bookings for a specific date
-// - Add useEffect hook to fetch data when component mounts or date changes
-
-// 2. Loading States:
-// - Add loading indicators while fetching data
-// - Implement error handling for failed API calls
-// - Add empty state UI for days with no bookings
-
-// 3. Booking Details:
-// - Add modal/popup for viewing booking details
-// - Fetch detailed information via GET /api/bookings/{bookingId}
-// - Consider caching frequently accessed data
-
-// 4. Real-time Updates:
-// - Implement WebSocket connection for live schedule updates
-// - Update UI when new bookings are made or existing ones are changed
-// - Consider a polling fallback if WebSockets aren't available
-
-// 5. Filtering and Search:
-// - Add backend-driven filters (by hall, time, department)
-// - Implement search functionality via GET /api/schedule/search?query=...
-
-// 6. Date Navigation:
-// - Keep selected date in URL for shareable links
-// - Optimize API calls to avoid unnecessary data fetching
+import React, { useState, useEffect, useRef } from "react";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import listPlugin from "@fullcalendar/list";
+import interactionPlugin from "@fullcalendar/interaction"; // Import for hover interactions
+import "./LiveSchedule.css"; // Import the new CSS file
+import api from '../api/api';
 
 const LiveSchedule = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // Format date to display as "TUESDAY, JANUARY 21, 2025"
-  const formatDate = (date) => {
-    return date.toLocaleString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric', 
-      year: 'numeric' 
-    }).toUpperCase();
+  const [bookings, setBookings] = useState([]);
+  const [lectureHalls, setRoomOptions] = useState([]);
+  const [selectedLectureHall, setSelectedLectureHall] = useState(null);
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: {} });
+  const calendarRef = useRef(null);
+  // Fetch rooms on component mount
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
+        });
+        console.log(response.data);
+        const rooms = Array.isArray(response.data) ? response.data : response.data.rooms;
+        setRoomOptions(rooms);
+        console.log(rooms)
+        } catch (error) {
+          console.error("Error fetching rooms:", error);
+        }
+    };
+    fetchRooms();
+  }, []);
+  // Fetch bookings when selected lecture hall changes
+  useEffect(() => {
+    if (selectedLectureHall) {
+      fetchBookings(selectedLectureHall);
+    }
+  }, [selectedLectureHall]);
+  // Backend API calls for fetching rooms
+  // Backend API calls for fetching bookings
+  const fetchBookings = async (hall_name) => {
+    console.log(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?search=${hall_name}`)
+    try {
+      const response = await api.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?search=${hall_name}`, {
+        headers: {
+          'Content-Type': 'application/json', // Specify the content type as JSON
+          Accept: 'application/json', // Specify that the response should be in JSON format
+        },
+      });
+      const data = response.data; // Access the data directly
+      console.log("bookings = ", data)
+      setBookings(data);
+    } catch (err) {
+      console.error('Error fetching bookings:', err.message || err);
+    }
   };
-
-  // Navigate to previous day
-  const previousDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(selectedDate.getDate() - 1);
-    setSelectedDate(newDate);
+  // Format bookings for FullCalendar
+  const events = bookings.map((event) => ({
+    title: event.title,
+    start: `${event.booking_date}T${event.start_time}`,
+    end: `${event.booking_date}T${event.end_time}`,
+    extendedProps: {
+      username: event.creator?.username || "Unknown",
+      roomName: event.room_details?.name || selectedLectureHall,
+      capacity: event.room_details?.capacity || "N/A",
+      description: event.remarks || "No description provided",
+    },
+  }));
+  // Show tooltip when hovering over an event
+  const handleEventClick = (info) => {
+    const { event, jsEvent } = info;
+    const props = event.extendedProps;
+    jsEvent.stopPropagation();
+    setTooltip(prev => ({
+      ...prev,
+      visible: true,
+      x: jsEvent.pageX + 10,
+      y: jsEvent.pageY + 10,
+      content: {
+        title: event.title,
+        username: props.username,
+        room: props.roomName,
+        capacity: props.capacity,
+        description: props.description,
+        start: event.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        end: event.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: event.start?.toLocaleDateString()
+      }
+    }));
   };
-
-  // Navigate to next day
-  const nextDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(selectedDate.getDate() + 1);
-    setSelectedDate(newDate);
+  // Hide tooltip when mouse leaves an event
+  const handleCloseTooltip = () => {
+    setTooltip({ visible: false, x: 0, y: 0, content: {} });
   };
-
-  // Mock data for lecture halls
-  const lectureHalls = ['LH1', 'LH2', 'LH3', 'LH5', 'LH6', 'LH7', 'LH8', 'LH9'];
-  
-  // Mock data for time slots
-  const timeSlots = [
-    '8:00 AM',
-    '9:00 AM',
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '1:00 PM',
-    '2:00 PM'
-  ];
-
-  // Mock data for bookings
-  const bookings = [
-    { hall: 'LH1', time: '10:00 AM', course: 'CS202', dropdown: true },
-    { hall: 'LH2', time: '10:00 AM', course: 'CS202', dropdown: true },
-    { hall: 'LH3', time: '11:00 AM', course: 'MTH112 QUIZ', dropdown: true },
-    { hall: 'LH5', time: '9:00 AM', course: 'PCLUB SESSION', dropdown: true },
-    { hall: 'LH7', time: '11:00 AM', course: 'CS771', dropdown: true },
-    { hall: 'LH1', time: '12:00 PM', course: 'CS253', dropdown: true },
-  ];
-
-  // Get booking for a specific hall and time
-  const getBooking = (hall, time) => {
-    return bookings.find(booking => booking.hall === hall && booking.time === time);
+  // Format dates in a nicer way for event rendering
+  const eventContent = (info) => {
+    return (
+      <>
+        <div className="fc-event-time">{info.timeText}</div>
+        <div className="fc-event-title">{info.event.title}</div>
+      </>
+    );
   };
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      // If tooltip is visible and click target is not inside tooltip
+      if (tooltip.visible && !e.target.closest('.booking-tooltip') &&
+          !e.target.closest('.fc-event')) {
+        handleCloseTooltip();
+      }
+    };
 
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [tooltip.visible]);
   return (
-    <div className="ls-container">
-      <div className="ls-date-navigator">
-        <button onClick={previousDay} className="ls-nav-button">&lt;</button>
-        <div className="ls-current-date">{formatDate(selectedDate)}</div>
-        <button onClick={nextDay} className="ls-nav-button">&gt;</button>
+    <div className="calendar-container">
+      <div className="dropdown-container">
+        <label htmlFor="lectureHallDropdown" className="dropdown-label">
+          Select Lecture Hall:
+        </label>
+        <select
+          id="lectureHallDropdown"
+          className="dropdown"
+          value={selectedLectureHall || ""}
+          onChange={(e) => setSelectedLectureHall(e.target.value)}
+        >
+          <option value="">Select a hall</option>
+          {lectureHalls.map((hall) => (
+            <option key={hall.id} value={hall.name}>
+              {hall.name}
+            </option>
+          ))}
+        </select>
       </div>
-      
-      <div className="ls-timetable-container">
-        <div className="ls-timetable">
-          <div className="ls-time-column">
-            {timeSlots.map((time, index) => (
-              <div key={index} className="ls-time-slot">{time}</div>
-            ))}
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin]}
+        initialView="timeGridWeek"
+        slotDuration="01:00:00"
+        slotMinTime="08:00:00"
+        slotMaxTime="20:00:00"
+        expandRows={true}
+        height="85vh"
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,listWeek",
+        }}
+        events={events}
+        allDaySlot={false}
+        eventContent={eventContent}
+        eventClick={handleEventClick}
+        eventTimeFormat={{
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }}
+      />
+            {tooltip.visible && (
+        <div
+          className="booking-tooltip visible"
+          style={{
+            top: tooltip.y,
+            left: tooltip.x
+          }}
+        >
+          <div className="booking-tooltip-header">
+            <div className="booking-tooltip-title">{tooltip.content.title}</div>
           </div>
-          
-          <div className="ls-halls-grid">
-            <div className="ls-hall-headers">
-              {lectureHalls.map((hall, index) => (
-                <div key={index} className="ls-hall-header">{hall}</div>
-              ))}
-            </div>
-            
-            <div className="ls-bookings-grid">
-              {timeSlots.map((time, timeIndex) => (
-                <div key={timeIndex} className="ls-time-row">
-                  {lectureHalls.map((hall, hallIndex) => {
-                    const booking = getBooking(hall, time);
-                    return (
-                      <div key={hallIndex} className="ls-booking-cell">
-                        {booking && (
-                          <div className="ls-booking-item">
-                            <div className="ls-booking-indicator"></div>
-                            <div className="ls-course-code">{booking.course}</div>
-                            {booking.dropdown && (
-                              <button className="ls-dropdown-button">▼</button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          <div className="booking-tooltip-details">
+            <div className="booking-tooltip-detail"><strong>Username:</strong> {tooltip.content.username}</div>
+            <div className="booking-tooltip-detail"><strong>Room:</strong> {tooltip.content.room}</div>
+            <div className="booking-tooltip-detail"><strong>Date:</strong> {tooltip.content.date}</div>
+            <div className="booking-tooltip-detail"><strong>Time:</strong> {tooltip.content.start} - {tooltip.content.end}</div>
+            {tooltip.content.description && (
+              <div className="booking-tooltip-detail"><strong>Description:</strong> {tooltip.content.description}</div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
-
 export default LiveSchedule;

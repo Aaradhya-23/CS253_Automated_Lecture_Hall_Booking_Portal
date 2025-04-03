@@ -23,7 +23,7 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
           className={`nav-item ${currentPath === item.path ? 'active' : ''}`}
         >
           {item.name}
-          {item.name === 'New' && <span className="info-icon">ⓘ</span>}
+          {item.name === 'New'}
         </button>
       ))}
     </div>

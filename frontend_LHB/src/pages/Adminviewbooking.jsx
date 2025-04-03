@@ -197,51 +197,48 @@ function Adminviewbooking() {
           <span className="admin-dropdown-arrow">▼</span>
         </div>
       </div>
-
-      <div className="admin-filter-section">
-        <div className="admin-filter-dropdown">
-          <span>Filter</span>
-          <span className="admin-dropdown-arrow">▼</span>
-        </div>
-
-        {/* **Changed**: Added input for filtering by username */}
-        <div className="admin-filter-dropdown">
-          <span>Username</span>
-          <input
-            type="text"
-            placeholder="Filter by username"
-            className="admin-search-input"
-            value={filterUsername}
-            onChange={(e) => setFilterUsername(e.target.value)} // **Changed**: Set state for username filter
-          />
-        </div>
-
-        {/* **Changed**: Added input for filtering by lecture hall */}
-        <div className="admin-filter-dropdown">
-          <span>Lecture Hall</span>
-          <input
-            type="text"
-            placeholder="Filter by lecture hall"
-            className="admin-search-input"
-            value={filterLectureHall}
-            onChange={(e) => setFilterLectureHall(e.target.value)} // **Changed**: Set state for lecture hall filter
-          />
-        </div>
-
+      
+  <div className="admin-filter-section">
+    <div className="admin-filter-info">
+    </div>
+    <div className="admin-filter-row">
+      <span className="admin-filter-column">
+        <span className="admin-filter-label">Username</span>
         <input
+          type="text"
+          placeholder="Filter by username"
+          className="admin-search-input"
+          value={filterUsername}
+          onChange={(e) => setFilterUsername(e.target.value)}
+        />
+      </span>
+
+    <span className="admin-filter-column">
+      <span className="admin-filter-label">Lecture Hall</span>
+      <input
+        type="text"
+        placeholder="Filter by lecture hall"
+        className="admin-search-input"
+        value={filterLectureHall}
+        onChange={(e) => setFilterLectureHall(e.target.value)}
+      />
+    </span>
+
+    <span className="admin-filter-column">
+    <span className="admin-filter-label">Search by keyword...</span>
+      <input
           type="text"
           placeholder="Search..."
           className="admin-search-input"
           value={searchQuery}
           onChange={handleSearch}
         />
-      </div>
-
+    </span>
+  </div>
+</div>
       <div className="admin-bookings-list">
-        {/* <h2 className="admin-date-header">{new Date(dateRange.start).toDateString()}</h2> */}
         <div className="admin-booking-item highlighted">
           <div className="admin-time-indicator">
-            {/* <div className="admin-blue-dot"></div> */}
             <div className="admin-time-text">
               <span>Time <slot></slot></span>
               <span className="admin-duration">(duration)</span>
@@ -253,8 +250,6 @@ function Adminviewbooking() {
             <div className="admin-room-info">Lecture Hall</div>
             <div className="admin-professor-info">Username</div>
             <div className="admin-course-info">Purpose</div>
-
-            {/* <div className="admin-booking-date">📅 2025-03-28</div> */}
           </div>
 
           <div className="admin-booking-actions">
@@ -266,7 +261,6 @@ function Adminviewbooking() {
 
           <div key={booking.id} className={`admin-booking-item `}>
             <div className="admin-time-indicator">
-              {/* <div className="admin-blue-dot"></div> */}
               <div className="admin-time-text">
                 <span>{booking.time}</span>
                 <span className="admin-duration">{booking.duration}</span>

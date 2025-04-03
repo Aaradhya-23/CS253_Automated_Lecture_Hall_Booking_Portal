@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
-// import { ROLE } from '../api/constants';
 import './Request_Booking.css';
 
 const Request_Booking = () => {
   const role = localStorage.getItem('ROLE');
   const token = localStorage.getItem(ACCESS_TOKEN);
+  const loggedInUsername = localStorage.getItem('USERNAME'); // Assuming the username is stored in localStorage
   console.log(role);
+
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
@@ -22,44 +23,40 @@ const Request_Booking = () => {
   const [accessoryOptions, setAccessoryOptions] = useState([]);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
 
-  const [users, setUsers] = useState([]); 
-  const [selectedUser, setSelectedUser] = useState(""); 
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(role === 'admin' ? '' : loggedInUsername); // Default to logged-in user if not admin
   const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
 
   useEffect(() => {
-    if (role !== 'admin') {
-      setSelectedUser('INVALID'); // Set user to null if the role is not admin
-    }
-  }, [role]);
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await api.get(VITE_USER_LIST_CREATE_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-  
-        console.log("API Response:", response.data); // Debugging step
-  
-        // Ensure the API response is an array before setting state
-        if (Array.isArray(response.data)) {
-          setUsers(response.data);
-        } else {
-          console.error("Unexpected API response format:", response.data);
-          setUsers([]); // Prevent crash
+    if (role === 'admin') {
+      const fetchUsers = async () => {
+        try {
+          const response = await api.get(VITE_USER_LIST_CREATE_URL, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          console.log('API Response:', response.data); // Debugging step
+
+          // Ensure the API response is an array before setting state
+          if (Array.isArray(response.data)) {
+            setUsers(response.data);
+          } else {
+            console.error('Unexpected API response format:', response.data);
+            setUsers([]); // Prevent crash
+          }
+        } catch (error) {
+          console.error('Error fetching users:', error);
+          setUsers([]);
         }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        setUsers([]);
-      }
-    };
-  
-    if (role === "admin") {
+      };
+
       fetchUsers();
     }
-  }, [role]);
+  }, [role, token]);
+
   // Time options for dropdowns
   const timeOptions = [
     '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
@@ -279,39 +276,53 @@ useEffect(() => {
     <div className="main-content-wrapper">
       <div className="booking-form-container">
         <form className="booking-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          {role === "admin" && (
-          <>
-            <label htmlFor="user">User</label>
-            <select
-              id="user"
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="form-control"
-            >
-              <option value="">Select User</option>
-              {users.length > 0 ? (
-                users.map((u) => (
-                  <option key={u.email} value={u.username}>
-                    {u.username}
-                  </option>
-                ))
-              ) : (
-                <option disabled>Loading users...</option>
-              )}
-            </select>
-          </>
-        )}
-          <label htmlFor="purpose">Purpose</label>
-          <input
-            type="text"
-            id="purpose"
-            value={purpose}
-            onChange={(e) => setPurpose(e.target.value)}
-            placeholder="Linux Session Y-24"
-            className="form-control"
-          />
-        </div>
+          <div className="form-row">
+            {role === 'admin' ? (
+              <div className="form-column">
+                <label htmlFor="user">User</label>
+                <select
+                  id="user"
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                  className="form-control"
+                >
+                  <option value="">Select User</option>
+                  {users.length > 0 ? (
+                    users.map((u) => (
+                      <option key={u.email} value={u.username}>
+                        {u.username}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Loading users...</option>
+                  )}
+                </select>
+              </div>
+            ) : (
+              <div className="form-column">
+                <label htmlFor="user">User</label>
+                <input
+                  type="text"
+                  id="user"
+                  value={selectedUser}
+                  readOnly
+                  className="form-control"
+                  style={{ userSelect: 'none', cursor: 'not-allowed' }} // Prevent text selection and show disabled cursor
+                />
+              </div>
+            )}
+            <div className="form-column">
+              <label htmlFor="purpose">Purpose</label>
+              <input
+                type="text"
+                id="purpose"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                placeholder="Linux Session Y-24"
+                className="form-control"
+              />
+            </div>
+          </div>
           <div className="form-row">
             <div className="form-column">
               <label>Date</label>
@@ -322,7 +333,8 @@ useEffect(() => {
                   onChange={handleDateChange} 
                   className="date-input"
                   placeholder="dd-mm-yyyy"
-                />
+                  min={new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split("T")[0]} // Disable dates up to 2 days ahead
+                  />
               </div>
             </div>
             <div className="form-column">
@@ -371,8 +383,9 @@ useEffect(() => {
             </select>
           </div> */}
 
-          <div className="form-group">
-              <label>Capacity</label>
+        <div className="form-row">
+          <div className="form-column">
+            <label>Capacity</label>
             <select 
               value={capacity} 
               onChange={(e) => setCapacity(e.target.value)}
@@ -384,11 +397,10 @@ useEffect(() => {
               ))}
             </select>
           </div>
-
-          <div className="form-group">
-            <div className="section-header">
-              <label>Accessories</label>
-            </div>
+        </div>
+        <div className="form-row">
+          <div className="form-column">
+            <label>Accessories</label>
             <div className="accessories-grid">
               {accessoryOptions.map((accessory) => (
                 <button
@@ -402,6 +414,7 @@ useEffect(() => {
               ))}
             </div>
           </div>
+        </div>
 
           {capacity && (
           <div className="form-group">

@@ -1,8 +1,18 @@
+.navbar-trigger-area {
+  width: 20px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: transparent;
+  z-index: 10;
+}
+
 .admin-navbar {
     width: 200px;
-    background-color: #EFF6FF; /* blue-50 */
+    background-color: #EFF6FF; 
     padding: 16px;
-    height: 100vh;
+    height: 100%;
   }
   
   .admin-nav-item {
@@ -11,8 +21,8 @@
     padding: 8px 16px;
     margin-bottom: 12px;
     text-align: center;
-    background-color: #DBEAFE; /* blue-100 */
-    color: #1E3A8A; /* blue-900 */
+    background-color: #DBEAFE; 
+    color: #1E3A8A; 
     transition: background-color 0.2s, color 0.2s;
     cursor: pointer;
     border: none;
@@ -23,11 +33,13 @@
   }
   
   .admin-nav-item:hover {
-    background-color: #BFDBFE; /* blue-200 */
+    background-color: #fcfcfc; 
+    transform: scale(1.05); 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
   }
   
   .admin-nav-item.active {
-    background-color: #3B82F6; /* blue-500 */
+    background-color: #3B82F6;
     color: white;
   }
   
@@ -40,7 +52,8 @@
     margin-left: 4px;
     font-size: 12px;
     color: white;
-    background-color: #2563EB; /* blue-600 */
+    background-color: #2563EB; 
     border-radius: 50%;
   }
+  
   
