@@ -10,6 +10,7 @@
 .admin-date-range-section {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 20px;
   font-size: 14px;
 }
@@ -18,12 +19,17 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  transition: all 0.3s ease;
 }
+
 
 .admin-date-selector:hover {
   background-color: #f0f0f0;
+  border-color: #007bff;
 }
 
 .admin-dropdown-arrow {
@@ -33,6 +39,8 @@
 
 .admin-date-separator {
   margin: 0 10px;
+  font-size: 18px;
+  color: #555;
 }
 
 .admin-filter-section {
@@ -41,22 +49,52 @@
   gap: 10px;
 }
 
-.admin-filter-dropdown {
+.admin-filter-info {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.admin-filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Divide into three equal columns */
+  gap: 20px; /* Add spacing between columns */
+  width: 100%;
+  margin-bottom: 20px;
+  justify-content: center; /* Center the grid horizontally */
+  align-items: center; /* Center the content vertically */
+  text-align: center; /* Center-align text inside the columns */
+}
+
+.admin-filter-column {
   display: flex;
-  align-items: center;
-  padding: 8px 15px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
+  flex-direction: column;
+  align-items: center; /* Center-align the label and input */
+}
+
+.admin-filter-label {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #555;
+  text-align: center; /* Center-align the label text */
 }
 
 .admin-search-input {
-  flex: 1;
-  padding: 8px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: 80%; /* Adjust width for better alignment */
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
   font-size: 14px;
+  line-height: 1.5;
+  transition: border-color 0.3s ease;
+  text-align: center; /* Center-align the input text */
+}
+
+.admin-search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+  outline: none;
 }
 
 .admin-date-header {
@@ -76,7 +114,8 @@
   border-radius: 4px;
   border: 1px solid #ddd;
   position: relative;
-  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+  flex-wrap: wrap;
+  background-color: #EFF6FF;/* Allow wrapping for smaller screens */
 }
 
 .admin-booking-item.highlighted {

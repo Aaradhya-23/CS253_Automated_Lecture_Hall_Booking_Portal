@@ -1,40 +1,46 @@
 .header {
-    width: 100%;
-    background-color: #EFF6FF; /* blue-50 */
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #DBEAFE; /* blue-100 */
-  }
-  
-  .logo-container {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo {
-    height: 40px;
-    width: 40px;
-    margin-right: 12px;
-  }
-  
-  .title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #1E3A8A; /* blue-900 */
-  }
-  
-  .button {
-    background-color: #3B82F6; /* blue-500 */
-    color: white;
-    padding: 8px 24px;
-    border-radius: 9999px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .button:hover {
-    background-color: #2563EB; /* blue-600 */
-  }
+  margin: 0; /* Remove unnecessary margins */
+  width: 100%; /* Ensure the header spans the full width of the viewport */
+  max-width: 100%; /* Prevent the header from exceeding the viewport width */
+  background-color: #f5f7ff; /* blue-50 */
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #DBEAFE; /* blue-100 */
+  box-sizing: border-box; /* Include padding and borders in width calculation */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 69px;
+  width: 69px;
+  margin-right: 11px;
+}
+
+.title {
+  font-size: 44px;
+  font-weight: bold;
+  color: #207bff; /* blue-900 */
+}
+
+.button {
+  background-color: #4ea5ff; /* blue-500 */
+  color: white;
+  padding: 7px 21px;
+  margin-bottom: 0; /* Removed unnecessary bottom margin */
+  margin-right: 0; /* Removed unnecessary right margin */
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: #207bff; /* blue-600 */
+}

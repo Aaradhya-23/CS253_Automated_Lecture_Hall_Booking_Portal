@@ -1,8 +1,3 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-}
-
 .feedback-container {
   width: 100%;
   max-width: 1000px;
@@ -11,18 +6,15 @@ body {
   background-color: white;
   border-radius: 8px;
 }
-
 .feedback-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-
 .feedback-section {
   border-bottom: 1px solid #e0e0e0;
   padding-bottom: 15px;
 }
-
 .feedback-label {
   display: flex;
   align-items: center;
@@ -31,14 +23,12 @@ body {
   color: #333;
   margin-bottom: 10px;
 }
-
 .label-icon {
   color: #2196f3;
   margin-right: 10px;
   width: 20px;
   height: 20px;
 }
-
 .satisfaction-icons {
   display: flex;
   justify-content: flex-start;
@@ -46,7 +36,6 @@ body {
   gap: 15px;
   flex-direction: row;
 }
-
 .satisfaction-icon {
   width: 24px;
   height: 24px;
@@ -54,33 +43,26 @@ body {
   cursor: pointer;
   transition: color 0.2s, transform 0.2s;
 }
-
 .satisfaction-icon:hover {
   transform: scale(1.1);
 }
-
 .satisfaction-icon.selected {
   transform: scale(1.2);
 }
-
 .satisfaction-icon.selected.positive {
   color: #4caf50;
 }
-
 .satisfaction-icon.selected.neutral {
   color: #ff9800;
 }
-
 .satisfaction-icon.selected.negative {
   color: #f44336;
 }
-
 .star-rating {
   display: flex;
   justify-content: flex-start;
   gap: 5px;
 }
-
 .star-icon {
   width: 28px;
   height: 28px;
@@ -88,15 +70,12 @@ body {
   cursor: pointer;
   transition: color 0.2s;
 }
-
 .star-icon.filled {
   color: #ffc107;
 }
-
 .star-icon:hover {
   color: #ffd54f;
 }
-
 .feedback-textarea {
   width: 100%;
   padding: 10px;
@@ -105,8 +84,11 @@ body {
   resize: vertical;
   font-size: 14px;
 }
-
 .submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
   padding: 12px;
   background-color: #2196f3;
@@ -116,16 +98,13 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .submit-button:hover {
   background-color: #1976d2;
 }
-
 .submit-button:disabled {
   background-color: #b0b0b0;
   cursor: not-allowed;
 }
-
 .feedback-submission-success {
   display: flex;
   flex-direction: column;
@@ -134,14 +113,12 @@ body {
   text-align: center;
   padding: 30px;
 }
-
 .success-icon {
   width: 64px;
   height: 64px;
   color: #4caf50;
   margin-bottom: 15px;
 }
-
 .reset-button {
   margin-top: 15px;
   padding: 10px 20px;
@@ -151,7 +128,6 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .reset-button:hover {
   background-color: #1976d2;
 }

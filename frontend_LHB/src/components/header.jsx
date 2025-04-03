@@ -1,6 +1,6 @@
 import React from 'react';
 import './Header.css';
-import iitk_logo from '../assets/iitk_logo.png';
+import { assets } from '../assets/assets';
 import FRONTEND_ROUTES from '../frontend_urls';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -12,7 +12,7 @@ const Header = ({ isLoggedIn, userRole, handleLogout }) => {
   return (
     <div className="header">
       <div className="logo-container">
-        <img src={iitk_logo} alt="IIT-K Logo" className="logo" />
+        <img src={assets.iitk_logo} alt="IIT-K Logo" className="logo" />
         <h1 className="title" onClick={() => navigate(FRONTEND_ROUTES.home)} style={{ cursor: 'pointer' }}>
           IITK Lecture Hall Booking
         </h1>

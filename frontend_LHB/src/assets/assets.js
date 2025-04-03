@@ -2,6 +2,7 @@
 import iitk_logo from "./iitk_logo.png";
 import lgpiitk from "./loginpageiitk.png";
 import elbees from "./elbees_iitk.jpg";
+import newlogo from "./favicon.ico";
 
 // Import L1 to L10 images
 import L1 from "./L1.jpg";
@@ -27,7 +28,8 @@ export const assets = {
   // Use the imported variable, not a string path
   iitk_logo: iitk_logo,
   loginpageiitk: lgpiitk,
-  elbees: elbees,  // Changed from L20 to elbees to match the imported variable
+  elbees: elbees,
+  newlogo: newlogo,
   
   // Add L1 to L10 images
   L1: L1,
