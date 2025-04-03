@@ -81,6 +81,7 @@ function Bookingdetails() {
     navigate('/admin-view-booking');
   };
 
+
   const handleRemoveBooking = async (id) => {
     console.log(`Removing booking with ID: ${id}`);
     const token = localStorage.getItem('ACCESS_TOKEN');
@@ -96,7 +97,6 @@ function Bookingdetails() {
                 },
             }
         );
-
         console.log(`Rejection email sent for booking ${id}.`);
         alert("Booking removed, email sent to user.");
         window.location.href = FRONTEND_ROUTES.adminViewBooking;
@@ -105,7 +105,7 @@ function Bookingdetails() {
         console.error("Error removing booking:", error);
         alert("Error removing booking. Please try again.");
     }
-};
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
@@ -175,5 +175,5 @@ function Bookingdetails() {
     </div>
   );
 }
-
+  
 export default Bookingdetails;
