@@ -65,86 +65,68 @@ def send_rejection_mail(request, booking_id):
     
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
+        # Extract data from request
         booking_date = request.data.get("booking_date")  # YYYY-MM-DD
-        start_time = request.data.get("start_time")  # HH:MM
-        end_time = request.data.get("end_time")  # HH:MM
-        duration = int(request.data.get("duration", 1))  # Duration in hours
-
-        # Room preferences
-        room_id = request.data.get("room")  # Optional
-        capacity = int(request.data.get("capacity", 1))  # Minimum capacity
-        need_projector = request.data.get("need_projector", False)
-        need_blackboard = request.data.get("need_blackboard", False)
-        need_ac = request.data.get("need_ac", False)
+        start_time = request.data.get("start_time")  # HH:MM:SS
+        end_time = request.data.get("end_time")  # HH:MM:SS
+        duration = int(request.data.get("duration", 1))  # Default: 1 hour
 
         # Validate input
         if not booking_date or not start_time or not end_time:
-            return Response({"error": "booking_date, start_time, and end_time are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Convert times to datetime objects
-        start_time = datetime.strptime(start_time, "%H:%M").time()
-        end_time = datetime.strptime(end_time, "%H:%M").time()
-        booking_date = datetime.strptime(booking_date,"%Y-%m-%d" )
-
-        if start_time >= end_time:
-            return Response({"error": "end_time must be later than start_time."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Ensure booking is not on a holiday (every Sunday)
-        holidays = Holiday.objects.filter(date=booking_date)
-        if booking_date.weekday() == 6 or (holidays.exists()):  # Sunday
-            return Response({"error": "Bookings cannot be made on Holidays"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Get all available rooms that match the criteria
-        if room_id:
-            rooms = Room.objects.filter(id=room_id)
-        else:
-            rooms = Room.objects.filter(
-                capacity__gte=capacity,
-                has_projector=need_projector,
-                has_board=need_blackboard,
-                has_ac=need_ac,
+            return Response(
+                {"error": "booking_date, start_time, and end_time are required."},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not rooms.exists():
-            return Response({"error": "No rooms match the given criteria."}, status=status.HTTP_400_BAD_REQUEST)
+        # Convert string to date/time objects
+        try:
+            booking_date = datetime.strptime(booking_date, "%Y-%m-%d").date()
+            start_time = datetime.strptime(start_time, "%H:%M:%S").time()
+            end_time = datetime.strptime(end_time, "%H:%M:%S").time()
+        except ValueError:
+            return Response(
+                {"error": "Invalid date/time format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        available_slots = []
+        if start_time >= end_time:
+            return Response(
+                {"error": "end_time must be later than start_time."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Loop through each matching room to find available slots
-        slot_id = 1
-        for room in rooms:
-            current_time = timezone.datetime.strptime(request.data.get("start_time"), "%H:%M")
-            end_time_limit = timezone.datetime.strptime(request.data.get("end_time"), "%H:%M")
+        # Ensure booking is not on a holiday (every Sunday)
+        if booking_date.weekday() == 6 or Holiday.objects.filter(date=booking_date).exists():
+            return Response(
+                {"error": "Bookings cannot be made on Holidays"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            while current_time + timedelta(hours=duration) <= end_time_limit:
-                overlapping_bookings = Booking.objects.filter(
-                    room=room,
-                    booking_date=booking_date,
-                    start_time__lt=current_time + timedelta(hours=duration),
-                    end_time__gt=current_time
-                ).exists()
-                
-                
+        # Convert times to datetime for correct calculations
+        # start_datetime = datetime.combine(booking_date, start_time)
+        # end_datetime = start_datetime + timedelta(hours=duration)
 
-                if not overlapping_bookings:
-                    available_slots.append({
-                        "slot_id" : slot_id,
-                        "room_id": room.id,
-                        "room_name": room.name,
-                        "room.price" : room.price_per_hour,
-                        "start_time": current_time.strftime("%H:%M"),
-                        "end_time": (current_time + timedelta(hours=duration)).strftime("%H:%M")
-                    })
-                    slot_id = slot_id + 1
+        # Find booked room IDs that overlap with the requested slot
+        booked_room_ids = Booking.objects.filter(
+            booking_date=booking_date,
+            start_time__lt=end_time,
+            end_time__gt=start_time
+        ).values_list("room_id", flat=True)  # Get booked room IDs
 
-                # Move in 30-minute intervals to find more slots
-                current_time += timedelta(minutes=30)
+        # Get available rooms
+        available_rooms = Room.objects.exclude(id__in=booked_room_ids)
 
-        if not available_slots:
-            return Response({"error": "No available slots found."}, status=status.HTTP_400_BAD_REQUEST)
+        if not available_rooms.exists():
+            return Response(
+                {"error": "No available rooms for this slot found."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+        # Serialize and return response
+        serializer = RoomSerializer(available_rooms, many=True)
+        return Response({"rooms": serializer.data}, status=status.HTTP_200_OK)
 def send_approval_email(authority_email, booking):
     # Get specific authority token for the booking
     print(booking.authority_tokens)
