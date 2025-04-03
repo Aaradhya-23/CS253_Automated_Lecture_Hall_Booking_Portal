@@ -37,7 +37,7 @@ function ProtectedRoute({ children, role }) {
 
   const auth = async () => {
     const token = localStorage.getItem(ACCESS_TOKEN);
-    const stored_role = localStorage.getItem("ROLE")
+    const stored_role = localStorage.getItem("ROLE");
     console.log("Existing access token:", token);
     if (!token) {
       console.log("No access token found.");
