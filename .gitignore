@@ -53,4 +53,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+poop
 db.sqlite3

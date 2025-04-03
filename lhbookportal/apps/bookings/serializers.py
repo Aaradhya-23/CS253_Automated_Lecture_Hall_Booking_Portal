@@ -71,7 +71,7 @@ class BookingSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Booking
-        exclude = ['approval_token', 'token_expiry']  # Exclude sensitive fields
+        exclude = ['booking_token', 'token_expiry']  # Exclude sensitive fields
         read_only_fields = ['status', 'requested_on', 'cost']  # Fields not set by the user
         depth = 1 
 
