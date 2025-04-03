@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import './CreateUser.css';
-import api from '../api/api';
-import { ACCESS_TOKEN } from '../api/constants';
+import React, { useState, useEffect } from "react";
+import "./CreateUser.css";
+import api from "../api/api";
+import { ACCESS_TOKEN } from "../api/constants";
 
 const CreateUser = () => {
   const [formData, setFormData] = useState({
@@ -15,33 +15,40 @@ const CreateUser = () => {
   const [newAuthority, setNewAuthority] = useState({ name: "", email: "" });
   const [existingAuthorities, setExistingAuthorities] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchAuthorities = async () => {
-      const token = localStorage.getItem("ACCESS_TOKEN");
+      const token = localStorage.getItem(ACCESS_TOKEN);
       if (!token) {
         console.error("No ACCESS_TOKEN found in localStorage.");
-        setError("User not authenticated. Please log in.");
+        setErrorMessage("User not authenticated. Please log in.");
         return;
       }
 
       setLoading(true);
-      setError(null);
+      setErrorMessage("");
 
       try {
-        const response = await api.get(import.meta.env.VITE_AUTHORITY_LIST_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await api.get(
+          import.meta.env.VITE_AUTHORITY_LIST_URL,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         console.log("Fetched Authorities:", response.data);
         setExistingAuthorities(response.data);
       } catch (err) {
-        console.error("Error fetching Authorities:", err.response?.data || err.message);
-        setError("Failed to load Authorities.");
+        console.error(
+          "Error fetching Authorities:",
+          err.response?.data || err.message
+        );
+        setErrorMessage("Failed to load Authorities.");
       } finally {
         setLoading(false);
       }
@@ -58,7 +65,9 @@ const CreateUser = () => {
   const handleExistingAuthorityChange = (selectedAuthority) => {
     setFormData((prev) => {
       const existingList = prev.authorities || [];
-      const exists = existingList.some((auth) => auth.id === selectedAuthority.id);
+      const exists = existingList.some(
+        (auth) => auth.id === selectedAuthority.id
+      );
 
       if (!exists) {
         return {
@@ -77,104 +86,57 @@ const CreateUser = () => {
     }));
   };
 
-  const resetForm = () => {
-    setFormData({
-      username: '',
-      password: '',
-      email: '',
-      remarks: '',
-      role: '',
-      authority_email: '',
-    });
-  };
-
-  const validateForm = () => {
-    // Basic validation
-    if (!formData.username || !formData.password || !formData.email || !formData.role) {
-      setErrorMessage('Please fill in all required fields');
-      return false;
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrorMessage('Please enter a valid email address');
-      return false;
-    }
-    
-    // If authority email is provided, validate it too
-    if (formData.authority_email && !emailRegex.test(formData.authority_email)) {
-      setErrorMessage('Please enter a valid authority email address');
-      return false;
-    }
-    
-    return true;
-  };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-    
-  //   // Clear previous messages
-  //   setSuccessMessage('');
-  //   setErrorMessage('');
-    
-  //   // Validate form
-  //   if (!validateForm()) return;
-    
-  //   setIsSubmitting(true);
-    
-  //   const token = localStorage.getItem(ACCESS_TOKEN);
-    
-  //   try {
-  //     const response = await api.post(
-  //       import.meta.env.VITE_USER_LIST_CREATE_URL,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           'Content-Type': 'application/json',
-  //           Accept: 'application/json',
-  //         },
-  //       }
-  //     );
-      
-  //     console.log('User created successfully:', response.data);
-  //     setSuccessMessage('User created successfully!');
-  //     resetForm();
-  //   } catch (error) {
-  //     console.error('Error creating user:', error);
-  //     setErrorMessage(error.response?.data?.message || 'Error creating user. Please try again.');
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // }
   const moveAuthority = (index, direction) => {
     setFormData((prev) => {
       const newAuthorities = [...prev.authorities];
       const swapIndex = index + direction;
       if (swapIndex >= 0 && swapIndex < newAuthorities.length) {
-        [newAuthorities[index], newAuthorities[swapIndex]] = [newAuthorities[swapIndex], newAuthorities[index]];
+        [newAuthorities[index], newAuthorities[swapIndex]] = [
+          newAuthorities[swapIndex],
+          newAuthorities[index],
+        ];
       }
       return { ...prev, authorities: newAuthorities };
     });
   };
 
+  const validateForm = () => {
+    if (
+      !formData.username ||
+      !formData.password ||
+      !formData.email ||
+      !formData.role
+    ) {
+      setErrorMessage("Please fill in all required fields");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setErrorMessage("Please enter a valid email address");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("ACCESS_TOKEN");
-    if (!token) {
-      alert("User not authenticated. Please log in.");
-      return;
-    }
-  
+
+    setErrorMessage("");
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    const token = localStorage.getItem(ACCESS_TOKEN);
     const payload = {
       username: formData.username,
       email: formData.email,
       role: formData.role,
       password: formData.password,
-      authorities: formData.authorities.map((auth) => auth.id), // Extract only IDs
+      authorities: formData.authorities.map((auth) => auth.id),
     };
-  
+
     try {
       await api.post(import.meta.env.VITE_USER_LIST_CREATE_URL, payload, {
         headers: {
@@ -191,92 +153,65 @@ const CreateUser = () => {
         authorities: [],
       });
     } catch (error) {
-      console.error("Error creating user:", error.response?.data || error.message);
-      alert("Error creating user: " + JSON.stringify(error.response?.data));
+      console.error(
+        "Error creating user:",
+        error.response?.data || error.message
+      );
+      setErrorMessage("Error creating user. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    console.log("Updated payload:", payload);
   };
-  useEffect(() => {
-    console.log("Updated Form Data:", formData);
-  }, [formData]);
 
   return (
-    <div className="create-user-container">
-      <div className="create-user-header">
-        <h2>Create New User</h2>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="username">User ID :</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              autoComplete="name"
-            />
-          </div>
-        
-        
-        {errorMessage && (
-          <div className="error-message">
-            {errorMessage}
-          </div>
-        )}
-
+    <div className="main-content-wrapper">
+      <div className="create-user-container">
+        <div className="create-user-header">
+          <h2>CREATE NEW USER </h2>
+        </div>
         <form onSubmit={handleSubmit} className="create-user-form">
           <div className="form-row">
             <div className="form-column">
-              <label htmlFor="username">User ID</label>
+              <label htmlFor="username">User ID :</label>
               <input
                 type="text"
+                className="form-control"
                 id="username"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="form-control"
                 required
+                autoComplete="name"
               />
             </div>
+
             <div className="form-column">
-              <label htmlFor="remarks">Remarks</label>
+              <label htmlFor="password">Password :</label>
               <input
-                type="text"
-                id="remarks"
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleChange}
+                type="password"
                 className="form-control"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                autoComplete="new-password"
               />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-column">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="form-control"
-                required
-              />
-            </div>
-            <div className="form-column">
-              <label htmlFor="email">E-mail</label>
+              <label htmlFor="email">E-mail :</label>
               <input
                 type="email"
                 id="email"
+                className="form-control"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-control"
                 required
+                autoComplete="email"
               />
             </div>
           </div>
@@ -291,32 +226,30 @@ const CreateUser = () => {
                     id="admin"
                     name="role"
                     value="admin"
-                    checked={formData.role === 'admin'}
+                    checked={formData.role === "admin"}
                     onChange={handleChange}
                     required
                   />
                   <label htmlFor="admin">Admin</label>
                 </div>
-
                 <div className="radio-option">
                   <input
                     type="radio"
                     id="faculty"
                     name="role"
                     value="faculty"
-                    checked={formData.role === 'faculty'}
+                    checked={formData.role === "faculty"}
                     onChange={handleChange}
                   />
                   <label htmlFor="faculty">Faculty</label>
                 </div>
-
                 <div className="radio-option">
                   <input
                     type="radio"
                     id="student"
                     name="role"
-                    value="student"
-                    checked={formData.role === 'student'}
+                    value="Student"
+                    checked={formData.role === "Student"}
                     onChange={handleChange}
                   />
                   <label htmlFor="student">Student</label>
@@ -324,48 +257,100 @@ const CreateUser = () => {
               </div>
             </div>
           </div>
-          </form>
-        </div>
-        {/* ✅ Select Existing Authorities in Priority Order */}
-        <h3>Select Authorities</h3>
-        {loading ? (
-          <p>Loading authorities...</p>
-        ) : existingAuthorities && existingAuthorities.length > 0 ? (
-          existingAuthorities.map((authority) => (
-            <div key={authority.id}>
-              <input
-                type="checkbox"
-                value={authority.id}
-                checked={formData.authorities.some((auth) => auth.id === authority.id)}
-                onChange={() => handleExistingAuthorityChange(authority)}
-              />
-              {authority.name} ({authority.email})
+
+          {formData.role === "Student" && (
+            <>
+              <div className="create-user-header">
+              <h3>SELECT AUTHORITIES</h3>
+              </div>
+              <div className="authority-selection">
+                {loading ? (
+                  <p className="loading-text">Loading authorities...</p>
+                ) : existingAuthorities && existingAuthorities.length > 0 ? (
+                  existingAuthorities.map((authority) => (
+                    <div key={authority.id} className="authority-item">
+                      <input
+                        type="checkbox"
+                        id={`authority-${authority.id}`}
+                        value={authority.id}
+                        checked={formData.authorities.some(
+                          (auth) => auth.id === authority.id
+                        )}
+                        onChange={() =>
+                          handleExistingAuthorityChange(authority)
+                        }
+                        className="authority-checkbox"
+                      />
+                      <label
+                        htmlFor={`authority-${authority.id}`}
+                        className="authority-label"
+                      >
+                        {authority.name} ({authority.email})
+                      </label>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-authorities-text">
+                    No authorities available.
+                  </p>
+                )}
+              </div>
+
+                <div className="create-user-header">
+              <h3>AUTHORITY PRIORITY ORDER</h3>
+              </div>
+              {formData.authorities.length > 0 ? (
+                <ul className="authority-priority-list">
+                  {formData.authorities.map((auth, index) => (
+                    <li key={auth.id} className="authority-priority-item">
+                      <span className="authority-name">
+                        {auth.name} ({auth.email})
+                      </span>
+                      <div className="priority-actions">
+                        <button
+                          type="button"
+                          onClick={() => moveAuthority(index, -1)}
+                          className="priority-btn"
+                        >
+                          Up
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveAuthority(index, 1)}
+                          className="priority-btn"
+                        >
+                          Down
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAuthority(index)}
+                          className="priority-btn remove-btn"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="no-authorities-selected-text">
+                  No authorities selected.
+                </p>
+              )}
+            </>
+          )}
+          <div className="form-actions">
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'CREATE USER'}
+            </button>
             </div>
-          ))
-        ) : (
-          <p>No authorities available.</p>
-        )}
-
-        <h3>Authority Priority Order</h3>
-        {formData.authorities.length > 0 ? (
-          <ul>
-            {formData.authorities.map((auth, index) => (
-              <li key={auth.id}>
-                {auth.name} ({auth.email})
-                <button type="button" onClick={() => moveAuthority(index, -1)}>Up</button>
-                <button type="button" onClick={() => moveAuthority(index, 1)}>Down</button>
-                <button type="button" onClick={() => handleRemoveAuthority(index)}>Remove</button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No authorities selected.</p>
-        )}
-        <button type="submit">Create User</button>
-
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
-
 export default CreateUser;
