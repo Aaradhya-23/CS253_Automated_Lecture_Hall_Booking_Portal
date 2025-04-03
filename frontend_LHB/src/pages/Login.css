@@ -1,127 +1,368 @@
+/* .login-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.login-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(68, 55, 55, 0.1);
+}
+
+.login-image-container {
+  flex: 1;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/campus-image.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-form-container {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.iit-logo {
+  height: 50px;
+  width: auto;
+}
+
+.logo-container span {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.login-form-content h2 {
+  color: #666;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.login-form-content h1 {
+  color: #333;
+  font-size: 28px;
+  margin-bottom: 32px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #555;
+  font-weight: 500;
+}
+
+.input-container {
+  position: relative;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.input-container input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.input-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.sign-in-button {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sign-in-button:hover {
+  background-color: #1557b0;
+}
+ */
+
+
+
 .login-page {
-    display: flex;
-    min-height: 100vh;
-    background-color: #f5f5f5;
-    padding: 20px;
-  }
-  
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.login-image-container {
+  flex: 1;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/campus-image.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-overlay-text {
+  color: white;
+  text-align: center;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+}
+
+.image-overlay-text h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.image-overlay-text p {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.login-form-container {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.iit-logo {
+  height: 50px;
+  width: auto;
+}
+
+.logo-container span {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.login-form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form-content h2 {
+  color: #666;
+  font-size: 18px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.login-form-content h1 {
+  color: #333;
+  font-size: 32px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.login-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #555;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.input-container {
+  position: relative;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 14px;
+  padding-right: 40px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s;
+  background-color: #f9f9f9;
+}
+
+.input-container input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+  background-color: #fff;
+}
+
+.input-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+  font-size: 18px;
+}
+
+.forgot-password-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -10px;
+}
+
+.forgot-password-link {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.forgot-password-link:hover {
+  color: #1557b0;
+  text-decoration: underline;
+}
+
+.sign-in-button {
+  margin-top: 16px;
+  padding: 14px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.sign-in-button:hover {
+  background-color: #1557b0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.sign-in-button:active {
+  transform: translateY(0);
+}
+
+.sign-in-button:disabled {
+  background-color: #a0c3ff;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-footer {
+  margin-top: auto;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding-top: 30px;
+}
+
+@media (max-width: 768px) {
   .login-container {
-    display: flex;
-    width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(68, 55, 55, 0.1);
+    flex-direction: column;
   }
   
   .login-image-container {
-    flex: 1;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('/campus-image.jpg');
-    background-size: cover;
-    background-position: center;
+    height: 200px;
   }
-  
-  .login-form-container {
-    flex: 1;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 40px;
-  }
-  
-  .iit-logo {
-    height: 50px;
-    width: auto;
-  }
-  
-  .logo-container span {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .login-form-content h2 {
-    color: #666;
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  
-  .login-form-content h1 {
-    color: #333;
-    font-size: 28px;
-    margin-bottom: 32px;
-  }
-  
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .form-group label {
-    color: #555;
-    font-weight: 500;
-  }
-  
-  .input-container {
-    position: relative;
-  }
-  
-  .input-container input {
-    width: 100%;
-    padding: 12px;
-    padding-right: 40px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-  }
-  
-  .input-container input:focus {
-    outline: none;
-    border-color: #1a73e8;
-  }
-  
-  .input-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    color: #666;
-  }
-  
-  .sign-in-button {
-    margin-top: 16px;
-    padding: 12px;
-    background-color: #1a73e8;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .sign-in-button:hover {
-    background-color: #1557b0;
-  }
+}
