@@ -13,10 +13,10 @@ const Request_Booking = () => {
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
   const [purpose, setPurpose] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [startTime, setStartTime] = useState('8:00 AM');
+  const [startDate, setStartDate] = useState(null);
+  const [startTime, setStartTime] = useState(null);
   const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState('8:30 AM');
+  const [endTime, setEndTime] = useState(null);
   const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
   const [selectedHall, setSelectedHall] = useState('');
   const [capacity, setCapacity] = useState('');
@@ -26,6 +26,24 @@ const Request_Booking = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(role === 'admin' ? '' : loggedInUsername); // Default to logged-in user if not admin
   const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
+
+  function convertTo24HourFormat(time12h) {
+    const [time, modifier] = time12h.split(' '); // ["8:30", "AM"]
+    let [hours, minutes] = time.split(':').map(Number);
+  
+    if (modifier === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    if (modifier === 'AM' && hours === 12) {
+      hours = 0;
+    }
+  
+    const hoursStr = String(hours).padStart(2, '0');
+    const minutesStr = String(minutes).padStart(2, '0');
+  
+    return `${hoursStr}:${minutesStr}:00`; // Add seconds
+  }
+
 
   useEffect(() => {
     if (role === 'admin') {
@@ -72,6 +90,11 @@ const Request_Booking = () => {
 
 // fetch rooms from the database
 useEffect(() => {
+  console.log("here")
+  if (!startDate || !startTime || !endTime) return;
+  
+  // console.log(startTime)
+
   const fetchRooms = async () => {
     console.log("here")
     if (!token) {
@@ -81,8 +104,15 @@ useEffect(() => {
     }
     console.log(token)
     try {
-      console.log("here")
-      const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
+      const start = convertTo24HourFormat(startTime)
+      const end = convertTo24HourFormat(endTime)
+      console.log(start)
+      const response = await api.post(import.meta.env.VITE_AVAILABLE_SLOTS_URL, {
+        "start_time": start,
+        "booking_date" : startDate,
+        "end_time" : end
+      },
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -132,7 +162,7 @@ useEffect(() => {
   };
 
   fetchRooms();
-}, []);
+}, [endTime, startDate, startTime, token]);
 
   // Filter room options based on selected capacity and accessories
   useEffect(() => {
