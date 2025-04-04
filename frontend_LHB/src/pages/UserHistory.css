@@ -1,0 +1,466 @@
+.user-booking-main {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+  }
+
+  .user-booking-main:hover {
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .user-date-range-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    font-size: 16px;
+  }
+
+  .user-date-selector {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+  }
+
+  .user-date-selector:hover {
+    background-color: #f0f0f0;
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .user-dropdown-arrow {
+    margin-left: 5px;
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .user-date-selector:hover .user-dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .user-date-separator {
+    margin: 0 15px;
+    font-size: 18px;
+    color: #555;
+  }
+
+  .user-filter-section {
+    display: flex;
+    margin-bottom: 25px;
+    gap: 15px;
+  }
+
+  .user-filter-info {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .user-filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 25px;
+    width: 100%;
+    margin-bottom: 25px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-filter-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+  }
+
+  .user-filter-column:hover {
+    transform: translateY(-3px);
+  }
+
+  .user-filter-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #444;
+    text-align: center;
+  }
+
+  .user-search-input {
+    width: 90%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .user-search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    outline: none;
+    width: 95%;
+  }
+
+  .user-date-header {
+    font-size: 18px;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+  }
+
+  .user-date-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #007bff, #0056b3);
+    border-radius: 3px;
+  }
+
+  .user-bookings-list {
+    margin-top: 30px;
+  }
+
+  .user-booking-item {
+    display: flex;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    position: relative;
+    flex-wrap: wrap;
+    background-color: #EFF6FF;
+    transition: all 0.3s ease-in-out;
+    overflow: visible;
+    /* z-index: 9999; */
+  }
+
+  .user-booking-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+  }
+
+  .user-booking-item.highlighted {
+    background: linear-gradient(to right, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
+  }
+
+  .user-time-indicator {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    min-width: 180px;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .user-blue-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #007bff;
+    border-radius: 50%;
+    margin-right: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .user-booking-item:hover .user-blue-dot {
+    transform: scale(1.2);
+  }
+
+  .user-booking-item.highlighted .user-blue-dot {
+    background-color: white;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  }
+
+  .user-time-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-duration {
+    font-size: 13px;
+    color: #666;
+    transition: color 0.3s ease;
+  }
+
+  .user-booking-item.highlighted .user-duration {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .user-booking-info {
+    display: flex;
+    flex: 1;
+    padding: 15px;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.3s ease;
+  }
+
+  .user-booking-item.highlighted .user-booking-info {
+    background-color: transparent;
+  }
+
+  .user-room-info,
+  .user-professor-info,
+  .user-course-info {
+    flex: 1;
+    padding: 0 15px;
+    transition: transform 0.3s ease;
+  }
+
+  .user-booking-item:hover .user-room-info,
+  .user-booking-item:hover .user-professor-info,
+  .user-booking-item:hover .user-course-info {
+    transform: scale(1.02);
+  }
+
+  .user-booking-date {
+    flex: 1;
+    padding: 0 15px;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+  }
+
+  .user-booking-item:hover .user-booking-date {
+    transform: scale(1.02);
+  }
+
+  .user-booking-actions {
+    padding: 15px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .user-manage-btn .user-manage-actions {
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    color: inherit;
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+  }
+
+  .user-manage-btn .user-manage-actions:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    transform: scale(1.05);
+  }
+
+  .user-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px);
+    width: 220px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    color: #333;
+    overflow: hidden;
+    transform-origin: top right;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 10000;
+  }
+
+  .user-dropdown-menu.show {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .user-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border: none;
+    background-color: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .user-dropdown-item:hover {
+    background-color: #f0f8ff;
+    padding-left: 22px;
+  }
+
+  .user-dropdown-item .user-icon {
+    margin-right: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .user-dropdown-item:hover .user-icon {
+    transform: scale(1.2);
+  }
+
+  .user-dropdown-item .user-trash {
+    color: #d32f2f;
+  }
+
+  .user-dropdown-item:hover .user-trash {
+    color: #f44336;
+  }
+
+  /* Download icon specific styles */
+  .user-icon.user-download {
+    color: #007bff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-width: 768px) {
+    .user-booking-item {
+      flex-direction: column;
+    }
+
+    .user-booking-info {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .user-room-info,
+    .user-professor-info,
+    .user-course-info,
+    .user-booking-date {
+      padding: 8px 0;
+      width: 100%;
+    }
+
+    .user-filter-row {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .user-date-range-section {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .user-date-separator {
+      margin: 5px 0;
+    }
+  }
+  /* Add these styles to ensure the download button is visible */
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border: none;
+    background-color: #f0f8ff;
+    color: #007bff;
+    border-radius: 6px;
+    width: auto;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .user-dropdown-item:hover {
+    background-color: #e1f0ff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .user-icon.user-download {
+    color: #007bff;
+    margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .user-dropdown-item:hover .user-icon.user-download {
+    transform: scale(1.2);
+    color: #0056b3;
+  }
+
+  /* Make sure the SVG is visible */
+  .user-icon.user-download svg {
+    stroke: currentColor;
+    stroke-width: 2;
+    height: 16px;
+    width: 16px;
+  }
+
+  .user-dropdown-item.disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed; 
+    pointer-events: none; 
+  }
+
+  /* Fix for the hidden button */
+  .user-dropdown-item[style*="visibility: hidden"] {
+    display: none; /* Better approach than visibility:hidden */
+  }
+
+  /* Ensure proper spacing in the actions column */
+  .user-booking-actions {
+    padding: 15px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+  }
+
+  .user-status-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .user-status-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .user-status-text {
+    font-weight: bold;
+  }
+
+  .user-approved {
+    color: #28a745; /* Green */
+  }
+
+  .user-pending {
+    color: #ffc107; /* Yellow */
+  }
+
+  .user-rejected {
+    color: #dc3545; /* Red */
+  }
+
+  .user-not-sent {
+    color: #6c757d; /* Grey */
+  }

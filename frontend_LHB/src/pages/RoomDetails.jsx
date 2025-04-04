@@ -45,6 +45,7 @@ const RoomDetails = () => {
           ? `Lecture Hall ${room.name}`
           : `Tutorial Block ${room.name}`,
       capacity: room.capacity,
+      price_per_hour: room.price_per_hour,
       image:
         assets[room.room_type === "lecture_hall" ? `L${room.id}` : `TB${room.id}`] ||
         assets.defaultImage,
@@ -165,6 +166,10 @@ const RoomDetails = () => {
                   <div className="modal-capacity">
                     <span className="modal-label">Capacity</span>
                     <span>{selectedItem.capacity} seats</span>
+                  </div>
+                  <div className="modal-capacity">
+                    <span className="modal-label">Room price per hour</span>
+                    <span>{selectedItem.price_per_hour} Rs</span>
                   </div>
                   <div className="modal-accessories">
                     <h3 className="modal-accessories-title">Accessories</h3>

@@ -1,10 +1,42 @@
 import React, { useState, useEffect } from "react";
-// import './History.css';
-// import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
-// import axios from 'axios';
+import { Check, Clock, X, AlertCircle } from "lucide-react"; // Import icons
+import "./UserHistory.css";
 import api from "../api/api";
-import "./Adminviewbooking.css";
+import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
+import { useNavigate } from "react-router-dom";
+
+// Reusable StatusIcon Component
+const StatusIcon = ({ status }) => {
+  const iconMap = {
+    Approved: <Check className="user-status-icon user-approved" />,
+    pending: <Clock className="user-status-icon user-pending" />,
+    rejected: <X className="user-status-icon user-rejected" />,
+    not_sent: <AlertCircle className="user-status-icon user-not-sent" />,
+  };
+
+  return iconMap[status] || null;
+};
+
+// Helper Functions
+const getStatusColor = (status) => {
+  const colorMap = {
+    Approved: "#28a745", // Green
+    pending: "#ffc107", // Yellow
+    rejected: "#dc3545", // Red
+    not_sent: "#6c757d", // Grey
+  };
+  return colorMap[status] || "#6c757d";
+};
+
+const formatStatusText = (status) => {
+  const statusMap = {
+    approved: "Approved",
+    pending: "Pending",
+    rejected: "Rejected",
+    not_sent: "Not Sent",
+  };
+  return statusMap[status] || status;
+};
 
 const convertTo12HourFormat = (time) => {
   const [hours, minutes] = time.split(":").map(Number);
@@ -222,10 +254,16 @@ function UserHistory() {
   }, [openDropdownId]);
 
   return (
-    <div className="admin-booking-main">
-      <div className="admin-date-range-section">
+    <motion.div
+      className="user-booking-main"
+      initial={{ opacity: 0, y: 20 }} // Page load animation
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="user-date-range-section">
         <div
-          className="admin-date-selector"
+          className="user-date-selector"
           onClick={() => setEditingDate("start")}
         >
           {editingDate === "start" ? (
@@ -239,12 +277,11 @@ function UserHistory() {
           ) : (
             <span>{new Date(dateRange.start).toDateString()}</span>
           )}
-          <span className="admin-dropdown-arrow">▼</span>
+          <span className="user-dropdown-arrow">▼</span>
         </div>
-        <span className="admin-date-separator">–</span>
-
+        <span className="user-date-separator">-</span>
         <div
-          className="admin-date-selector"
+          className="user-date-selector"
           onClick={() => setEditingDate("end")}
         >
           {editingDate === "end" ? (
@@ -258,109 +295,147 @@ function UserHistory() {
           ) : (
             <span>{new Date(dateRange.end).toDateString()}</span>
           )}
-          <span className="admin-dropdown-arrow">▼</span>
+          <span className="user-dropdown-arrow">▼</span>
         </div>
       </div>
-
-      <div className="admin-filter-section">
-        <div className="admin-filter-info"></div>
-        <div className="admin-filter-row">
-          <span className="admin-filter-column">
-            <span className="admin-filter-label">Lecture Hall</span>
+      <div className="user-filter-section">
+        <div className="user-filter-row">
+          <span className="user-filter-column">
+            <span className="user-filter-label">Lecture Hall</span>
             <input
               type="text"
               placeholder="Filter by lecture hall"
-              className="admin-search-input"
+              className="user-search-input"
               value={filterLectureHall}
               onChange={(e) => setFilterLectureHall(e.target.value)}
             />
           </span>
-
-          <span className="admin-filter-column">
-            <span className="admin-filter-label">Search by keyword...</span>
+          <span className="user-filter-column">
+            <span className="user-filter-label">Search by keyword...</span>
             <input
               type="text"
               placeholder="Search..."
-              className="admin-search-input"
+              className="user-search-input"
               value={searchQuery}
               onChange={handleSearch}
             />
           </span>
         </div>
       </div>
-
-      <div className="admin-bookings-list">
-        <h2 className="admin-date-header">
-          {new Date(dateRange.start).toDateString()}
+      <div className="user-bookings-list">
+        <h2 className="user-date-header">
+          Booking History
         </h2>
-        <div className="admin-booking-item highlighted">
-          <div className="admin-time-indicator">
-            {/* <div className="admin-blue-dot"></div> */}
-            <div className="admin-time-text">
-              <span>
-                Time <slot></slot>
-              </span>
-              <span className="admin-duration">duration</span>
+        <div className="user-booking-item highlighted">
+          <div className="user-time-indicator">
+            {/* <div className="user-blue-dot"></div> */}
+            <div className="user-time-text">
+              <span>Time</span>
+              <span className="user-duration">Duration</span>
             </div>
           </div>
-
-          <div className="admin-booking-info">
-            <div className="admin-room-info">BookingDate</div>
-            <div className="admin-room-info">LectureHall</div>
-            <div className="admin-course-info">Purpose</div>
-            <div className="admin-professor-info">status</div>
-            <div className="admin-professor-info">Amount</div>
-            {/* <div className="admin-booking-date">📅 2025-03-28</div> */}
+          <div className="user-booking-info">
+            <div className="user-room-info">Date</div>
+            <div className="user-room-info">Hall</div>
+            <div className="user-course-info">Purpose</div>
+            <div className="user-professor-info">Status</div>
+            <div className="user-professor-info">Amount</div>
           </div>
-
-          <div className="admin-booking-actions">
-            <div className="admin-professor-info">Generate bill </div>
+          <div className="user-booking-actions">
+            <div className="user-professor-info">Actions</div>
           </div>
         </div>
-
-        {filteredBookings.map((booking) => (
-          <div key={booking.id} className={`admin-booking-item `}>
-            <div className="admin-time-indicator">
-              {/* <div className="admin-blue-dot"></div> */}
-              <div className="admin-time-text">
-                <span>{booking.time}</span>
-                <span className="admin-duration">{booking.duration}</span>
-              </div>
-            </div>
-
-            <div className="admin-booking-info">
-              <div className="admin-room-info">{booking.date}</div>
-              <div className="admin-room-info">{booking.room}</div>
-              <div className="admin-course-info">{booking.purpose}</div>
-              <div className="admin-professor-info">{booking.status}</div>
-              <div className="admin-professor-info">{booking.cost}</div>
-            </div>
-
-            <div className="admin-booking-actions">
-              {booking.status === "approved" ? (
-                <button
-                  onClick={() => handleGeneratebill(booking.id)}
-                  className="admin-dropdown-item"
-                >
-                  <span className="admin-icon admin-trash">⬇</span> Download
-                  Bill
-                </button>
-              ) : (
-                <button
-                  className="admin-dropdown-item"
-                  style={{ visibility: "hidden" }}
-                  disabled
-                >
-                  <span className="admin-icon admin-trash">⬇</span> Download
-                  Bill
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+        {loading ? (
+          <motion.div
+            className="user-loading-message"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            Loading...
+          </motion.div>
+        ) : filteredBookings.length === 0 ? (
+          <motion.div
+            className="user-no-data-message"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2>No bookings found</h2>
+            <p>Please try adjusting your filters.</p>
+          </motion.div>
+        ) : (
+          <AnimatePresence>
+            {filteredBookings.map((booking, index) => (
+              <motion.div
+                key={booking.id}
+                className="user-booking-item"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }} // Staggered animation
+              >
+                <div className="user-time-indicator">
+                  <div className="user-blue-dot"></div>
+                  <div className="user-time-text">
+                    <span>{booking.time}</span>
+                    <span className="user-duration">{booking.duration}</span>
+                  </div>
+                </div>
+                <div className="user-booking-info">
+                  <div className="user-room-info">{booking.date}</div>
+                  <div className="user-room-info">{booking.room}</div>
+                  <div className="user-course-info">{booking.purpose}</div>
+                  <div className="user-professor-info">
+                    {/* Status Field with Icon and Color */}
+                    <div className="user-status-field">
+                      <StatusIcon status={booking.status} />
+                      <span
+                        className="user-status-text"
+                        style={{ color: getStatusColor(booking.status) }}
+                      >
+                        {formatStatusText(booking.status)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="user-professor-info">{booking.cost}</div>
+                </div>
+                <div className="user-booking-actions">
+                  <button
+                    onClick={() => handleGeneratebill(booking.id)}
+                    className={`user-dropdown-item ${
+                      booking.status !== "Approved" ? "disabled" : ""
+                    }`}
+                    disabled={booking.status !== "Approved"} // Explicitly disable the button
+                  >
+                    <span className="user-icon user-download">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    </span>
+                    Download Bill
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }
-
 export default UserHistory;
