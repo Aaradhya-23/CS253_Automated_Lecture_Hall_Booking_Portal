@@ -7,7 +7,7 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const navItems = [
-    { name: 'New', path: FRONTEND_ROUTES.requestBooking },
+    { name: 'New Booking', path: FRONTEND_ROUTES.requestBooking },
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
     { name: 'History', path: FRONTEND_ROUTES.history },
     { name: 'Status', path: FRONTEND_ROUTES.status },
