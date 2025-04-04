@@ -1,54 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import api from '../api/api';
-import { ACCESS_TOKEN } from '../api/constants';
-import './Request_Booking.css';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
+import api from "../api/api";
+import { ACCESS_TOKEN } from "../api/constants";
+import "./Request_Booking.css";
 
 const Request_Booking = () => {
-  const role = localStorage.getItem('ROLE');
+  const role = localStorage.getItem("ROLE");
   const token = localStorage.getItem(ACCESS_TOKEN);
-  const loggedInUsername = localStorage.getItem('USERNAME'); // Assuming the username is stored in localStorage
+  const loggedInUsername = localStorage.getItem("USERNAME"); // Assuming the username is stored in localStorage
   console.log(role);
 
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
-  const [purpose, setPurpose] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [startTime, setStartTime] = useState('8:00 AM');
-  const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState('8:30 AM');
-  const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
-  const [selectedHall, setSelectedHall] = useState('');
-  const [capacity, setCapacity] = useState('');
+  const [purpose, setPurpose] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("8:00 AM");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("8:30 AM");
+  const [repeatOption, setRepeatOption] = useState("Does Not Repeat");
+  const [selectedHall, setSelectedHall] = useState("");
+  const [capacity, setCapacity] = useState("");
   const [accessoryOptions, setAccessoryOptions] = useState([]);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
 
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(role === 'admin' ? '' : loggedInUsername); // Default to logged-in user if not admin
-  const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
+  const [selectedUser, setSelectedUser] = useState(
+    role === "admin" ? "" : loggedInUsername
+  ); // Default to logged-in user if not admin
+  const VITE_USER_LIST_CREATE_URL = `${
+    import.meta.env.VITE_API_BASE_URL
+  }accounts/users/`;
 
   useEffect(() => {
-    if (role === 'admin') {
+    if (role === "admin") {
       const fetchUsers = async () => {
         try {
           const response = await api.get(VITE_USER_LIST_CREATE_URL, {
             headers: {
               Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
 
-          console.log('API Response:', response.data); // Debugging step
+          console.log("API Response:", response.data); // Debugging step
 
           // Ensure the API response is an array before setting state
           if (Array.isArray(response.data)) {
             setUsers(response.data);
           } else {
-            console.error('Unexpected API response format:', response.data);
+            console.error("Unexpected API response format:", response.data);
             setUsers([]); // Prevent crash
           }
         } catch (error) {
-          console.error('Error fetching users:', error);
+          console.error("Error fetching users:", error);
           setUsers([]);
         }
       };
@@ -59,42 +64,62 @@ const Request_Booking = () => {
 
   // Time options for dropdowns
   const timeOptions = [
-    '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM',
-    '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM',
-    '5:00 PM', '5:30 PM', '6:00 PM'
+    "8:00 AM",
+    "8:30 AM",
+    "9:00 AM",
+    "9:30 AM",
+    "10:00 AM",
+    "10:30 AM",
+    "11:00 AM",
+    "11:30 AM",
+    "12:00 PM",
+    "12:30 PM",
+    "1:00 PM",
+    "1:30 PM",
+    "2:00 PM",
+    "2:30 PM",
+    "3:00 PM",
+    "3:30 PM",
+    "4:00 PM",
+    "4:30 PM",
+    "5:00 PM",
+    "5:30 PM",
+    "6:00 PM",
   ];
 
   // Repeat options
-  const repeatOptions = [
-    'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
-  ];
+  const repeatOptions = ["Does Not Repeat", "Daily", "Weekly", "Monthly"];
 
-// fetch rooms from the database
-useEffect(() => {
-  const fetchRooms = async () => {
-    console.log("here")
-    if (!token) {
-      console.log("here")
-      console.error("No token found. User is not authenticated.");
-      return;
-    }
-    console.log(token)
-    try {
-      console.log("here")
-      const response = await api.get(import.meta.env.VITE_ROOM_LIST_CREATE_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
+  // fetch rooms from the database
+  useEffect(() => {
+    const fetchRooms = async () => {
       console.log("here");
-      console.log(response.data);
-      const rooms = Array.isArray(response.data) ? response.data : response.data.rooms;
-      setRoomOptions(rooms); 
-      setFilteredRoomOptions(rooms);
-      console.log(rooms)
-      // Continue with the rest of your code
-      // try {
+      if (!token) {
+        console.log("here");
+        console.error("No token found. User is not authenticated.");
+        return;
+      }
+      console.log(token);
+      try {
+        console.log("here");
+        const response = await api.get(
+          import.meta.env.VITE_ROOM_LIST_CREATE_URL,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log("here");
+        console.log(response.data);
+        const rooms = Array.isArray(response.data)
+          ? response.data
+          : response.data.rooms;
+        setRoomOptions(rooms);
+        setFilteredRoomOptions(rooms);
+        console.log(rooms);
+        // Continue with the rest of your code
+        // try {
         // Extract unique capacities
         const uniqueCapacities = [];
         for (let i = 0; i < rooms.length; i++) {
@@ -104,7 +129,7 @@ useEffect(() => {
           }
         }
         setCapacityOptions(uniqueCapacities.sort((a, b) => a - b));
-      
+
         // Extract all accessories
         const allAccessories = [];
         for (let i = 0; i < rooms.length; i++) {
@@ -115,7 +140,7 @@ useEffect(() => {
             }
           }
         }
-      
+
         // Filter unique accessories
         const uniqueAccessories = [];
         for (let i = 0; i < allAccessories.length; i++) {
@@ -124,15 +149,15 @@ useEffect(() => {
             uniqueAccessories.push(accessory);
           }
         }
-      
+
         setAccessoryOptions(uniqueAccessories);
       } catch (error) {
         console.error("Error fetching rooms:", error);
       }
-  };
+    };
 
-  fetchRooms();
-}, []);
+    fetchRooms();
+  }, []);
 
   // Filter room options based on selected capacity and accessories
   useEffect(() => {
@@ -141,7 +166,9 @@ useEffect(() => {
 
       // Filter by capacity
       if (capacity) {
-        filtered = filtered.filter((room) => room.capacity >= parseInt(capacity));
+        filtered = filtered.filter(
+          (room) => room.capacity >= parseInt(capacity)
+        );
       }
 
       // Filter by selected accessories
@@ -159,25 +186,27 @@ useEffect(() => {
 
   // Calculate duration between start and end time
   const calculateDuration = () => {
-    if (!startTime || !endTime) return '';
-  
+    if (!startTime || !endTime) return "";
+
     // Parse the time strings into Date objects
     const parseTime = (time) => {
-      const [hours, minutes, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
-      let totalMinutes = parseInt(hours) % 12 * 60 + parseInt(minutes); // Convert hours and minutes to total minutes
-      if (period === 'PM') totalMinutes += 12 * 60; // Add 12 hours for PM times
+      const [hours, minutes, period] = time
+        .match(/(\d+):(\d+)\s(AM|PM)/)
+        .slice(1);
+      let totalMinutes = (parseInt(hours) % 12) * 60 + parseInt(minutes); // Convert hours and minutes to total minutes
+      if (period === "PM") totalMinutes += 12 * 60; // Add 12 hours for PM times
       return totalMinutes;
     };
-  
+
     const startMinutes = parseTime(startTime);
     const endMinutes = parseTime(endTime);
-  
+
     // Calculate the duration in minutes
     const duration = endMinutes - startMinutes;
-  
+
     // Handle cases where endTime is earlier than startTime (e.g., overnight bookings)
-    if (duration < 0) return 'Invalid time range';
-  
+    if (duration < 0) return "Invalid time range";
+
     return `${duration} minutes`;
   };
 
@@ -186,18 +215,22 @@ useEffect(() => {
     e.preventDefault();
     const formatTime = (time) => {
       // Match time in the format of 'hh:mm AM/PM'
-      const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
+      const [hour, minute, period] = time
+        .match(/(\d+):(\d+)\s(AM|PM)/)
+        .slice(1);
       let hours = parseInt(hour);
       let minutes = parseInt(minute);
-    
+
       // Convert 12-hour format to 24-hour format
-      if (period === 'PM' && hours !== 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-    
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+
       // Return time in 24-hour format with seconds always set to '00'
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:00`;
     };
-  
+
     // Format start and end times
     const formattedStartTime = formatTime(startTime);
     const formattedEndTime = formatTime(endTime);
@@ -209,8 +242,13 @@ useEffect(() => {
       start_time: formattedStartTime,
       end_time: formattedEndTime,
       room: selectedHall,
-      duration: Math.abs(new Date(`${endDate}T${formattedEndTime}`) - new Date(`${startDate}T${formattedStartTime}`)) / (1000 * 60 * 60),
-      Type:'academic',
+      duration:
+        Math.abs(
+          new Date(`${endDate}T${formattedEndTime}`) -
+            new Date(`${startDate}T${formattedStartTime}`)
+        ) /
+        (1000 * 60 * 60),
+      Type: "academic",
       remarks: purpose,
       accessories: selectedAccessories.reduce((acc, accessory) => {
         acc[accessory] = true;
@@ -218,45 +256,49 @@ useEffect(() => {
       }, {}),
     };
     console.log("here");
-  
+
     try {
       // Make a POST request to the backend
       const token = localStorage.getItem(ACCESS_TOKEN);
       if (!token) {
-        console.log("here")
+        console.log("here");
         console.error("No token found. User is not authenticated.");
         return;
       }
-      const response = await api.post(import.meta.env.VITE_REQUEST_BOOKING_URL, bookingData, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Add token in the header
-          'Content-Type': 'application/json', // Ensure the server knows you're sending JSON data
-          'Accept': 'application/json', // Optional: to specify that you expect JSON in response
-        },
-      });
+      const response = await api.post(
+        import.meta.env.VITE_REQUEST_BOOKING_URL,
+        bookingData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token in the header
+            "Content-Type": "application/json", // Ensure the server knows you're sending JSON data
+            Accept: "application/json", // Optional: to specify that you expect JSON in response
+          },
+        }
+      );
 
       if (response.status === 201 || response.status === 200) {
         // Show success notification
-        alert('Booking successful!');
-  
+        alert("Booking successful!");
+
         // Clear the form
-        setPurpose('');
-        setStartDate('');
-        setStartTime('8:00 AM');
-        setEndDate('');
-        setEndTime('8:30 AM');
-        setRepeatOption('Does Not Repeat');
-        setSelectedHall('');
-        setCapacity('');
+        setPurpose("");
+        setStartDate("");
+        setStartTime("8:00 AM");
+        setEndDate("");
+        setEndTime("8:30 AM");
+        setRepeatOption("Does Not Repeat");
+        setSelectedHall("");
+        setCapacity("");
         setSelectedAccessories([]);
       } else {
         // Show error notification
-        alert('Booking unsuccessful. Please try again.');
+        alert("Booking unsuccessful. Please try again.");
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      console.error("Error submitting booking:", error);
       // Show error notification
-      alert('Booking unsuccessful. Please try again.');
+      alert("Booking unsuccessful. Please try again.");
     }
   };
   const handleDateChange = (e) => {
@@ -265,19 +307,30 @@ useEffect(() => {
     setEndDate(value);
   };
   const handleAccessoryChange = (accessory) => {
-    setSelectedAccessories((prev) =>
-      prev.includes(accessory)
-        ? prev.filter((item) => item !== accessory) // Remove if already selected
-        : [...prev, accessory] // Add if not selected
+    setSelectedAccessories(
+      (prev) =>
+        prev.includes(accessory)
+          ? prev.filter((item) => item !== accessory) // Remove if already selected
+          : [...prev, accessory] // Add if not selected
     );
   };
 
   return (
-    <div className="main-content-wrapper">
-      <div className="booking-form-container">
+    <motion.div
+      className="main-content-wrapper"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div
+        className="booking-form-container"
+        // initial={{ opacity: 0, scale: 0.9 }}
+        // animate={{ opacity: 1, scale: 1 }}
+        // transition={{ duration: 0.5 }}
+      >
         <form className="booking-form" onSubmit={handleSubmit}>
           <div className="form-row">
-            {role === 'admin' ? (
+            {role === "admin" ? (
               <div className="form-column">
                 <label htmlFor="user">User</label>
                 <select
@@ -307,7 +360,7 @@ useEffect(() => {
                   value={selectedUser}
                   readOnly
                   className="form-control"
-                  style={{ userSelect: 'none', cursor: 'not-allowed' }} // Prevent text selection and show disabled cursor
+                  style={{ userSelect: "none", cursor: "not-allowed" }} // Prevent text selection and show disabled cursor
                 />
               </div>
             )}
@@ -323,31 +376,40 @@ useEffect(() => {
               />
             </div>
           </div>
-          <div className="form-row">
+
+          <div
+            className="form-row"
+          >
             <div className="form-column">
               <label>Date</label>
               <div className="date-time-controls">
-                <input 
-                  type="date" 
-                  value={startDate} 
-                  onChange={handleDateChange} 
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={handleDateChange}
                   className="date-input"
                   placeholder="dd-mm-yyyy"
-                  min={new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split("T")[0]} // Disable dates up to 2 days ahead
-                  />
+                  min={
+                    new Date(new Date().setDate(new Date().getDate() + 2))
+                      .toISOString()
+                      .split("T")[0]
+                  } // Disable dates up to 2 days ahead
+                />
               </div>
             </div>
             <div className="form-column">
               {/* <label>End</label> */}
               <label>Start</label>
               <div className="date-time-controls">
-                <select 
-                  value={startTime} 
+                <select
+                  value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   className="time-select"
                 >
-                  {timeOptions.map(time => (
-                    <option key={`start-${time}`} value={time}>{time}</option>
+                  {timeOptions.map((time) => (
+                    <option key={`start-${time}`} value={time}>
+                      {time}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -356,108 +418,112 @@ useEffect(() => {
               {/* <label>End</label> */}
               <label>End</label>
               <div className="date-time-controls">
-              <select 
-                  value={endTime} 
+                <select
+                  value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   className="time-select"
                 >
-                  {timeOptions.map(time => (
-                    <option key={`end-${time}`} value={time}>{time}</option>
+                  {timeOptions.map((time) => (
+                    <option key={`end-${time}`} value={time}>
+                      {time}
+                    </option>
                   ))}
-              </select>
+                </select>
               </div>
             </div>
-            
           </div>
-
-          {/* <div className="form-group">
-            <label>Repeat</label>
-            <select 
-              value={repeatOption} 
-              onChange={(e) => setRepeatOption(e.target.value)}
-              className="form-control"
-            >
-              {repeatOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div> */}
-
-        <div className="form-row">
-          <div className="form-column">
-            <label>Capacity</label>
-            <select 
-              value={capacity} 
-              onChange={(e) => setCapacity(e.target.value)}
-              className="form-control"
-            >
-              <option value="">Select capacity</option>
-              {capacityOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-column">
-            <label>Accessories</label>
-            <div className="accessories-grid">
-              {accessoryOptions.map((accessory) => (
-                <button
-                  key={accessory}
-                  type="button"
-                  className={`accessory-btn ${selectedAccessories.includes(accessory) ? 'selected' : ''}`}
-                  onClick={() => handleAccessoryChange(accessory)}
-                >
-                  {accessory}
-                </button>
-              ))}
+          <div className="form-row">
+            <div className="form-column">
+              <label>Capacity</label>
+              <select
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                className="form-control"
+              >
+                <option value="">Select capacity</option>
+                {capacityOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
+          <div className="form-row">
+            <div className="form-column">
+              <label>Accessories</label>
+              <div className="accessories-grid">
+                {accessoryOptions.map((accessory) => (
+                  <motion.button
+                    key={accessory}
+                    type="button"
+                    className={`accessory-btn ${
+                      selectedAccessories.includes(accessory) ? "selected" : ""
+                    }`}
+                    onClick={() => handleAccessoryChange(accessory)}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {accessory}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {capacity && (
-          <div className="form-group">
-            <div className="section-header">
-              <label>Lecture Hall</label>
-            </div>
-            {filteredRoomOptions.length > 0 ? (
-           <div className="halls-grid">
-            {filteredRoomOptions.map(hall => (
-              <div 
-                key={hall.id} 
-                className={`hall-card ${selectedHall === hall.id ? 'selected' : ''}`}
-                onClick={() => setSelectedHall(hall.id)}
-              >
-                <div className="hall-header">{hall.id}</div>
-                <div className="hall-details">
-                  <p>Capacity: {hall.capacity}</p>
-                  <p>Accessories: {Object.keys(hall.accessories).join(', ')}</p>
-                  <p className="hall-description">{hall.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-            ) : (
-              <div className="no-halls-available">
-                No lecture halls available matching your criteria.
-              </div>
-            )}
-          </div>
+            <motion.div
+              className="halls-grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <AnimatePresence>
+                {filteredRoomOptions.map((hall) => (
+                  <motion.div
+                    key={hall.id}
+                    className={`hall-card ${
+                      selectedHall === hall.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedHall(hall.id)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.9 }} // Initial state when added
+                    animate={{ opacity: 1, scale: 1 }} // Animate to this state
+                    exit={{ opacity: 0, scale: 0.9 }} // Animate out when removed
+                    transition={{ duration: 0.3 }} // Smooth transition
+                  >
+                    <div className="hall-header">{hall.id}</div>
+                    <div className="hall-details">
+                      <p>Capacity: {hall.capacity}</p>
+                      <p>
+                        Accessories: {Object.keys(hall.accessories).join(", ")}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
 
-          <div className="form-actions">
-            <button 
-              type="submit" 
+          <motion.div
+            className="form-actions"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <button
+              type="submit"
               className="submit-btn"
               disabled={!selectedHall}
             >
               SUBMIT
             </button>
-          </div>
+          </motion.div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
