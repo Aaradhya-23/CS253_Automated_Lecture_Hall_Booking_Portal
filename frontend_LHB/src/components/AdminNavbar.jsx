@@ -8,7 +8,7 @@ const AdminNavbar = ({ onNavigate, currentPath }) => {
   const [isVisible, setIsVisible] = useState(true);
   // Map of navigation items to their respective routes
   const navItems = [
-    { name: 'New', path: FRONTEND_ROUTES.requestBooking },
+    { name: 'New Booking', path: FRONTEND_ROUTES.requestBooking },
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
     { name: 'History', path: FRONTEND_ROUTES.adminViewBooking }, // Assuming Home page has history
     { name: 'View Pending', path: FRONTEND_ROUTES.viewPending }, // You'll need to add this route
