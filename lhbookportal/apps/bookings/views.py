@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, mixins, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
+from django.shortcuts import render
 import json
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
@@ -75,7 +76,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
 
         # Validate input
         if not booking_date or not start_time or not end_time:
-            return Response(
+            return JsonResponse(
                 {"error": "booking_date, start_time, and end_time are required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -86,27 +87,23 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
             start_time = datetime.strptime(start_time, "%H:%M:%S").time()
             end_time = datetime.strptime(end_time, "%H:%M:%S").time()
         except ValueError:
-            return Response(
+            return JsonResponse(
                 {"error": "Invalid date/time format."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if start_time >= end_time:
-            return Response(
+            return JsonResponse(
                 {"error": "end_time must be later than start_time."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         # Ensure booking is not on a holiday (every Sunday)
         if booking_date.weekday() == 6 or Holiday.objects.filter(date=booking_date).exists():
-            return Response(
+            return JsonResponse(
                 {"error": "Bookings cannot be made on Holidays"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # Convert times to datetime for correct calculations
-        # start_datetime = datetime.combine(booking_date, start_time)
-        # end_datetime = start_datetime + timedelta(hours=duration)
 
         # Find booked room IDs that overlap with the requested slot
         booked_room_ids = Booking.objects.filter(
@@ -119,7 +116,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
         available_rooms = Room.objects.exclude(id__in=booked_room_ids)
 
         if not available_rooms.exists():
-            return Response(
+            return JsonResponse(
                 {"error": "No available rooms for this slot found."},
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -127,6 +124,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
         # Serialize and return response
         serializer = RoomSerializer(available_rooms, many=True)
         return Response({"rooms": serializer.data}, status=status.HTTP_200_OK)
+    
 def send_approval_email(authority_email, booking):
     # Get specific authority token for the booking
     print(booking.authority_tokens)
@@ -179,6 +177,7 @@ class BookingCRUDView(
     generics.GenericAPIView, 
     mixins.ListModelMixin, 
     mixins.CreateModelMixin, 
+
     mixins.RetrieveModelMixin, 
     mixins.UpdateModelMixin, 
     mixins.DestroyModelMixin
@@ -323,40 +322,7 @@ class BookingCRUDView(
             print("----------------------------------------------------------------------------------------------------------------------------")
             send_approval_email(first_authority_email, booking)
 
-        return HttpResponse("Booking approved successfully!, You many close this page now")
-        # Prepare accessory details for email
-        # accessories_list = [name.replace('_', ' ').title() for name, selected in accessories.items() if selected]
-        # accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
-
-        # Generate approval and rejection URLs
-    #     approve_url = self.request.build_absolute_uri(reverse('approve-booking', args=[booking.approval_token]))
-    #     reject_url = self.request.build_absolute_uri(reverse('reject-booking', args=[booking.approval_token]))
-
-    #     # Send email to the authority
-    #     subject = "[LHC OFFICE] Booking Request Approval Needed"
-    #     message = f"""
-    #     A new booking request has been submitted by {user.username}.
-
-    #     Purpose :     {booking.title}
-    #     Remarks :     {booking.remarks}
-    #     Room:         {room.name}
-    #     Date:         {booking_date}
-    #     Time:         {start_time} - {end_time}
-    #     Requested On: {requested_on}
-    #     Accessories:  {accessories_str}
-    #     Total Cost:   ₹{total_cost}
-
-    #     Approve: {approve_url}
-    #     Reject: {reject_url}
-
-    #     Note: Unapproved bookings will be auto-rejected in 2 days or less.
-    #     """
-
-    #     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ['chaudharidivyesh7384@gmail.com'])
-    # #add more mails in the list if needed
-    #             #right now only one is supported 
-    #             # Save the booking
-    #         # GET: List all bookings or retrieve a specific booking
+            return render(request, "bookings/Confirmed.html", status=200)
 
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:
@@ -507,70 +473,7 @@ class RoomSearchView(generics.ListAPIView):
                 pass  # Ignore invalid capacity values
         return queryset
     
-# def approve_booking(request, token):
-#     booking = get_object_or_404(Booking, approval_token=token)
-#     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
-#     if booking.status != 'pending': return JsonResponse({"error": "This booking is not available for approval"}, status=400)
-#     booking.status = 'approved'
-#     booking.save()
-    
-#     #if a pending requets is there for the same slot rooom. reject that booking
-#     pending_bookings_same_slot = Booking.objects.filter(
-#             Q(room=booking.room.id)&
-#             Q(booking_date=booking.booking_date)&
-#             Q(start_time__lt=booking.end_time, end_time__gt=booking.start_time) 
-#     )  # Exclude cancelled bookings
 
-#     if(pending_bookings_same_slot.exists()):
-#         for pending in pending_bookings_same_slot:
-#             if pending.status == 'pending':
-#                 pending.status = 'rejected'
-#                 send_mail(
-#                 'Booking Rejected',
-#                 f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
-#                 settings.DEFAULT_FROM_EMAIL,
-#                 [ pending.creator.email ],
-#             )  
-#                 pending.delete()
-        
-    
-#     # if booking.creator.role == 'student':
-#     x = f'Your bill amount is : {booking.cost}'
-#     # print(type([booking.creator.email]))
-#     # Send email to user
-#     send_mail(
-#         'Booking Approved',
-#         f"""
-#         Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
-#         {x}
-#         """
-#         ,
-#         settings.DEFAULT_FROM_EMAIL,
-#         [booking.creator.email]
-#     )
-
-#     return HttpResponse("Booking approved successfully!, You many close this page now")
-
-# def reject_booking(request, token):
-#     booking = get_object_or_404(Booking, approval_token = token)
-#     if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
-
-#     if not booking or booking.token_expiry < timezone.now():return JsonResponse({"error": "Token expired or invalid"}, status=400)
-
-#     booking.status = 'rejected'
-
-#     # if not booking.is_token_valid() or booking.token_expiry < timezone.now():
-#     #     return JsonResponse({"error": "Token expired or invalid"}, status=400)
-#     # Send email to user
-#     send_mail(
-#         'Booking Rejected',
-#         f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
-#         settings.DEFAULT_FROM_EMAIL,
-#         [ booking.creator.email ],
-#     )
-
-#     booking.delete()
-#     return HttpResponse("Booking rejected successfully!, You may close this page now")
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 @api_view(['GET'])
@@ -581,7 +484,7 @@ def approve_booking(request):
     authority_token = request.GET.get("authority_token")
 
     if not booking_token or not authority_token:
-        return HttpResponse("❌ Invalid or missing approval token.", status=400)
+        return JsonResponse({"error": "Invalid or missing approval token."}, status=400)
 
     booking = get_object_or_404(Booking, booking_token=booking_token)
     #added 
@@ -614,10 +517,10 @@ def approve_booking(request):
     )
 
     if not authority_email or booking.status in ["Approved", "Rejected"]:
-        return HttpResponse(f"⚠ Booking is already {booking.status}. No further action needed.", status=400)
+        return render(request, "bookings/Booking Processed.html", context={"status" : booking.status}, status=200)
 
     if booking.approvals_pending.get(authority_email, False):
-        return HttpResponse("✅ You have already approved this booking.", status=400)
+        return render(request, "bookings/AlreadyApproved.html", context={}, status=200)
 
     # Mark the approval
     booking.approvals_pending[authority_email] = True
@@ -641,14 +544,32 @@ def approve_booking(request):
             settings.DEFAULT_FROM_EMAIL,
             [booking.creator.email]
         )
+        send_mail(
+        subject="[LHC OFFICE] Booking Details",
+        message=f"""
 
-        return HttpResponse("✅ Booking approved successfully!, You many close this page now")
+User       : {booking.creator.username}
+Purpose    : {booking.title}
+Remarks    : {booking.remarks}
+Room       : {booking.room.name}
+Date       : {booking.booking_date}
+Time       : {booking.start_time} - {booking.end_time}
+Requested On: {booking.requested_on}
+Total Cost : ₹{booking.cost}
+
+""",
+        from_email="no-reply@yourdomain.com",
+        recipient_list=["bhavya0525@gmail.com"],
+    )
+
+
+        return render(request, "bookings/Confirmed.html", context={}, status=200)
 
     next_approver_email = next((email for email, approved in booking.approvals_pending.items() if not approved), None)
     if next_approver_email:
         send_approval_email(next_approver_email, booking)
 
-    return HttpResponse("✅ Approval recorded. Waiting for next authority.", status=200)
+    return render(request, "bookings/Approved.html", context={}, status=200)
 
 
 def reject_booking(request):
@@ -656,7 +577,7 @@ def reject_booking(request):
     authority_token = request.GET.get("authority_token")
 
     if not booking_token or not authority_token:
-        return HttpResponse("❌ Invalid or missing rejection token.", status=400)
+        return JsonResponse({"error" : "Invalid or missing rejection token."}, status=400)
 
     booking = get_object_or_404(Booking, booking_token=booking_token)
     if booking.status != 'pending': return JsonResponse({"error": "Token expired or invalid"}, status=400)
@@ -668,7 +589,7 @@ def reject_booking(request):
     )
 
     if booking.status in ["Approved", "Rejected"]:
-        return HttpResponse(f"⚠ Booking is already {booking.status}. No further action needed.", status=400)
+        return render(request, "bookings/Booking Processed.html", context={"status":booking.status}, status=200)
 
     booking.status = "Rejected"
     booking.approvals_pending = {}
@@ -682,142 +603,5 @@ def reject_booking(request):
     )
 
     booking.delete()
-    return HttpResponse("Booking rejected successfully!, You may close this page now")
+    return render(request, "bookings/Rejected.html", context={}, status=200);
 
-
-# def generate_bill(data):
-#     buffer = BytesIO()
-#     c = canvas.Canvas(buffer, pagesize=letter)
-#     width, height = letter
-    
-#     # --- HEADER WITH LOGO ---
-#     logo_path = ".resources/images.png"  # Replace with actual path
-#     if os.path.exists(logo_path):
-#         c.drawImage(logo_path, 265, height - 90, width=1.1*inch, height=1.1*inch, preserveAspectRatio=True)
-    
-#     # Add "Lecture Hall Office" text
-#     c.setFont("Helvetica-Bold", 14)
-#     c.drawCentredString(width / 2, height - 110, "Lecture Hall Office")
-    
-#     # Centered main heading
-#     c.setFont("Helvetica-Bold", 16)
-#     c.drawCentredString(width / 2, height - 130, "BOOKING DETAILS")
-    
-#     # Horizontal line
-#     c.setStrokeColor(colors.black)
-#     c.line(100, height - 140, width - 100, height - 140)
-    
-#     # --- BODY CONTENT ---
-#     y_position = height - 170
-    
-#     def draw_row(label, value):
-#         nonlocal y_position
-#         c.setFont("Helvetica-Bold", 12)
-#         c.drawString(100, y_position, label)
-#         c.setFont("Helvetica", 12)
-#         c.drawString(220, y_position, value)
-#         y_position -= 25
-    
-#     # Booking Details
-#     draw_row("Booking Reference:", data['booking_ref'])
-#     draw_row("Event Name:", data['event_name'])
-#     draw_row("Date:", data['date'])
-#     draw_row("Time:", data['time'])
-#     draw_row("Hall:", data['hall_name'])
-#     draw_row("Booked By:", data['booked_by'])
-#     draw_row("Charges:", data['charges'])
-    
-#     # Accessories Section
-#     accessories_str = data.get('accessories', 'None')
-#     if accessories_str == 'None':
-#         accessories_display = "No Accessories"
-#     else:
-#         accessories_display = f"Accessories: {accessories_str}"
-    
-#     c.setFont("Helvetica-Bold", 12)
-#     c.drawString(100, y_position, "Accessories:")
-#     c.setFont("Helvetica", 12)
-#     c.drawString(220, y_position, accessories_display)
-#     y_position -= 40
-    
-#     # --- FOOTER ---
-#     footer_y = 50
-#     c.setStrokeColor(colors.black)
-#     c.line(100, footer_y + 20, width - 100, footer_y + 20)
-    
-#     c.setFont("Helvetica", 10)
-#     c.drawCentredString(width / 2, footer_y, "Lecture Hall Office, IIT Kanpur - Tel: 0512-259XXXX")
-    
-#     c.save()
-#     buffer.seek(0)
-#     return buffer
-
-
-
-
-# def download_daily_schedule_csv(request, date):
-#     # Get date from query parameters (default to today)
-#     date_str = date
-#     try:
-#         if date_str:
-#             schedule_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-#         else:
-#             schedule_date = datetime.now().date()
-#     except ValueError:
-#         return HttpResponse("Invalid date format. Use YYYY-MM-DD", status=400)
-
-#     # Create the HTTP response with CSV header
-#     response = HttpResponse(content_type='text/csv')
-#     response['Content-Disposition'] = f'attachment; filename="room_schedule_{schedule_date}.csv"'
-
-#     writer = csv.writer(response)
-    
-#     # Generate time slots from 8:00 AM to 8:00 PM in 30-minute intervals
-#     start_time = time(8, 0)
-#     end_time = time(20, 0)
-#     time_slots = []
-#     current_time = datetime.combine(schedule_date, start_time)
-#     end_datetime = datetime.combine(schedule_date, end_time)
-    
-#     while current_time <= end_datetime:
-#         time_slots.append(current_time.time())
-#         current_time += timedelta(minutes=30)
-
-#     # Get all rooms and active bookings for the day
-#     rooms = Room.objects.all().order_by('name')
-#     bookings = Booking.objects.filter(
-#         booking_date=schedule_date,
-#         status__in=['approved', 'completed']
-#     )
-
-#     # Write header row with accessories information
-#     accessory_headers = [f"{room.name} (Accessories)" for room in rooms]
-#     header = ['Time Slot'] + [room.name for room in rooms] + accessory_headers
-#     writer.writerow(header)
-
-#     # For each time slot, check room availability
-#     for slot_start in time_slots:
-#         slot_end = (datetime.combine(schedule_date, slot_start) + timedelta(minutes=30)).time()
-#         row = [f"{slot_start.strftime('%H:%M')}-{slot_end.strftime('%H:%M')}"]
-        
-#         for room in rooms:
-#             # Check if room is booked during this time slot
-#             booking = bookings.filter(
-#                 room=room,
-#                 start_time__lt=slot_end,
-#                 end_time__gt=slot_start
-#             ).first()
-            
-#             if booking:
-#                 row.append(f"{booking.title}")
-#             else:
-#                 row.append("")
-        
-#         # Append accessories information
-#         for room in rooms:
-#             accessories_list = [name.replace('_', ' ').title() for name, available in room.accessories.items() if available]
-#             row.append(", ".join(accessories_list) if accessories_list else "None")
-        
-#         writer.writerow(row)
-
-#     return response
