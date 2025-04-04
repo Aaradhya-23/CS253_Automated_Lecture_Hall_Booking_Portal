@@ -322,7 +322,7 @@ class BookingCRUDView(
             print("----------------------------------------------------------------------------------------------------------------------------")
             send_approval_email(first_authority_email, booking)
 
-            return render(request, "bookings/Confirmed.html", status=200)
+            # return render(request, "bookings/Confirmed.html", status=200)
 
     def get(self, request, *args, **kwargs):
         if "pk" in kwargs:

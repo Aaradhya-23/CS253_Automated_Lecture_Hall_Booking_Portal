@@ -21,7 +21,7 @@ import Adminviewbooking from "./pages/Adminviewbooking";
 import Viewpending from "./pages/Viewpending";
 import RoomDetails from "./pages/RoomDetails";
 import Bookingdetails from "./pages/Bookingdetails";
-
+import OTPRequest from "./pages/RequestOTP";
 // Import navbar components
 import UserNavbar from "./components/UserNavbar";
 import AdminNavbar from "./components/AdminNavbar";
@@ -154,7 +154,7 @@ const App = () => {
               }
             />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            
+            <Route path="/request-otp" element={<OTPRequest />} />
             {/* Protected route for registration (admin only) */}
             <Route
               path={FRONTEND_ROUTES.register}

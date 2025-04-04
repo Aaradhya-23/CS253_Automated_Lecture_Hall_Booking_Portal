@@ -168,7 +168,7 @@ const Login = ({ onLogin }) => {
   };
 
   const handleForgotPassword = () => {
-    navigate(FRONTEND_ROUTES.ForgotPassword); // Navigate to the Forgot Password page
+    navigate(FRONTEND_ROUTES.requestOTP); // Navigate to the Forgot Password page
   };
 
   return (
