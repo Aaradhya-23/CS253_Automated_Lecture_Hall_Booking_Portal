@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
 import './Request_Booking.css';
-
+import { motion, AnimatePresence } from 'framer-motion';
 const Request_Booking = () => {
   const role = localStorage.getItem('ROLE');
   const token = localStorage.getItem(ACCESS_TOKEN);
   const loggedInUsername = localStorage.getItem('USERNAME'); // Assuming the username is stored in localStorage
   console.log(role);
-
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
@@ -28,6 +29,8 @@ const Request_Booking = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(role === 'admin' ? '' : loggedInUsername); // Default to logged-in user if not admin
   const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
+
+
 
   function convertTo24HourFormat(time12h) {
     const [time, modifier] = time12h.split(' '); // ["8:30", "AM"]
@@ -93,7 +96,7 @@ const Request_Booking = () => {
 // fetch rooms from the database
 useEffect(() => {
   console.log("here")
-  if (!startDate || !startTime || !endTime) return;
+  if (startDate == "" || startTime == "" || endTime == "") return;
   
   // console.log(startTime)
 
@@ -215,6 +218,7 @@ useEffect(() => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
     const formatTime = (time) => {
       // Match time in the format of 'hh:mm AM/PM'
@@ -266,30 +270,47 @@ useEffect(() => {
           'Accept': 'application/json', // Optional: to specify that you expect JSON in response
         },
       });
-
+     
+      console.log(response.status)
       if (response.status === 201 || response.status === 200) {
-        // Show success notification
-        alert('Booking successful!');
-  
+          // Show success notification
+        // alert('Booking successful!');
+        setShowError(false);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 6000); // Hide after 4s (optional)
         // Clear the form
         setPurpose('');
         setRemark('');
         setStartDate('');
-        setStartTime('8:00 AM');
+        setStartTime('');
         setEndDate('');
-        setEndTime('8:30 AM');
-        setRepeatOption('Does Not Repeat');
+        setEndTime('');
         setSelectedHall('');
         setCapacity('');
-        setSelectedAccessories([]);
+        setAccessoryOptions([])
+        // rooms = []
+  // const [selectedAccessories
+        // setRepeatOption('Does Not Repeat');
+        // setSelectedHall('');
+        // setCapacity('');
+        // setSelectedAccessories([]);
+        
       } else {
+        setShowError(true);
+        setShowSuccess(false); // Hide success if previously shown
+
+        setTimeout(() => setShowError(false), 5000);
         // Show error notification
-        alert('Booking unsuccessful. Please try again.');
+        // alert('Booking unsuccessful. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting booking:', error);
       // Show error notification
-      alert('Booking unsuccessful. Please try again.');
+        setShowError(true);
+        setShowSuccess(false); // Hide success if previously shown
+
+        setTimeout(() => setShowError(false), 5000);
+      // alert('Booking unsuccessful. Please try again.');
     } finally {
       setIsSubmitting(false); // Reset submitting state
     }
@@ -306,9 +327,41 @@ useEffect(() => {
         : [...prev, accessory] // Add if not selected
     );
   };
-
+  // return 
   return (
+    // <div className="request-booking-container">
+   
+    
+    
     <div className="main-content-wrapper">
+      <AnimatePresence>
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4 }}
+          className="success-message"
+        >
+          ✅ Booking successful! You will receive a confirmation mail shortly
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+  {showError && (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.4 }}
+      className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md my-2"
+    >
+      ❌ Booking failed. Please try again.
+    </motion.div>
+  )}
+</AnimatePresence>
+
       <div className="booking-form-container">
         <form className="booking-form" onSubmit={handleSubmit}>
           <div className="form-row">
