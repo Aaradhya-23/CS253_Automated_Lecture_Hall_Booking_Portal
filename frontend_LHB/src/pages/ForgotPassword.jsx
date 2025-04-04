@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ForgotPassword.css';
 import * as assets from '../assets/assets';
+import api from '../api/api';
 
 const ForgotPassword = () => {
   const [username, setUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleResetPassword = async (e) => {
@@ -22,21 +24,24 @@ const ForgotPassword = () => {
       return;
     }
 
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      setMessage('User ID not found. Please restart the process.');
+      return;
+    }
+
     setLoading(true);
-
     try {
-      // TODO: Replace with actual API call
-      const response = await api.auth.resetPassword(username, newPassword);
-
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await api.post(`${import.meta.env.VITE_API_BASE_URL}accounts/verify_reset/`, {
+        user_id: userId,
+        otp,
+        new_password: newPassword,
+      });
 
       setIsSuccess(true);
-      setMessage('Your password has been reset successfully.');
-    } catch (error) {
-      setIsSuccess(false);
-      const errorMsg = error?.response?.data?.detail || error.message || 'Unable to reset password. Please try again later.';
-      setMessage(errorMsg);
+      setMessage('Password reset successful!');
+    } catch (err) {
+      setMessage(err.response?.data?.error || 'Error resetting password');
     } finally {
       setLoading(false);
     }
@@ -49,7 +54,6 @@ const ForgotPassword = () => {
   return (
     <div className="fp-page">
       <div className="fp-container">
-        {/* Background Image Container */}
         <div
           className="fp-image-container"
           style={{
@@ -59,7 +63,6 @@ const ForgotPassword = () => {
           }}
         ></div>
 
-        {/* Form Container */}
         <div className="fp-form-container">
           <div className="fp-header">
             <div className="fp-logo-container">
@@ -84,7 +87,6 @@ const ForgotPassword = () => {
                 <p className="fp-description">Enter your username and new password to reset your account.</p>
 
                 <form onSubmit={handleResetPassword} className="fp-form">
-                  {/* Username Field */}
                   <div className="fp-form-group">
                     <label htmlFor="username">Username</label>
                     <div className="fp-input-container">
@@ -100,7 +102,6 @@ const ForgotPassword = () => {
                     </div>
                   </div>
 
-                  {/* New Password Field */}
                   <div className="fp-form-group">
                     <label htmlFor="newPassword">New Password</label>
                     <div className="fp-input-container">
@@ -122,7 +123,6 @@ const ForgotPassword = () => {
                     </div>
                   </div>
 
-                  {/* Confirm Password Field */}
                   <div className="fp-form-group">
                     <label htmlFor="confirmPassword">Confirm Password</label>
                     <div className="fp-input-container">
@@ -144,15 +144,27 @@ const ForgotPassword = () => {
                     </div>
                   </div>
 
-                  {/* Error Message */}
+                  <div className="fp-form-group">
+                    <label htmlFor="otp">OTP</label>
+                    <div className="fp-input-container">
+                      <input
+                        type="text"
+                        id="otp"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Enter OTP"
+                        required
+                      />
+                      <span className="fp-input-icon">🔑</span>
+                    </div>
+                  </div>
+
                   {message && <p className="fp-error-message">{message}</p>}
 
-                  {/* Reset Password Button */}
                   <button type="submit" className="fp-reset-button" disabled={loading}>
                     {loading ? 'Resetting...' : 'Reset Password'}
                   </button>
 
-                  {/* Back to Login Button */}
                   <button type="button" className="fp-back-button" onClick={handleBackToLogin}>
                     Back to Login
                   </button>
