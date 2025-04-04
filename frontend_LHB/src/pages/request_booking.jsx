@@ -12,6 +12,7 @@ const Request_Booking = () => {
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [purpose, setPurpose] = useState('');
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('8:00 AM');
@@ -183,7 +184,7 @@ useEffect(() => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    setIsSubmitting(true);
     const formatTime = (time) => {
       // Match time in the format of 'hh:mm AM/PM'
       const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
@@ -257,6 +258,8 @@ useEffect(() => {
       console.error('Error submitting booking:', error);
       // Show error notification
       alert('Booking unsuccessful. Please try again.');
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
   };
   const handleDateChange = (e) => {
@@ -447,13 +450,13 @@ useEffect(() => {
           )}
 
           <div className="form-actions">
-            <button 
-              type="submit" 
-              className="submit-btn"
-              disabled={!selectedHall}
-            >
-              SUBMIT
-            </button>
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={!selectedHall || isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "SUBMIT"}
+          </button>
           </div>
         </form>
       </div>
