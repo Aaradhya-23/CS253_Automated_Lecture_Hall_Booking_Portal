@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
 import './Request_Booking.css';
-
+import { motion, AnimatePresence } from 'framer-motion';
 const Request_Booking = () => {
   const role = localStorage.getItem('ROLE');
   const token = localStorage.getItem(ACCESS_TOKEN);
   const loggedInUsername = localStorage.getItem('USERNAME'); // Assuming the username is stored in localStorage
   console.log(role);
-
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
   const [capacityOptions, setCapacityOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [purpose, setPurpose] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+  const [remark, setRemark] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
   const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState(null);
+  const [endTime, setEndTime] = useState("");
   const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
   const [selectedHall, setSelectedHall] = useState('');
   const [capacity, setCapacity] = useState('');
@@ -27,6 +29,8 @@ const Request_Booking = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(role === 'admin' ? '' : loggedInUsername); // Default to logged-in user if not admin
   const VITE_USER_LIST_CREATE_URL = `${import.meta.env.VITE_API_BASE_URL}accounts/users/`;
+
+
 
   function convertTo24HourFormat(time12h) {
     const [time, modifier] = time12h.split(' '); // ["8:30", "AM"]
@@ -85,19 +89,19 @@ const Request_Booking = () => {
   ];
 
   // Repeat options
-  const repeatOptions = [
-    'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
-  ];
+  // const repeatOptions = [
+  //   'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
+  // ];
 
 // fetch rooms from the database
 useEffect(() => {
   console.log("here")
-  if (!startDate || !startTime || !endTime) return;
+  if (startDate == "" || startTime == "" || endTime == "") return;
   
   // console.log(startTime)
 
   const fetchRooms = async () => {
-    console.log("here")
+    console.log("100")
     if (!token) {
       console.log("here")
       console.error("No token found. User is not authenticated.");
@@ -214,6 +218,7 @@ useEffect(() => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
     const formatTime = (time) => {
       // Match time in the format of 'hh:mm AM/PM'
@@ -242,7 +247,7 @@ useEffect(() => {
       room: selectedHall,
       duration: Math.abs(new Date(`${endDate}T${formattedEndTime}`) - new Date(`${startDate}T${formattedStartTime}`)) / (1000 * 60 * 60),
       Type:'academic',
-      remarks: purpose,
+      remarks: remark,
       accessories: selectedAccessories.reduce((acc, accessory) => {
         acc[accessory] = true;
         return acc;
@@ -265,29 +270,47 @@ useEffect(() => {
           'Accept': 'application/json', // Optional: to specify that you expect JSON in response
         },
       });
-
+     
+      console.log(response.status)
       if (response.status === 201 || response.status === 200) {
-        // Show success notification
-        alert('Booking successful!');
-  
+          // Show success notification
+        // alert('Booking successful!');
+        setShowError(false);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 6000); // Hide after 4s (optional)
         // Clear the form
         setPurpose('');
+        setRemark('');
         setStartDate('');
-        setStartTime('8:00 AM');
+        setStartTime('');
         setEndDate('');
-        setEndTime('8:30 AM');
-        setRepeatOption('Does Not Repeat');
+        setEndTime('');
         setSelectedHall('');
         setCapacity('');
-        setSelectedAccessories([]);
+        setAccessoryOptions([])
+        // rooms = []
+  // const [selectedAccessories
+        // setRepeatOption('Does Not Repeat');
+        // setSelectedHall('');
+        // setCapacity('');
+        // setSelectedAccessories([]);
+        
       } else {
+        setShowError(true);
+        setShowSuccess(false); // Hide success if previously shown
+
+        setTimeout(() => setShowError(false), 5000);
         // Show error notification
-        alert('Booking unsuccessful. Please try again.');
+        // alert('Booking unsuccessful. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting booking:', error);
       // Show error notification
-      alert('Booking unsuccessful. Please try again.');
+        setShowError(true);
+        setShowSuccess(false); // Hide success if previously shown
+
+        setTimeout(() => setShowError(false), 5000);
+      // alert('Booking unsuccessful. Please try again.');
     } finally {
       setIsSubmitting(false); // Reset submitting state
     }
@@ -304,9 +327,41 @@ useEffect(() => {
         : [...prev, accessory] // Add if not selected
     );
   };
-
+  // return 
   return (
+    // <div className="request-booking-container">
+   
+    
+    
     <div className="main-content-wrapper">
+      <AnimatePresence>
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4 }}
+          className="success-message"
+        >
+          ✅ Booking successful! You will receive a confirmation mail shortly
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+  {showError && (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.4 }}
+      className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md my-2"
+    >
+      ❌ Booking failed. Please try again.
+    </motion.div>
+  )}
+</AnimatePresence>
+
       <div className="booking-form-container">
         <form className="booking-form" onSubmit={handleSubmit}>
           <div className="form-row">
@@ -354,6 +409,7 @@ useEffect(() => {
                 placeholder="Linux Session Y-24"
                 className="form-control"
               />
+             
             </div>
           </div>
           <div className="form-row">
@@ -462,7 +518,7 @@ useEffect(() => {
                 className={`hall-card ${selectedHall === hall.id ? 'selected' : ''}`}
                 onClick={() => setSelectedHall(hall.id)}
               >
-                <div className="hall-header">{hall.id}</div>
+                <div className="hall-header">{hall.name}</div>
                 <div className="hall-details">
                   <p>Capacity: {hall.capacity}</p>
                   <p>Accessories: {Object.keys(hall.accessories).join(', ')}</p>
@@ -478,6 +534,22 @@ useEffect(() => {
             )}
           </div>
           )}
+
+          {/* REMARK FIELD START */}
+<div className="form-row">
+  <div className="form-column">
+    <label htmlFor="remark">Remark</label>
+    <textarea
+      id="remark"
+      value={remark}
+      onChange={(e) => setRemark(e.target.value)}
+      className="form-control"
+      placeholder="Any additional comments or remarks..."
+      rows={3}
+    />
+  </div>
+</div>
+{/* REMARK FIELD END */}
 
           <div className="form-actions">
           <button 
