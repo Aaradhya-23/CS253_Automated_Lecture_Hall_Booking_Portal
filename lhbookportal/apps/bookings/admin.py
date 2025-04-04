@@ -3,9 +3,9 @@ from .models import *
 
 
 
+admin.site.register(Holiday)
 admin.site.register(Booking)
 admin.site.register(Room)
-admin.site.register(Holiday)
 
 
 # Register your models here.
