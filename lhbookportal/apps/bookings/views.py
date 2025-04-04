@@ -71,7 +71,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
         booking_date = request.data.get("booking_date")  # YYYY-MM-DD
         start_time = request.data.get("start_time")  # HH:MM:SS
         end_time = request.data.get("end_time")  # HH:MM:SS
-        duration = int(request.data.get("duration", 1))  # Default: 1 hour
+        # duration = int(request.data.get("duration", 1))  # Default: 1 hour
 
         # Validate input
         if not booking_date or not start_time or not end_time:
