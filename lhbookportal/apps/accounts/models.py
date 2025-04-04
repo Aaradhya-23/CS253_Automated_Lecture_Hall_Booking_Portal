@@ -1,12 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
-
 from datetime import datetime, timedelta
 from django.utils import timezone
 
-
-#added by divyesh 
 class Authority(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
@@ -14,8 +11,6 @@ class Authority(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.email})"
-
-
 
 #TODO : make this better or use groups 
 class User(AbstractUser):
@@ -72,3 +67,11 @@ class UserAuthority(models.Model):
     def _str_(self):
         return f"{self.user.username} → {self.authority.name} (Order: {self.order})"
 # Create your models here.
+
+class OTPReset(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + datetime.timedelta(minutes=5)

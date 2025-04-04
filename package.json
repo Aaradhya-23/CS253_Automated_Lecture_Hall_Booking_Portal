@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "framer-motion": "^12.6.3",
     "fullcalendar-interaction": "^5.3.3"
   }
 }

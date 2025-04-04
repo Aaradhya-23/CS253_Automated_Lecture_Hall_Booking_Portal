@@ -1,21 +1,26 @@
 from .models import User
 from .serializers import *
 from ..bookings.permissions import IsAdmin, Issameuser
+import datetime
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from django.conf import settings
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils.crypto import get_random_string
 import random
 from django.utils.timezone import now
-from .models import User,Authority, UserAuthority
+from .models import User,Authority, UserAuthority, OTPReset
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from .serializers import UserSerializer,AuthoritySerializer
 from ..bookings.permissions import IsAdmin
 from rest_framework.response import Response
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from django.utils import timezone
 from rest_framework import status
 from django.db import models
 from rest_framework.generics import CreateAPIView
@@ -140,3 +145,71 @@ class AuthorityCreateView(CreateAPIView):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
     permission_classes = [IsAdmin]  # Ensure only admins can create    
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def request_reset_otp(request):
+    email = request.data.get('email')
+    username = request.data.get('username')
+
+    if not email or not username:
+        return Response({'error': 'Email and username are required'}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+        user2 = User.objects.get(username=username)
+        if user != user2:
+            return Response({'error': 'User and registered email do not match'}, status=404)
+        otp_code = str(random.randint(100000, 999999))
+        hashed_otp = make_password(otp_code)
+        OTPReset.objects.create(user=user, otp=hashed_otp)
+
+        send_mail(
+                '[LHC Office] OTP for password reset',
+                f"""Your OTP to reset your account password is :
+                {otp_code}
+                Please do not share this with anyone. 
+                Valid for 10 minutes.
+                
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            
+        )
+        return Response({'message': 'OTP sent successfully', 'user_id': user.id})
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_and_reset_password(request):
+    user_id = request.data.get('user_id')
+    otp = request.data.get('otp')
+    password = request.data.get('new_password')
+
+    if not all([user_id, otp, password]):
+        return Response({'error': 'Missing fields'}, status=400)
+
+    try:
+        user = User.objects.get(id=user_id)
+        otp_record = OTPReset.objects.filter(user=user).order_by('-created_at').first()
+
+        if otp_record and check_password(otp, otp_record.otp) and (timezone.now() < otp_record.created_at + datetime.timedelta(minutes=10)):
+            user.set_password(password)
+            user.save()
+            send_mail(
+                '[LHC Office] Password Updated Successfully',
+                f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
+                
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            )
+            return Response({'message': 'Password reset successful'})
+        else:
+            return Response({'error': 'Invalid or expired OTP'}, status=400)
+
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid user'}, status=404)
