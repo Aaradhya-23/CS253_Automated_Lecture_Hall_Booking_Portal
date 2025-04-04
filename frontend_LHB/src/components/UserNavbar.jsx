@@ -5,7 +5,7 @@ import FRONTEND_ROUTES from '../frontend_urls';
 const UserNavbar = ({ onNavigate, currentPath }) => {
   // Map of navigation items to their respective routes
   const navItems = [
-    { name: 'New', path: FRONTEND_ROUTES.requestBooking },
+    { name: 'New Booking', path: FRONTEND_ROUTES.requestBooking },
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
     { name: 'History', path: FRONTEND_ROUTES.history }, // Changed from '/' to '/history'
     { name: 'Status', path: FRONTEND_ROUTES.status },
