@@ -1,11 +1,10 @@
 .navbar-trigger-area {
-  width: 20px;
+  width: 180px;
   height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
   background: transparent;
-  z-index: 10;
 }
 
 .admin-navbar {
@@ -13,6 +12,7 @@
     background-color: #EFF6FF; 
     padding: 16px;
     height: 100%;
+    z-index: 10;
   }
   
   .admin-nav-item {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./CreateUser.css";
+import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 import api from "../api/api";
 import { ACCESS_TOKEN } from "../api/constants";
 
@@ -164,8 +165,19 @@ const CreateUser = () => {
   };
 
   return (
-    <div className="main-content-wrapper">
-      <div className="create-user-container">
+    <motion.div
+      className="main-content-wrapper"
+      initial={{ opacity: 0, y: 20 }} // Page load animation
+      animate={{ opacity: 1, y: 0 }}
+      // exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div
+        className="create-user-container"
+        // initial={{ opacity: 0, scale: 0.95 }}
+        // animate={{ opacity: 1, scale: 1 }}
+        // transition={{ duration: 0.5 }}
+      >
         <div className="create-user-header">
           <h2>CREATE NEW USER </h2>
         </div>
@@ -257,100 +269,113 @@ const CreateUser = () => {
               </div>
             </div>
           </div>
-
-          {formData.role === "Student" && (
-            <>
-              <div className="create-user-header">
-              <h3>SELECT AUTHORITIES</h3>
-              </div>
-              <div className="authority-selection">
-                {loading ? (
-                  <p className="loading-text">Loading authorities...</p>
-                ) : existingAuthorities && existingAuthorities.length > 0 ? (
-                  existingAuthorities.map((authority) => (
-                    <div key={authority.id} className="authority-item">
-                      <input
-                        type="checkbox"
-                        id={`authority-${authority.id}`}
-                        value={authority.id}
-                        checked={formData.authorities.some(
-                          (auth) => auth.id === authority.id
-                        )}
-                        onChange={() =>
-                          handleExistingAuthorityChange(authority)
-                        }
-                        className="authority-checkbox"
-                      />
-                      <label
-                        htmlFor={`authority-${authority.id}`}
-                        className="authority-label"
-                      >
-                        {authority.name} ({authority.email})
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p className="no-authorities-text">
-                    No authorities available.
-                  </p>
-                )}
-              </div>
+          <AnimatePresence>
+            {formData.role === "Student" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="create-user-header">
+                  <h3>SELECT AUTHORITIES</h3>
+                </div>
+                <div className="authority-selection">
+                  {loading ? (
+                    <p className="loading-text">Loading authorities...</p>
+                  ) : existingAuthorities && existingAuthorities.length > 0 ? (
+                    existingAuthorities.map((authority) => (
+                      <div key={authority.id} className="authority-item">
+                        <input
+                          type="checkbox"
+                          id={`authority-${authority.id}`}
+                          value={authority.id}
+                          checked={formData.authorities.some(
+                            (auth) => auth.id === authority.id
+                          )}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              handleExistingAuthorityChange(authority); // Add authority if checked
+                            } else {
+                              const index = formData.authorities.findIndex(
+                                (auth) => auth.id === authority.id
+                              );
+                              handleRemoveAuthority(index); // Remove authority if unchecked
+                            }
+                          }}
+                          className="authority-checkbox"
+                        />
+                        <label
+                          htmlFor={`authority-${authority.id}`}
+                          className="authority-label"
+                        >
+                          {authority.name} ({authority.email})
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-authorities-text">
+                      No authorities available.
+                    </p>
+                  )}
+                </div>
 
                 <div className="create-user-header">
-              <h3>AUTHORITY PRIORITY ORDER</h3>
-              </div>
-              {formData.authorities.length > 0 ? (
-                <ul className="authority-priority-list">
-                  {formData.authorities.map((auth, index) => (
-                    <li key={auth.id} className="authority-priority-item">
-                      <span className="authority-name">
-                        {auth.name} ({auth.email})
-                      </span>
-                      <div className="priority-actions">
-                        <button
-                          type="button"
-                          onClick={() => moveAuthority(index, -1)}
-                          className="priority-btn"
-                        >
-                          Up
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveAuthority(index, 1)}
-                          className="priority-btn"
-                        >
-                          Down
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveAuthority(index)}
-                          className="priority-btn remove-btn"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="no-authorities-selected-text">
-                  No authorities selected.
-                </p>
-              )}
-            </>
-          )}
+                  <h3>AUTHORITY PRIORITY ORDER</h3>
+                </div>
+                {formData.authorities.length > 0 ? (
+                  <ul className="authority-priority-list">
+                    {formData.authorities.map((auth, index) => (
+                      <li key={auth.id} className="authority-priority-item">
+                        <span className="authority-name">
+                          {auth.name} ({auth.email})
+                        </span>
+                        <div className="priority-actions">
+                          <button
+                            type="button"
+                            onClick={() => moveAuthority(index, -1)}
+                            className="priority-btn"
+                          >
+                            Up
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveAuthority(index, 1)}
+                            className="priority-btn"
+                          >
+                            Down
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAuthority(index)}
+                            className="priority-btn remove-btn"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="no-authorities-selected-text">
+                    No authorities selected.
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="form-actions">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating...' : 'CREATE USER'}
+              {isSubmitting ? "Creating..." : "CREATE USER"}
             </button>
-            </div>
+          </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 export default CreateUser;

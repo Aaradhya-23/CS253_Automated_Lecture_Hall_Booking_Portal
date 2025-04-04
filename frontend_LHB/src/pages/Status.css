@@ -242,3 +242,30 @@
     font-size: 16px;
     color: #777;
   }
+
+  /* Add spacing and background for each booking card */
+.st-booking-card {
+  background-color: #ffffff; /* White background for each booking */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+  margin-bottom: 30px; /* Space between bookings */
+  padding: 20px; /* Inner padding */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+}
+
+/* Hover effect for booking cards */
+.st-booking-card:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Add a subtle border to visually separate bookings */
+.st-booking-card::before {
+  content: '';
+  display: block;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #3498db, #2ecc71); /* Gradient border */
+  border-radius: 12px 12px 0 0; /* Rounded top corners */
+  margin-bottom: 15px; /* Space below the border */
+}
