@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bookings', '0001_initial'),
+        ('bookings', '0002_alter_booking_token_expiry'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='booking',
             name='token_expiry',
-            field=models.DateTimeField(default=datetime.datetime(2025, 4, 6, 9, 21, 16, 605242, tzinfo=datetime.timezone.utc)),
+            field=models.DateTimeField(default=datetime.datetime(2025, 4, 6, 9, 21, 20, 948328, tzinfo=datetime.timezone.utc)),
         ),
     ]
