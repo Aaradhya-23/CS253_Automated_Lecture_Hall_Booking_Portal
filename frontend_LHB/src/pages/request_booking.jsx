@@ -14,10 +14,11 @@ const Request_Booking = () => {
   const [capacityOptions, setCapacityOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [purpose, setPurpose] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+  const [remark, setRemark] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
   const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState(null);
+  const [endTime, setEndTime] = useState("");
   const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
   const [selectedHall, setSelectedHall] = useState('');
   const [capacity, setCapacity] = useState('');
@@ -85,9 +86,9 @@ const Request_Booking = () => {
   ];
 
   // Repeat options
-  const repeatOptions = [
-    'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
-  ];
+  // const repeatOptions = [
+  //   'Does Not Repeat', 'Daily', 'Weekly', 'Monthly'
+  // ];
 
 // fetch rooms from the database
 useEffect(() => {
@@ -97,7 +98,7 @@ useEffect(() => {
   // console.log(startTime)
 
   const fetchRooms = async () => {
-    console.log("here")
+    console.log("100")
     if (!token) {
       console.log("here")
       console.error("No token found. User is not authenticated.");
@@ -242,7 +243,7 @@ useEffect(() => {
       room: selectedHall,
       duration: Math.abs(new Date(`${endDate}T${formattedEndTime}`) - new Date(`${startDate}T${formattedStartTime}`)) / (1000 * 60 * 60),
       Type:'academic',
-      remarks: purpose,
+      remarks: remark,
       accessories: selectedAccessories.reduce((acc, accessory) => {
         acc[accessory] = true;
         return acc;
@@ -272,6 +273,7 @@ useEffect(() => {
   
         // Clear the form
         setPurpose('');
+        setRemark('');
         setStartDate('');
         setStartTime('8:00 AM');
         setEndDate('');
@@ -354,6 +356,7 @@ useEffect(() => {
                 placeholder="Linux Session Y-24"
                 className="form-control"
               />
+             
             </div>
           </div>
           <div className="form-row">
@@ -462,7 +465,7 @@ useEffect(() => {
                 className={`hall-card ${selectedHall === hall.id ? 'selected' : ''}`}
                 onClick={() => setSelectedHall(hall.id)}
               >
-                <div className="hall-header">{hall.id}</div>
+                <div className="hall-header">{hall.name}</div>
                 <div className="hall-details">
                   <p>Capacity: {hall.capacity}</p>
                   <p>Accessories: {Object.keys(hall.accessories).join(', ')}</p>
@@ -478,6 +481,22 @@ useEffect(() => {
             )}
           </div>
           )}
+
+          {/* REMARK FIELD START */}
+<div className="form-row">
+  <div className="form-column">
+    <label htmlFor="remark">Remark</label>
+    <textarea
+      id="remark"
+      value={remark}
+      onChange={(e) => setRemark(e.target.value)}
+      className="form-control"
+      placeholder="Any additional comments or remarks..."
+      rows={3}
+    />
+  </div>
+</div>
+{/* REMARK FIELD END */}
 
           <div className="form-actions">
           <button 
