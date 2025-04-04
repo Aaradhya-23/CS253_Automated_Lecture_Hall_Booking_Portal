@@ -13,6 +13,7 @@ const FRONTEND_ROUTES = {
     bookingDetails: "/booking/:id",
     userhelp: "/help-user",
     adminhelp: "/help-admin",
+    adminfeedbackview: "/view_feedback",
   };
 
 export default FRONTEND_ROUTES
