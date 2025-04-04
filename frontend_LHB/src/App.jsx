@@ -7,7 +7,7 @@ import {
   Navigate,
   Link,
 } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import CreateUser from "./pages/CreateUser";
 import LiveSchedule from "./pages/LiveSchedule";
 import Feedback from "./pages/Feedback";
@@ -15,6 +15,7 @@ import Request_Booking from "./pages/request_booking";
 import AdminHelp from "./pages/AdminHelp"
 import UserHelp from "./pages/UserHelp"
 import Status from "./pages/Status";
+import ForgotPassword from "./pages/ForgotPassword";
 import UserHistory from "./pages/UserHistory"
 import Adminviewbooking from "./pages/Adminviewbooking";
 import Viewpending from "./pages/Viewpending";
@@ -29,6 +30,7 @@ import FRONTEND_ROUTES from './frontend_urls';
 import ProtectedRoute from "./api/protected_route";
 import api from "./api/api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./api/constants";
+// import ForgotPassword from "./pages/ForgotPassword";
 
 
 const App = () => {
@@ -109,6 +111,10 @@ const App = () => {
     navigate(FRONTEND_ROUTES.home); // Navigate to the home page
   };
 
+  // const handleForgotPassword = () => {
+  //   navigate(FRONTEND_ROUTES.ForgotPassword); // Navigate to the forgot password page
+  // }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header
@@ -147,7 +153,8 @@ const App = () => {
                 )
               }
             />
-
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            
             {/* Protected route for registration (admin only) */}
             <Route
               path={FRONTEND_ROUTES.register}
