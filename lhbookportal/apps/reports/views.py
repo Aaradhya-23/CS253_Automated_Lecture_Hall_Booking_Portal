@@ -38,6 +38,10 @@ class CreateFeedbackView(APIView):
             serializer.save(user=request.user) 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request):
+        feedbacks = Feedback.objects.all().order_by('-created_at')  # newest first
+        serializer = FeedbackSerializer(feedbacks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DownloadBillPDF(APIView):

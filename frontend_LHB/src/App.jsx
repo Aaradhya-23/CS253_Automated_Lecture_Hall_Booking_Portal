@@ -11,7 +11,7 @@ import Login from "./pages/login";
 import CreateUser from "./pages/CreateUser";
 import LiveSchedule from "./pages/LiveSchedule";
 import Feedback from "./pages/Feedback";
-import Request_Booking from "./pages/Request_Booking";
+import Request_Booking from "./pages/request_booking";
 import AdminHelp from "./pages/AdminHelp"
 import UserHelp from "./pages/UserHelp"
 import Status from "./pages/Status";
@@ -22,6 +22,7 @@ import Viewpending from "./pages/Viewpending";
 import RoomDetails from "./pages/RoomDetails";
 import Bookingdetails from "./pages/Bookingdetails";
 import OTPRequest from "./pages/RequestOTP";
+import AdminFeedbackview from "./pages/AdminFeedbackview";
 // Import navbar components
 import UserNavbar from "./components/UserNavbar";
 import AdminNavbar from "./components/AdminNavbar";
@@ -206,6 +207,13 @@ const App = () => {
              element={
               <ProtectedRoute role="admin">
                 <Adminviewbooking />
+              </ProtectedRoute>
+            }
+            />
+            <Route path={FRONTEND_ROUTES.adminfeedbackview}
+             element={
+              <ProtectedRoute role="admin">
+                <AdminFeedbackview />
               </ProtectedRoute>
             }
             />
