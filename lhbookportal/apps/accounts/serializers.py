@@ -4,13 +4,8 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from .models import User
 from django.conf import settings
-
-# from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
-# User = get_user_model()
-# from rest_framework import serializers
-# from .models import User  # Adjust the import according to your app structure
 
 class ChangePasswordSerializer(serializers.Serializer):
     """ Serializer for changing password. """
@@ -30,8 +25,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         if(len(value) < 4):
             raise serializers.ValidationError("Password Length must be greater than 4")
         return value
-
-
 class ChangePasswordSerializer(serializers.Serializer):
     """ Serializer for changing password. """
     """either provide old password or otp"""
@@ -50,33 +43,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         if(len(value) < 4):
             raise serializers.ValidationError("Password Length must be greater than 4")
         return value
-
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'role', 'authority_email', 'password']
-#         extra_kwargs = {
-#             'password': {'write_only': True}  # Ensure password is write-only
-#         }
-#         read_only_fields = ['total_bill']
-
-#     def create(self, validated_data):
-#         password = validated_data.pop('password', None)  # Remove password from validated_data
-#         user = User.objects.create(**validated_data)  # Create user without password
-#         if password:
-#             user.set_password(password)  # Hash password manually
-#             user.save()  # Save the hashed password
-#         return user
-
-#     def update(self, instance, validated_data):
-#         password = validated_data.pop('password', None)  # Extract password
-#         for attr, value in validated_data.items():
-#             setattr(instance, attr, value)
-#         if password:
-#             instance.set_password(password)  # Hash password manually
-#         instance.save()
-#         return instance
 
 from rest_framework import serializers
 from .models import User, Authority, UserAuthority
