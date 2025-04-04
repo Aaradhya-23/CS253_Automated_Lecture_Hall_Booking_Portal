@@ -15,10 +15,10 @@ const Request_Booking = () => {
   const [capacityOptions, setCapacityOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [purpose, setPurpose] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
   const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState(null);
+  const [endTime, setEndTime] = useState("");
   const [repeatOption, setRepeatOption] = useState('Does Not Repeat');
   const [selectedHall, setSelectedHall] = useState('');
   const [capacity, setCapacity] = useState('');
@@ -460,6 +460,8 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          {startDate && startTime && endTime && (
+  <>
           <div className="form-row">
             <div className="form-column">
               <label>Capacity</label>
@@ -499,6 +501,8 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          </>
+          )}
 
           {capacity && (
             <motion.div
