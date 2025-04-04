@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
+import { ACCESS_TOKEN } from '../api/constants';
+import React, { useState, useEffect } from 'react';
+import api from '../api/api';
 import {
   ThumbsUp,
   ThumbsDown,
@@ -11,6 +14,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './Feedback.css';
+
+
+
 const Feedback = () => {
   const [overallSatisfaction, setOverallSatisfaction] = useState(null);
   const [facilitySatisfaction, setFacilitySatisfaction] = useState(null);
@@ -19,18 +25,19 @@ const Feedback = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = {
-      overallSatisfaction: overallSatisfaction,
-      facilitySatisfaction: facilitySatisfaction,
-      bookingExperience: bookingExperience,
-      additionalComments: additionalComments
+    const satisfactionMap = {
+      'negative': 1,
+      'neutral': 2,
+      'positive': 3
     };
-    console.log({
-      overallSatisfaction,
-      facilitySatisfaction,
-      bookingExperience,
-      additionalComments
-    });
+    const formData = {
+      comment: additionalComments,
+      rating: facilitySatisfaction, // From star rating (1-5)
+      booking_experience: satisfactionMap[bookingExperience],
+      overall_satisfaction: satisfactionMap[overallSatisfaction],
+      // booking: <OPTIONAL: if you want to include a booking ID here>
+    };
+    console.log("Payload to send:", formData);
     try {
       // Make a POST request to the backend
       const token = localStorage.getItem(ACCESS_TOKEN);

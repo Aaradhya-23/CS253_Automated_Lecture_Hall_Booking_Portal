@@ -10,13 +10,13 @@ const AdminNavbar = () => {
   const location = useLocation(); // for currentPath comparison
 
   const navItems = [
-    { name: 'New', path: FRONTEND_ROUTES.requestBooking },
+    { name: 'New Booking', path: FRONTEND_ROUTES.requestBooking },
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
     { name: 'History', path: FRONTEND_ROUTES.adminViewBooking },
     { name: 'View Pending', path: FRONTEND_ROUTES.viewPending },
     { name: 'Room Details', path: FRONTEND_ROUTES.roomDetails },
-    { name: 'Create New User', path: FRONTEND_ROUTES.register },
-    { name: 'Feedback', path: FRONTEND_ROUTES.feedback },
+    { name: 'Create New User', path: FRONTEND_ROUTES.register }, // You'll need to add this route
+    { name: 'Feedback', path: FRONTEND_ROUTES.adminfeedbackview },
     { name: 'Help', path: FRONTEND_ROUTES.adminhelp },
   ];
 

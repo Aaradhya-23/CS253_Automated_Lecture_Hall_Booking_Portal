@@ -22,6 +22,26 @@ from apps.bookings.permissions import BookingPermissions
 # from datetime import timedelta, datetime
 # from django.utils import timezone
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from .models import Feedback
+from .serializers import FeedbackSerializer
+
+class CreateFeedbackView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        # print(request.data.get('rating'))
+        serializer = FeedbackSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user) 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request):
+        feedbacks = Feedback.objects.all().order_by('-created_at')  # newest first
+        serializer = FeedbackSerializer(feedbacks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DownloadBillPDF(APIView):
