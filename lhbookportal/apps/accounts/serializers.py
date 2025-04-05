@@ -112,17 +112,12 @@ class UserSerializer(serializers.ModelSerializer):
         return UserAuthoritySerializer(user_auths, many=True).data
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)  # Remove password from validated_data
+        password = get_random_string(8)  # Default password if not provided
         authorities_ids = validated_data.pop('authorities', [])
         with transaction.atomic():  # Ensures rollback if anything fails
             user = User.objects.create(**validated_data)
-        # user = User.objects.create(**validated_data)  # Create user without password
-        #If password provided then ok else generate a random one
-        if password:
-            pswd = password
-            # Hash password manually
-        else:
-            pswd = get_random_string(5) 
+            user.set_password(password)
+            user.save()  # Save the user first to get the ID
 
         for order, authority_id in enumerate(authorities_ids):
                 try:
@@ -136,20 +131,21 @@ class UserSerializer(serializers.ModelSerializer):
         authority_names = ", ".join([ua.authority.name for ua in user_auths])
 
         send_email_in_background(
-            'Your New Account Details',
-            (
-                f'Hello {user.username},\n\nYour account has been created successfully!\n'
-                f'Your login credentials:\n'
-                f'Username: {user.username}\n'
-                f'Password: {user.password}\n'
-                f'Your clearance authorities (in order): {authority_names}'
-            ),
-            settings.EMAIL_HOST_USER,  # Sender email
-            [user.email],  # Recipient email
-            fail_silently=False,
-        )
+    subject='Your New Account Details',
+    message=(
+        f"Hello {user.username},\n\n"
+        "Your account has been created successfully!\n"
+        "Your login credentials:\n"
+        f"Username: {user.username}\n"
+        f"Password: {password}\n"
+        f"Your clearance authorities (in order): {authority_names}"
+    ),
+    from_email=settings.EMAIL_HOST_USER,
+    recipient_list=[user.email],
+)
+
             
-        user.set_password(pswd)
+        # user.set_password(pswd)
         
         user.save()  # Save the hashed password
         return user
