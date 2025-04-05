@@ -82,10 +82,11 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 class SendOTP(APIView):
     permission_classes = [Issameuser]
     def post(self, request, *args, **kwargs):
-        user = request.user
+        email = request.data.get('email')
         otp_code = str(random.randint(100000, 999999))
 
         # Update user model with new OTP
+        user = User.objects.get(email = email)
         user.otp = otp_code
         user.otp_created_at = now()
         user.save()
@@ -106,13 +107,15 @@ class SendOTP(APIView):
     
 class ChangePasswordView(APIView):
     """ Allow users to change their password. """
-    permission_classes = [Issameuser]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        username = request.data.get('username')
+        serializer = ChangePasswordSerializer(data=request.data, context={'username': username})
         
         if serializer.is_valid():
-            user = request.user
+            user = User.objects.get(username = username)
+            # user = request.user
             user.set_password(serializer.validated_data['newpassword'])
             user.save()
             send_mail(

@@ -16,7 +16,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_otp(self, value):
         """ Ensure the old password is correct. """
-        user = self.context['request'].user
+        username = self.context['username']
+        user = User.objects.get(username = username)
         if user.otp != value  or not user.is_otp_valid():
             raise serializers.ValidationError("OTP expired or wrong")
             # else: raise serializers.ValidationError("Old password is incorrect.")
@@ -25,24 +26,24 @@ class ChangePasswordSerializer(serializers.Serializer):
         if(len(value) < 4):
             raise serializers.ValidationError("Password Length must be greater than 4")
         return value
-class ChangePasswordSerializer(serializers.Serializer):
-    """ Serializer for changing password. """
-    """either provide old password or otp"""
-    # old_password = serializers.CharField(write_only=True, required=False)
-    newpassword = serializers.CharField(write_only=True, required=True)
-    otp = serializers.CharField(max_length=6)
+# class ChangePasswordSerializer(serializers.Serializer):
+#     """ Serializer for changing password. """
+#     """either provide old password or otp"""
+#     # old_password = serializers.CharField(write_only=True, required=False)
+#     newpassword = serializers.CharField(write_only=True, required=True)
+#     otp = serializers.CharField(max_length=6)
 
-    def validate_otp(self, value):
-        """ Ensure the old password is correct. """
-        user = self.context['request'].user
-        if user.otp != value  or not user.is_otp_valid():
-            raise serializers.ValidationError("OTP expired or wrong")
-            # else: raise serializers.ValidationError("Old password is incorrect.")
-        return value
-    def validate_newpassword(self, value):
-        if(len(value) < 4):
-            raise serializers.ValidationError("Password Length must be greater than 4")
-        return value
+#     def validate_otp(self, value):
+#         """ Ensure the old password is correct. """
+#         user = self.context['request'].user
+#         if user.otp != value  or not user.is_otp_valid():
+#             raise serializers.ValidationError("OTP expired or wrong")
+#             # else: raise serializers.ValidationError("Old password is incorrect.")
+#         return value
+#     def validate_newpassword(self, value):
+#         if(len(value) < 4):
+#             raise serializers.ValidationError("Password Length must be greater than 4")
+#         return value
 
 from rest_framework import serializers
 from .models import User, Authority, UserAuthority

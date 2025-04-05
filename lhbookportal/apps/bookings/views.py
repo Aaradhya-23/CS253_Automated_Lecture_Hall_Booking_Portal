@@ -241,11 +241,10 @@ class BookingCRUDView(
 
         if user.role != 'admin':
             Type = 'academic' if user.role == 'faculty' else 'nonacademic'
-        status = 'approved' if user.role == 'admin' else 'pending'
+        status = 'approved' if user.role in [ 'admin' , 'faculty'] else 'pending'
 
         if Type == 'academic':
             status = 'approved'
-
         # Calculate cost
         base_cost = room.price_per_hour * duration
         accessory_cost = sum(
@@ -270,7 +269,7 @@ class BookingCRUDView(
                 end_time=end_time,
                 booking_date=booking_date,
                 booking_token = str(uuid.uuid4()),
-                status=status,
+                status='approved',
                 Type=Type,
                 requested_on=requested_on,
                 cost=total_cost,
@@ -434,9 +433,7 @@ class RoomSearchView(generics.ListAPIView):
     # Exact field filters
     filterset_fields = [
         'room_type',  # Filter by room type (tutorial or lecture_hall)
-        'has_ac',     # Filter by AC availability
-        'has_board',  # Filter by board availability
-        'has_projector',  # Filter by projector availability
+         # Filter by projector availability
    # Filter by capacity
         'price_per_hour',  # Filter by price per hour
     ]
