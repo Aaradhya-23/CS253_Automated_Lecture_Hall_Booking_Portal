@@ -25,7 +25,29 @@ from rest_framework import status
 from django.db import models
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-#TODO : ACCOUNT CRUD only admin --> DONE
+import threading
+
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, message, from_email, recipient_list):
+        self.subject = subject
+        self.message = message
+        self.from_email = from_email
+        self.recipient_list = recipient_list
+        super().__init__()
+
+    def run(self):
+        send_mail(
+            subject=self.subject,
+            message=self.message,
+            from_email=self.from_email,
+            recipient_list=self.recipient_list,
+            fail_silently=False,
+        )
+
+def send_email_in_background(subject, message, from_email, recipient_list):
+    EmailThread(subject, message, from_email, recipient_list).start()
+
 
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
@@ -78,9 +100,9 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 #         r
         
     
-
 class SendOTP(APIView):
     permission_classes = [Issameuser]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         otp_code = str(random.randint(100000, 999999))
@@ -89,44 +111,49 @@ class SendOTP(APIView):
         user.otp = otp_code
         user.otp_created_at = now()
         user.save()
-        send_mail(
-                '[LHC Office] OTP for password reset',
-                f"""Your OTP to reset your account password is :
-                {otp_code}
-                Please do not share this with anyone. 
-                Valid for 10 minutes.
-                
-            """,
+
+        # Compose email
+        subject = '[LHC Office] OTP for password reset'
+        message = f"""
+Your OTP to reset your account password is:
+{otp_code}
+Please do not share this with anyone.
+Valid for 10 minutes.
+"""
+
+        # Send email in background
+        send_email_in_background(
+            subject,
+            message,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
-            
         )
-        return Response({"message": "OPT send successfully"}, status=status.HTTP_200_OK)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-class ChangePasswordView(APIView):
-    """ Allow users to change their password. """
-    permission_classes = [Issameuser]
 
-    def post(self, request, *args, **kwargs):
-        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        return Response({"message": "OTP sent successfully"}, status=status.HTTP_200_OK)    
+
+# class ChangePasswordView(APIView):
+#     """ Allow users to change their password. """
+#     permission_classes = [Issameuser]
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
         
-        if serializer.is_valid():
-            user = request.user
-            user.set_password(serializer.validated_data['newpassword'])
-            user.save()
-            send_mail(
-                '[LHC Office] Password Updated Successfully',
-                f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
+#         if serializer.is_valid():
+#             user = request.user
+#             user.set_password(serializer.validated_data['newpassword'])
+#             user.save()
+#             send_mail(
+#                 '[LHC Office] Password Updated Successfully',
+#                 f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
                 
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
+#             """,
+#             settings.DEFAULT_FROM_EMAIL,
+#             [user.email],
             
-            )
-            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+#             )
+#             return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AuthorityViewSet(ReadOnlyModelViewSet):  
     """
@@ -165,18 +192,16 @@ def request_reset_otp(request):
         hashed_otp = make_password(otp_code)
         OTPReset.objects.create(user=user, otp=hashed_otp)
 
-        send_mail(
-                '[LHC Office] OTP for password reset',
-                f"""Your OTP to reset your account password is :
-                {otp_code}
-                Please do not share this with anyone. 
-                Valid for 10 minutes.
-                
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            
-        )
+        send_email_in_background(
+    '[LHC Office] OTP for password reset',
+    f"""Your OTP to reset your account password is :
+    {otp_code}
+    Please do not share this with anyone. 
+    Valid for 10 minutes.
+    """,
+    settings.DEFAULT_FROM_EMAIL,
+    [user.email],
+)
         return Response({'message': 'OTP sent successfully', 'user_id': user.id})
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=404)
@@ -199,14 +224,12 @@ def verify_and_reset_password(request):
         if otp_record and check_password(otp, otp_record.otp) and (timezone.now() < otp_record.created_at + datetime.timedelta(minutes=10)):
             user.set_password(password)
             user.save()
-            send_mail(
-                '[LHC Office] Password Updated Successfully',
-                f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
-                
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            )
+            send_email_in_background(
+    '[LHC Office] Password Updated Successfully',
+    f"""If you did not request this, someone else might be using your account. Contact LHC Office Immediately.""",
+    settings.DEFAULT_FROM_EMAIL,
+    [user.email],
+)
             return Response({'message': 'Password reset successful'})
         else:
             return Response({'error': 'Invalid or expired OTP'}, status=400)

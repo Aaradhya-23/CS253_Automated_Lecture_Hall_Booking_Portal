@@ -244,116 +244,222 @@ const Request_Booking = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const formatTime = (time) => {
-      // Match time in the format of 'hh:mm AM/PM'
-      const [hour, minute, period] = time
-        .match(/(\d+):(\d+)\s(AM|PM)/)
-        .slice(1);
-      let hours = parseInt(hour);
-      let minutes = parseInt(minute);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+  //   const formatTime = (time) => {
+  //     // Match time in the format of 'hh:mm AM/PM'
+  //     const [hour, minute, period] = time
+  //       .match(/(\d+):(\d+)\s(AM|PM)/)
+  //       .slice(1);
+  //     let hours = parseInt(hour);
+  //     let minutes = parseInt(minute);
 
-      // Convert 12-hour format to 24-hour format
-      if (period === "PM" && hours !== 12) hours += 12;
-      if (period === "AM" && hours === 12) hours = 0;
+  //     // Convert 12-hour format to 24-hour format
+  //     if (period === "PM" && hours !== 12) hours += 12;
+  //     if (period === "AM" && hours === 12) hours = 0;
 
-      // Return time in 24-hour format with seconds always set to '00'
-      return `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}:00`;
-    };
+  //     // Return time in 24-hour format with seconds always set to '00'
+  //     return `${hours.toString().padStart(2, "0")}:${minutes
+  //       .toString()
+  //       .padStart(2, "0")}:00`;
+  //   };
 
-    // Format start and end times
-    const formattedStartTime = formatTime(startTime);
-    const formattedEndTime = formatTime(endTime);
-    // Prepare the data to be sent to the backend
-    const bookingData = {
-      user: selectedUser,
-      title: purpose,
-      booking_date: startDate,
-      start_time: formattedStartTime,
-      end_time: formattedEndTime,
-      room: selectedHall,
-      duration:
-        Math.abs(
-          new Date(`${endDate}T${formattedEndTime}`) -
-            new Date(`${startDate}T${formattedStartTime}`)
-        ) /
-        (1000 * 60 * 60),
-      Type: "academic",
-      remarks: remark,
-      accessories: selectedAccessories.reduce((acc, accessory) => {
-        acc[accessory] = true;
-        return acc;
-      }, {}),
-    };
-    console.log("here");
+  //   // Format start and end times
+  //   const formattedStartTime = formatTime(startTime);
+  //   const formattedEndTime = formatTime(endTime);
+  //   // Prepare the data to be sent to the backend
+  //   const bookingData = {
+  //     user: selectedUser,
+  //     title: purpose,
+  //     booking_date: startDate,
+  //     start_time: formattedStartTime,
+  //     end_time: formattedEndTime,
+  //     room: selectedHall,
+  //     duration:
+  //       Math.abs(
+  //         new Date(`${endDate}T${formattedEndTime}`) -
+  //           new Date(`${startDate}T${formattedStartTime}`)
+  //       ) /
+  //       (1000 * 60 * 60),
+  //     Type: "academic",
+  //     remarks: remark,
+  //     accessories: selectedAccessories.reduce((acc, accessory) => {
+  //       acc[accessory] = true;
+  //       return acc;
+  //     }, {}),
+  //   };
+  //   console.log("here");
 
-    try {
-      // Make a POST request to the backend
-      const token = localStorage.getItem(ACCESS_TOKEN);
-      if (!token) {
-        console.log("here");
-        console.error("No token found. User is not authenticated.");
-        return;
-      }
-      const response = await api.post(
-        import.meta.env.VITE_REQUEST_BOOKING_URL,
-        bookingData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token in the header
-            "Content-Type": "application/json", // Ensure the server knows you're sending JSON data
-            Accept: "application/json", // Optional: to specify that you expect JSON in response
-          },
-        }
-      );
+  //   try {
+  //     // Make a POST request to the backend
+  //     const token = localStorage.getItem(ACCESS_TOKEN);
+  //     if (!token) {
+  //       console.log("here");
+  //       console.error("No token found. User is not authenticated.");
+  //       return;
+  //     }
+  //     const response = await api.post(
+  //       import.meta.env.VITE_REQUEST_BOOKING_URL,
+  //       bookingData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`, // Add token in the header
+  //           "Content-Type": "application/json", // Ensure the server knows you're sending JSON data
+  //           Accept: "application/json", // Optional: to specify that you expect JSON in response
+  //         },
+  //       }
+  //     );
 
-      console.log(response.status);
-      if (response.status === 201 || response.status === 200) {
-        // Show success notification
-        // alert('Booking successful!');
-        setShowError(false);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 6000); // Hide after 4s (optional)
-        // Clear the form
-        setPurpose("");
-        setRemark("");
-        setStartDate("");
-        setStartTime("");
-        setEndDate("");
-        setEndTime("");
-        setSelectedHall("");
-        setCapacity("");
-        setAccessoryOptions([]);
-        // rooms = []
-        // const [selectedAccessories
-        // setRepeatOption('Does Not Repeat');
-        // setSelectedHall('');
-        // setCapacity('');
-        // setSelectedAccessories([]);
-      } else {
-        setShowError(true);
-        setShowSuccess(false); // Hide success if previously shown
+  //     console.log(response.status);
+  //     if (response.status === 201 || response.status === 200) {
+  //       // Show success notification
+  //       // alert('Booking successful!');
+  //       setShowError(false);
+  //       setShowSuccess(true);
+  //       setTimeout(() => setShowSuccess(false), 6000); // Hide after 4s (optional)
+  //       // Clear the form
+  //       setPurpose("");
+  //       setRemark("");
+  //       setStartDate("");
+  //       setStartTime("");
+  //       setEndDate("");
+  //       setEndTime("");
+  //       setSelectedHall("");
+  //       setCapacity("");
+  //       setAccessoryOptions([]);
+  //       // rooms = []
+  //       // const [selectedAccessories
+  //       // setRepeatOption('Does Not Repeat');
+  //       // setSelectedHall('');
+  //       // setCapacity('');
+  //       // setSelectedAccessories([]);
+  //     } else {
+  //       setShowError(true);
+  //       setShowSuccess(false); // Hide success if previously shown
 
-        setTimeout(() => setShowError(false), 5000);
-        // Show error notification
-        // alert('Booking unsuccessful. Please try again.');
-      }
-    } catch (error) {
-      console.error("Error submitting booking:", error);
-      // Show error notification
-      setShowError(true);
-      setShowSuccess(false); // Hide success if previously shown
+  //       setTimeout(() => setShowError(false), 5000);
+  //       // Show error notification
+  //       // alert('Booking unsuccessful. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting booking:", error);
+  //     // Show error notification
+  //     setShowError(true);
+  //     setShowSuccess(false); // Hide success if previously shown
 
-      setTimeout(() => setShowError(false), 5000);
-      // alert('Booking unsuccessful. Please try again.');
-    } finally {
-      setIsSubmitting(false); // Reset submitting state
-    }
+  //     setTimeout(() => setShowError(false), 5000);
+  //     // alert('Booking unsuccessful. Please try again.');
+  //   } finally {
+  //     setIsSubmitting(false); // Reset submitting state
+  //   }
+  // };
+  const [showConfirmation, setShowConfirmation] = useState(false);
+const [tempBookingData, setTempBookingData] = useState(null);
+
+const handleSubmitInit = async (e) => {
+  e.preventDefault();
+  
+  // Prepare the booking data first
+  const formatTime = (time) => {
+    const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
+    let hours = parseInt(hour);
+    let minutes = parseInt(minute);
+
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:00`;
   };
+
+  const formattedStartTime = formatTime(startTime);
+  const formattedEndTime = formatTime(endTime);
+  
+  const bookingData = {
+    user: selectedUser,
+    title: purpose,
+    booking_date: startDate,
+    start_time: formattedStartTime,
+    end_time: formattedEndTime,
+    room: selectedHall,
+    duration: Math.abs(
+      new Date(`${endDate}T${formattedEndTime}`) - 
+      new Date(`${startDate}T${formattedStartTime}`)
+    ) / (1000 * 60 * 60),
+    Type: "academic",
+    remarks: remark,
+    accessories: selectedAccessories.reduce((acc, accessory) => {
+      acc[accessory] = true;
+      return acc;
+    }, {}),
+  };
+
+  // Store the prepared data and show confirmation
+  setTempBookingData(bookingData);
+  setShowConfirmation(true);
+};
+
+const handleConfirmSubmit = async () => {
+  setShowConfirmation(false);
+  setIsSubmitting(true);
+
+  try {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (!token) {
+      console.error("No token found. User is not authenticated.");
+      return;
+    }
+
+    const response = await api.post(
+      import.meta.env.VITE_REQUEST_BOOKING_URL,
+      tempBookingData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (response.status === 201 || response.status === 200) {
+      setShowError(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 6000);
+      
+      // Clear the form
+      setPurpose("");
+      setRemark("");
+      setStartDate("");
+      setStartTime("");
+      setEndDate("");
+      setEndTime("");
+      setSelectedHall("");
+      setCapacity("");
+      setAccessoryOptions([]);
+    } else {
+      setShowError(true);
+      setShowSuccess(false);
+      setTimeout(() => setShowError(false), 5000);
+    }
+  } catch (error) {
+    console.error("Error submitting booking:", error);
+    setShowError(true);
+    setShowSuccess(false);
+    setTimeout(() => setShowError(false), 5000);
+  } finally {
+    setIsSubmitting(false);
+    setTempBookingData(null);
+  }
+};
+
+const handleCancelSubmit = () => {
+  setShowConfirmation(false);
+  setTempBookingData(null);
+};
+
   const handleDateChange = (e) => {
     const value = e.target.value;
     setStartDate(value);
@@ -399,9 +505,25 @@ const Request_Booking = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {showConfirmation && (
+  <div className="confirmation-modal">
+    <div className="confirmation-content">
+      <h3>Confirm Booking</h3>
+      <p>Are you sure you want to submit this booking?</p>
+      <div className="confirmation-buttons">
+        <button onClick={handleConfirmSubmit} className="confirm-btn">
+          Yes, Book Now
+        </button>
+        <button onClick={handleCancelSubmit} className="cancel-btn">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <div className="booking-form-container">
-        <form className="booking-form" onSubmit={handleSubmit}>
+        <form className="booking-form" onSubmit={handleSubmitInit}>
           <div className="form-row">
             {role === "admin" ? (
               <div className="form-column">
@@ -579,7 +701,7 @@ const Request_Booking = () => {
                     exit={{ opacity: 0, scale: 0.9 }} // Animate out when removed
                     transition={{ duration: 0.3 }} // Smooth transition
                   >
-                    <div className="hall-header">{hall.id}</div>
+                    <div className="hall-header">{hall.name}</div>
                     <div className="hall-details">
                       <p>Capacity: {hall.capacity}</p>
                       <p>
@@ -618,6 +740,8 @@ const Request_Booking = () => {
         </form>
       </div>
     </div>
+
+    
   );
 };
 
