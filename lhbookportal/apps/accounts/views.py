@@ -94,10 +94,6 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdmin] 
     serializer_class = UserSerializer
     
-# class UserProfile(APIView):
-#     permission_classes = [Issameuser]
-#     def post(self, request, *args, **kwargs):
-#         r
         
     
 class SendOTP(APIView):

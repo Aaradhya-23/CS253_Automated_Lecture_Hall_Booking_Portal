@@ -191,12 +191,12 @@ const RoomDetails = () => {
                       })}
                     </div>
                   </div>
-                  <button
+                  {/* <button
                     className="modal-book-button"
                     onClick={() => alert(`Booking for ${selectedItem.name}`)}
                   >
                     Book Now
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <button
