@@ -28,6 +28,28 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import time, datetime, timedelta
 from rest_framework.permissions import AllowAny
+import threading
+
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, message, from_email, recipient_list, *args, **kwargs):
+        self.subject = subject
+        self.message = message
+        self.from_email = from_email
+        self.recipient_list = recipient_list
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        send_mail(
+            self.subject,
+            self.message,
+            self.from_email,
+            self.recipient_list,
+            fail_silently=False,
+        )
+
+def send_email_in_background(subject, message, from_email, recipient_list):
+    EmailThread(subject, message, from_email, recipient_list).start()
 
 @csrf_exempt
 def send_rejection_mail(request, booking_id):
@@ -35,8 +57,8 @@ def send_rejection_mail(request, booking_id):
         return JsonResponse({"error": "Invalid request method"}, status=405)
     
     try:
-        data = json.loads(request.body)  # Parse the request body to get JSON data
-        remarks = data.get("remark", "")  # Get remarks from request
+        data = json.loads(request.body)
+        remarks = data.get("remark", "")
 
         if not remarks:
             return JsonResponse({"error": "Remarks are required"}, status=400)
@@ -45,15 +67,18 @@ def send_rejection_mail(request, booking_id):
         booking = get_object_or_404(Booking, id=booking_id)
         booking.status = 'rejected'
 
-        # Send rejection email
-        send_mail(
-            'Booking Rejected',
-            f"""Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION.
-            Remarks: {remarks}
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [booking.creator.email],
+        # Compose the email content
+        subject = 'Booking Rejected'
+        message = (
+            f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} '
+            f'for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION.\n'
+            f'Remarks: {remarks}'
         )
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [booking.creator.email]
+
+        # Send the email in the background
+        send_email_in_background(subject, message, from_email, recipient_list)
 
         # Delete the booking
         booking.delete()
@@ -63,7 +88,7 @@ def send_rejection_mail(request, booking_id):
         return JsonResponse({"error": "Invalid JSON format"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
+
 
 class AvailableBookingSlotsView(generics.GenericAPIView):
     permission_classes = [AllowAny]
@@ -126,32 +151,28 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
         return Response({"rooms": serializer.data}, status=status.HTTP_200_OK)
     
 def send_approval_email(authority_email, booking):
-    # Get specific authority token for the booking
-    print(booking.authority_tokens)
-    authority_token = booking.authority_tokens.get(authority_email)  
-    print(authority_token)
+    authority_token = booking.authority_tokens.get(authority_email)
     if not authority_token:
         return  # Safety check
 
-    print("----------------------------------------------------------------------------------------------------------------------------")
-    print(authority_email)
-    print("----------------------------------------------------------------------------------------------------------------------------")
-    # Process accessories
-    accessories_list = [name.replace('_', ' ').title() for name, selected in booking.accessories.items() if selected]
+    accessories_list = [
+        name.replace('_', ' ').title()
+        for name, selected in booking.accessories.items() if selected
+    ]
     accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
 
-    # Build approval and rejection links
-    approval_link = f"http://127.0.0.1:8000/bookings/approve/?booking_token={booking.booking_token}&authority_token={authority_token}"
-    rejection_link = f"http://127.0.0.1:8000/bookings/reject/?booking_token={booking.booking_token}&authority_token={authority_token}"
+    approval_link = (
+        f"http://127.0.0.1:8000/bookings/approve/?booking_token={booking.booking_token}"
+        f"&authority_token={authority_token}"
+    )
+    rejection_link = (
+        f"http://127.0.0.1:8000/bookings/reject/?booking_token={booking.booking_token}"
+        f"&authority_token={authority_token}"
+    )
 
-    # Build time slots string (if needed)
-    # time_slots = ", ".join(f"{ts.start_time} - {ts.end_time}" for ts in booking.time_slots.all())
     user = booking.creator
-
-    # Send the email using send_mail
-    send_mail(
-        subject="[LHC OFFICE] Booking Request Approval Needed",
-        message=f"""
+    subject = "[LHC OFFICE] Booking Request Approval Needed"
+    message = f"""
 A new booking request has been submitted by {user.username}.
 
 Purpose    : {booking.title}
@@ -167,11 +188,14 @@ Approve: {approval_link}
 Reject:  {rejection_link}
 
 Note: Unapproved bookings will be auto-rejected in 2 days or less.
-        """,
-        from_email="no-reply@yourdomain.com",
-        recipient_list=[authority_email],
-    )
+    """
 
+    send_email_in_background(
+        subject,
+        message,
+        from_email="no-reply@yourdomain.com",
+        recipient_list=[authority_email]
+    )
 
 class BookingCRUDView(
     generics.GenericAPIView, 
@@ -534,17 +558,16 @@ def approve_booking(request):
         x = f'Your bill amount is : {booking.cost}'
         # print(type([booking.creator.email]))
         # Send email to user
-        send_mail(
-            'Booking Approved',
-            f"""
-            Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
-            {x}
-            """
-            ,
-            settings.DEFAULT_FROM_EMAIL,
-            [booking.creator.email]
-        )
-        send_mail(
+        send_email_in_background(
+    'Booking Approved',
+    f"""
+    Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
+    Your bill amount is : ₹{booking.cost}
+    """,
+    settings.DEFAULT_FROM_EMAIL,
+    [booking.creator.email]
+)
+        send_email_in_background(
         subject="[LHC OFFICE] Booking Details",
         message=f"""
 
@@ -559,7 +582,7 @@ Total Cost : ₹{booking.cost}
 
 """,
         from_email="no-reply@yourdomain.com",
-        recipient_list=["bhavya0525@gmail.com"],
+        recipient_list=["bhavya0525@gmail.com"], #accounts email to be addeded
     )
 
 
@@ -595,12 +618,12 @@ def reject_booking(request):
     booking.approvals_pending = {}
     booking.save()
 
-    send_mail(
-        'Booking Rejected',
-        f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
-        settings.DEFAULT_FROM_EMAIL,
-        [ booking.creator.email ],
-    )
+    send_email_in_background(
+    'Booking Rejected',
+    f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
+    settings.DEFAULT_FROM_EMAIL,
+    [booking.creator.email],
+)
 
     booking.delete()
     return render(request, "bookings/Rejected.html", context={}, status=200);

@@ -1,4 +1,3 @@
-import ForgotPassword from "./pages/ForgotPassword";
 
 const FRONTEND_ROUTES = {
     home: "/", // This is your landing page (timetable or available rooms)
