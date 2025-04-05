@@ -6,11 +6,14 @@ from .models import Holiday
 from .models import *
 from apps.accounts.serializers import UserSerializer
 from django.utils import timezone
+from django.core.mail import send_mail
+import threading
 import datetime
 from django.db.models import Q
 User = get_user_model()
 
 #TODO MAKE this more secure better password handling not exposing passwords, hashing passwords
+
 
 class HolidaySerializer(serializers.ModelSerializer):
     class Meta:

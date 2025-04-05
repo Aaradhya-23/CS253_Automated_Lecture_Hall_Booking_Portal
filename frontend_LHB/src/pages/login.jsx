@@ -302,7 +302,7 @@ const Login = ({ onLogin }) => {
                     <i className="fas fa-circle-notch fa-spin"></i> Signing In
                   </span>
                 ) : (
-                  'Sign In'
+                  'Login'
                 )}
               </button>
             </form>
