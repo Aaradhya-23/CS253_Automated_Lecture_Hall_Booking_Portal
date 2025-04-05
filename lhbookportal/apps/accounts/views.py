@@ -60,7 +60,8 @@ class UserListCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         """Extract authority IDs from frontend request and pass correct format."""
         data = request.data.copy()  # Ensure it's mutable
-
+        print(data)
+        
         if 'authorities' in data:
             # Get the authority IDs in the order provided
             authority_ids = data['authorities']
@@ -82,7 +83,12 @@ class UserListCreateView(generics.ListCreateAPIView):
 
         # Validate and save user data
         serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError as e:
+            print("Validation Error:", e.detail)
+            raise
+
         self.perform_create(serializer)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -94,10 +100,6 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdmin] 
     serializer_class = UserSerializer
     
-# class UserProfile(APIView):
-#     permission_classes = [Issameuser]
-#     def post(self, request, *args, **kwargs):
-#         r
         
     
 class SendOTP(APIView):
