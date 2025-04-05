@@ -105,16 +105,16 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'HELLO',
-#         'USER': 'postgres',
-#         'PASSWORD': '28122251',
-#         'HOST': 'localhost',  # Change if using a remote DB
-#         'PORT': '5432',       # Default PostgreSQL port
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'HELLO',
+        'USER': 'postgres',
+        'PASSWORD': '28122251',
+        'HOST': 'localhost',  # Change if using a remote DB
+        'PORT': '5432',       # Default PostgreSQL port
+    }
+}
 
 ROOT_URLCONF = 'lhbookportal.urls'
 CORS_ALLOW_ALL_ORIGINS = True
@@ -155,12 +155,12 @@ WSGI_APPLICATION = 'lhbookportal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
