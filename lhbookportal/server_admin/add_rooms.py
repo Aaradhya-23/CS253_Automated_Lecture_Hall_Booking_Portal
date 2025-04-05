@@ -17,7 +17,7 @@ def generate_random_accessories():
 def create_room_entries(n=10):
     for j in range(5):
         room = Room(
-            name="TB-" + str(j + 1),
+            name="L-" + str(j + 1),
             capacity=5 * (j + 1),
             room_type="tutorial",
             accessories=generate_random_accessories(),

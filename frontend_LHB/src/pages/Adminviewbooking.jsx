@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from "framer-motion"; // Import Framer Motion
 // import axios from 'axios';
 import api from '../api/api';
 import './Adminviewbooking.css';
@@ -164,7 +165,13 @@ function Adminviewbooking() {
   }, [openDropdownId]);
 
   return (
-    <div className="admin-booking-main">
+    <motion.div
+     className="admin-booking-main"
+     initial={{ opacity: 0, y: 20 }} // Initial state for animation
+      animate={{ opacity: 1, y: 0 }} // Final state for animation
+      transition={{ duration: 0.6 }}
+      >
+      {/* Date Range Section */}
       <div className="admin-date-range-section">
         <div className="admin-date-selector" onClick={() => setEditingDate('start')}>
           {editingDate === 'start' ? (
@@ -238,65 +245,82 @@ function Adminviewbooking() {
 </div>
       <div className="admin-bookings-list">
         <div className="admin-booking-item highlighted">
+          {/* Header Row */}
           <div className="admin-time-indicator">
             <div className="admin-time-text">
-              <span>Time <slot></slot></span>
+              <span>Time</span>
               <span className="admin-duration">(duration)</span>
             </div>
           </div>
-
           <div className="admin-booking-info">
             <div className="admin-room-info">Booking Date</div>
             <div className="admin-room-info">Lecture Hall</div>
             <div className="admin-professor-info">Username</div>
             <div className="admin-course-info">Purpose</div>
           </div>
-
           <div className="admin-booking-actions">
             <div className="admin-course-info">Action</div>
           </div>
         </div>
 
-        {filteredBookings.map((booking) => (
+        {/* Animated Booking Items */}
+        <AnimatePresence>
+          {filteredBookings.map((booking) => (
+            <div
+              key={booking.id}
+              className="admin-booking-item"
+            >
+              <div className="admin-time-indicator">
+                <div className="admin-time-text">
+                  <span>{booking.time}</span>
+                  <span className="admin-duration">{booking.duration}</span>
+                </div>
+              </div>
+              <div className="admin-booking-info">
+                <div className="admin-room-info">{booking.date}</div>
+                <div className="admin-room-info">{booking.room}</div>
+                <div className="admin-professor-info">{booking.professor}</div>
+                <div className="admin-course-info">{booking.course}</div>
+              </div>
+              <div className="admin-booking-actions">
+                <button
+                  className="admin-manage-btn"
+                  onClick={() => toggleDropdown(booking.id)}
+                >
+                  Manage <span className="admin-dropdown-arrow">▼</span>
+                </button>
 
-          <div key={booking.id} className={`admin-booking-item `}>
-            <div className="admin-time-indicator">
-              <div className="admin-time-text">
-                <span>{booking.time}</span>
-                <span className="admin-duration">{booking.duration}</span>
+                {/* Animated Dropdown Menu */}
+                <AnimatePresence>
+                  {openDropdownId === booking.id && (
+                    <motion.div
+                      className="admin-dropdown-menu"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <button
+                        onClick={() => handleViewDetails(booking.id)}
+                        className="admin-dropdown-item"
+                      >
+                        <span className="admin-icon">✎</span> View
+                      </button>
+                      <button
+                        onClick={() => handleRemoveBooking(booking.id)}
+                        className="admin-dropdown-item"
+                      >
+                        <span className="admin-icon admin-trash">🗑</span> Remove booking
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-
-            <div className="admin-booking-info">
-              <div className="admin-room-info">{booking.date}</div>
-              <div className="admin-room-info">{booking.room}</div>
-              <div className="admin-professor-info">{booking.professor}</div>
-              <div className="admin-course-info">{booking.course}</div>
-            </div>
-
-            <div className="admin-booking-actions">
-              <button
-                className="admin-manage-btn"
-                onClick={() => toggleDropdown(booking.id)}
-              >
-                Manage <span className="admin-dropdown-arrow">▼</span>
-              </button>
-
-              {openDropdownId === booking.id && (
-                <div className="admin-dropdown-menu">
-                  <button onClick={() => handleViewDetails(booking.id)} className="admin-dropdown-item">
-                    <span className="admin-icon">✎</span> View
-                  </button>
-                  <button onClick={() => handleRemoveBooking(booking.id)} className="admin-dropdown-item">
-                    <span className="admin-icon admin-trash">🗑</span> Remove booking
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
