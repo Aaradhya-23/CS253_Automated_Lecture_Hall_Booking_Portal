@@ -3,12 +3,10 @@ import './AdminNavbar.css';
 import FRONTEND_ROUTES from '../frontend_urls';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-
 const AdminNavbar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
   const location = useLocation(); // for currentPath comparison
-
   const navItems = [
     { name: 'New Booking', path: FRONTEND_ROUTES.requestBooking },
     { name: 'Live Schedule', path: FRONTEND_ROUTES.home },
@@ -19,14 +17,12 @@ const AdminNavbar = () => {
     { name: 'Feedback', path: FRONTEND_ROUTES.adminfeedbackview },
     { name: 'Help', path: FRONTEND_ROUTES.adminhelp },
   ];
-
   return (
     <>
       <div
         className="navbar-trigger-area"
         onMouseEnter={() => setIsVisible(true)}
       ></div>
-
       <motion.div
         className="admin-navbar"
         initial={{ x: -220, opacity: 0 }}
@@ -38,7 +34,7 @@ const AdminNavbar = () => {
         {navItems.map((item, index) => (
           <motion.button
             key={item.name}
-            onClick={() => { 
+            onClick={() => {
               console.log(item);
               navigate(item.path);
             }}
@@ -57,5 +53,4 @@ const AdminNavbar = () => {
     </>
   );
 };
-
 export default AdminNavbar;

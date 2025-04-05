@@ -6,6 +6,28 @@ from .models import User
 from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
+import threading
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, message, from_email, recipient_list):
+        self.subject = subject
+        self.message = message
+        self.from_email = from_email
+        self.recipient_list = recipient_list
+        super().__init__()
+
+    def run(self):
+        send_mail(
+            subject=self.subject,
+            message=self.message,
+            from_email=self.from_email,
+            recipient_list=self.recipient_list,
+            fail_silently=False,
+        )
+
+def send_email_in_background(subject, message, from_email, recipient_list):
+    EmailThread(subject, message, from_email, recipient_list).start()
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     """ Serializer for changing password. """
@@ -16,8 +38,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_otp(self, value):
         """ Ensure the old password is correct. """
-        username = self.context['username']
-        user = User.objects.get(username = username)
+        user = self.context['request'].user
         if user.otp != value  or not user.is_otp_valid():
             raise serializers.ValidationError("OTP expired or wrong")
             # else: raise serializers.ValidationError("Old password is incorrect.")
@@ -26,24 +47,24 @@ class ChangePasswordSerializer(serializers.Serializer):
         if(len(value) < 4):
             raise serializers.ValidationError("Password Length must be greater than 4")
         return value
-# class ChangePasswordSerializer(serializers.Serializer):
-#     """ Serializer for changing password. """
-#     """either provide old password or otp"""
-#     # old_password = serializers.CharField(write_only=True, required=False)
-#     newpassword = serializers.CharField(write_only=True, required=True)
-#     otp = serializers.CharField(max_length=6)
+class ChangePasswordSerializer(serializers.Serializer):
+    """ Serializer for changing password. """
+    """either provide old password or otp"""
+    # old_password = serializers.CharField(write_only=True, required=False)
+    newpassword = serializers.CharField(write_only=True, required=True)
+    otp = serializers.CharField(max_length=6)
 
-#     def validate_otp(self, value):
-#         """ Ensure the old password is correct. """
-#         user = self.context['request'].user
-#         if user.otp != value  or not user.is_otp_valid():
-#             raise serializers.ValidationError("OTP expired or wrong")
-#             # else: raise serializers.ValidationError("Old password is incorrect.")
-#         return value
-#     def validate_newpassword(self, value):
-#         if(len(value) < 4):
-#             raise serializers.ValidationError("Password Length must be greater than 4")
-#         return value
+    def validate_otp(self, value):
+        """ Ensure the old password is correct. """
+        user = self.context['request'].user
+        if user.otp != value  or not user.is_otp_valid():
+            raise serializers.ValidationError("OTP expired or wrong")
+            # else: raise serializers.ValidationError("Old password is incorrect.")
+        return value
+    def validate_newpassword(self, value):
+        if(len(value) < 4):
+            raise serializers.ValidationError("Password Length must be greater than 4")
+        return value
 
 from rest_framework import serializers
 from .models import User, Authority, UserAuthority
@@ -91,38 +112,13 @@ class UserSerializer(serializers.ModelSerializer):
         return UserAuthoritySerializer(user_auths, many=True).data
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)  # Remove password from validated_data
+        password = get_random_string(8)  # Default password if not provided
         authorities_ids = validated_data.pop('authorities', [])
         with transaction.atomic():  # Ensures rollback if anything fails
             user = User.objects.create(**validated_data)
-        # user = User.objects.create(**validated_data)  # Create user without password
-        #If password provided then ok else generate a random one
-        if password:
-            pswd = password
-            # Hash password manually
-        else:
-            pswd = get_random_string(5) 
-            # Generate a 12-character password
-        
-        # send_mail(
-        #     'LHC booking portal Account Created!',
-        #     f"""An Account with your email has been created by the IITK LHC Office. 
-        #     Use these details to access the Online Booking portal.
-        #     username : {user.username}
-        #     password : {pswd}
-        #     email : {user.email}
-        #     role : {user.role}
-            
-        #     Happy Booking!
-            
-            
-        #     LHC Office.
-        #     IIT-K 
-            
-        #     """,
-        #     settings.DEFAULT_FROM_EMAIL,
-        #     [user.email],
-        # )
+            user.set_password(password)
+            user.save()  # Save the user first to get the ID
+
         for order, authority_id in enumerate(authorities_ids):
                 try:
                     authority_instance = Authority.objects.get(id=authority_id)
@@ -134,21 +130,22 @@ class UserSerializer(serializers.ModelSerializer):
         user_auths = user.get_ordered_authorities()
         authority_names = ", ".join([ua.authority.name for ua in user_auths])
 
-        send_mail(
-            'Your New Account Details',
-            (
-                f'Hello {user.username},\n\nYour account has been created successfully!\n'
-                f'Your login credentials:\n'
-                f'Username: {user.username}\n'
-                f'Password: {user.password}\n'
-                f'Your clearance authorities (in order): {authority_names}'
-            ),
-            settings.EMAIL_HOST_USER,  # Sender email
-            [user.email],  # Recipient email
-            fail_silently=False,
-        )
+        send_email_in_background(
+    subject='Your New Account Details',
+    message=(
+        f"Hello {user.username},\n\n"
+        "Your account has been created successfully!\n"
+        "Your login credentials:\n"
+        f"Username: {user.username}\n"
+        f"Password: {password}\n"
+        f"Your clearance authorities (in order): {authority_names}"
+    ),
+    from_email=settings.EMAIL_HOST_USER,
+    recipient_list=[user.email],
+)
+
             
-        user.set_password(pswd)
+        # user.set_password(pswd)
         
         user.save()  # Save the hashed password
         return user
@@ -186,123 +183,3 @@ class UserAuthorityCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return UserAuthority.objects.create(**validated_data)
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'role', 'authority_email', 'password']
-#         extra_kwargs = {
-#             'password': {'write_only': True}  # Ensure password is write-only
-#         }
-
-#     def create(self, validated_data):
-#         user = User.objects.create_user(
-#             username=validated_data['username'],
-#             email=validated_data['email'],
-#             password=validated_data['password'],
-#             role=validated_data.get('role', 'Student'),  # Default role is 'Student'
-#             authority_email=validated_data.get('authority_email', None)
-#         )
-#         # user.set_password()
-#         return user
-
-#     def update(self, instance, validated_data):
-#         instance.username = validated_data.get('username', instance.username)
-#         instance.email = validated_data.get('email', instance.email)
-#         instance.role = validated_data.get('role', instance.role)
-#         instance.authority_email = validated_data.get('authority_email', instance.authority_email)
-#         if 'password' in validated_data:
-#             instance.set_password(validated_data['password'])
-#         instance.save()
-#         return instance
-
-# class UserSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'password', 'role']
-#         extra_kwargs = {
-#             'password': {'write_only': True},
-#             'role': {'read_only': True},  # Role should not be set directly by the user
-#         }
-
-#     def create(self, validated_data):
-#         """Create a new user with the validated data."""
-#         # Create the user
-#         user = User.objects.create_user(**validated_data)
-#         return user
-
-#     def update(self, instance, validated_data):
-#         """Update an existing user."""
-#         # Update the user
-#         instance.username = validated_data.get('username', instance.username)
-#         instance.email = validated_data.get('email', instance.email)
-#         if 'password' in validated_data:
-#             instance.set_password(validated_data['password'])
-#         instance.save()
-#         return instance
-    
-
-# class UserSerializer(serializers.ModelSerializer):
-#     """
-#     Secure User Serializer for creating and updating users.
-#     Handles password hashing and ensures sensitive fields are not exposed.
-#     """
-#     email = serializers.EmailField(
-#         required=True,
-#         validators=[UniqueValidator(queryset=User.objects.all())]
-#     )
-#     username = serializers.CharField(
-#         required=True,
-#         validators=[UniqueValidator(queryset=User.objects.all())]
-#     )
-#     password = serializers.CharField(
-#         write_only=True,  # Password is never returned in the response
-#         required=True,
-#         validators=[validate_password]  # Enforce strong password validation
-#     )
-#     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, required=True)
-
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 'role']
-#         extra_kwargs = {
-#             'password': {'write_only': True},  # Ensure password is never returned
-#             'id': {'read_only': True},  # ID is auto-generated and should not be editable
-#         }
-
-#     def create(self, validated_data):
-#         """
-#         Create and return a new user instance with a hashed password.
-#         """
-#         user = User(
-#             username=validated_data['username'],
-#             email=validated_data['email'],
-#             first_name=validated_data.get('first_name', ''),
-#             last_name=validated_data.get('last_name', ''),
-#             role=validated_data['role'],
-#         )
-#         user.set_password(validated_data['password'])  # Hash the password
-#         user.save()
-#         return user
-
-#     def update(self, instance, validated_data):
-#         """
-#         Update and return an existing user instance.
-#         Handles password hashing if the password is provided.
-#         """
-#         instance.username = validated_data.get('username', instance.username)
-#         instance.email = validated_data.get('email', instance.email)
-#         instance.first_name = validated_data.get('first_name', instance.first_name)
-#         instance.last_name = validated_data.get('last_name', instance.last_name)
-#         instance.role = validated_data.get('role', instance.role)
-
-#         # Handle password update
-#         password = validated_data.get('password')
-#         if password:
-#             instance.set_password(password)  # Hash the new password
-
-#         instance.save()
-#         return instance
-

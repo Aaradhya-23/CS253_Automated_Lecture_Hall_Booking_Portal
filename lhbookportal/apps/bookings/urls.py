@@ -1,9 +1,10 @@
+
 from django.urls import path
 
 from .views import *
 
 urlpatterns = [
-    path('booking/', BookingCRUDView.as_view()),  # List bookings shifted to '/'
+    # path('booking/', BookingCRUDView.as_view()),  # List bookings shifted to '/'
     # removed 'booking' keyword as it was becoming redundant --> bookings/booking/new_booking --> bookings/new_bookings
     path('new_booking/', BookingCRUDView.as_view(), name='new_booking'), # create bookings 
     path('<int:pk>/', BookingCRUDView.as_view()),  # Retrieve, update, delete a specific booking

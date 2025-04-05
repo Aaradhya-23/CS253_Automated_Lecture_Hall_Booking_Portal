@@ -1,0 +1,158 @@
+.otp-request-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ebecf4, #ded9da);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+  }
+  
+  .otp-request-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+    margin-top: 20px;
+  }
+  
+  .otp-request-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .otp-request-title {
+    color: #343a40;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .otp-request-title-icon {
+    margin-right: 10px;
+    font-size: 1.8rem;
+    color: #3f5efb;
+  }
+  
+  .otp-request-description {
+    color: #6c757d;
+    margin-bottom: 30px;
+    font-size: 1rem;
+  }
+  
+  .otp-request-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .otp-request-input-group {
+    position: relative;
+    margin-bottom: 25px;
+  }
+  
+  .otp-request-input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+    font-size: 1.2rem;
+  }
+  
+  .otp-request-input-field {
+    padding: 10px 15px 15px 45px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #495057;
+    transition: border-color 0.3s ease;
+    width: 100%;
+  }
+  
+  .otp-request-input-field:focus {
+    outline: none;
+    border-color: #3f5efb;
+    box-shadow: 0 0 0 2px rgba(63, 94, 251, 0.2);
+  }
+  
+  .otp-request-submit-button {
+    background-color: #3f5efb;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .otp-request-submit-button:hover {
+    background-color: #5a77fa;
+  }
+  
+  .otp-request-submit-button:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+  }
+  
+  .otp-request-submit-button.loading {
+    color: rgba(255, 255, 255, 0.8);
+    cursor: wait;
+  }
+  
+  .otp-request-submit-button.loading::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    animation: pulse 1.5s infinite;
+    border-radius: 8px;
+  }
+  
+  @keyframes pulse {
+    0% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.5;
+    }
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .otp-request-card {
+      padding: 30px;
+    }
+  
+    .otp-request-title {
+      font-size: 1.8rem;
+    }
+  
+    .otp-request-description {
+      font-size: 0.9rem;
+    }
+  
+    .otp-request-input-field {
+      font-size: 0.9rem;
+    }
+  
+    .otp-request-submit-button {
+      font-size: 1rem;
+    }
+  }
+  
