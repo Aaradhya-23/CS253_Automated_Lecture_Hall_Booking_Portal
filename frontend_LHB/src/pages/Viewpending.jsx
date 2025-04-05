@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './Viewpending.css'; // Import the CSS file
 import api from '../api/api';
 import { ACCESS_TOKEN } from '../api/constants';
+import { AnimatePresence, motion } from "framer-motion"; // Import Framer Motion
+
 const Viewpending = () => {
     const [pendingBookings, setPendingBookings] = useState([]);
     const [rejectionRemarksVisible, setRejectionRemarksVisible] = useState({});
@@ -86,31 +88,46 @@ const Viewpending = () => {
         }
     };
     return (
-        <div className="pending-bookings-main">
+        <motion.div
+         className="pending-bookings-main"
+         initial={{ opacity: 0, y: 20 }} // Initial state for animation
+        animate={{ opacity: 1, y: 0 }} // Final state for animation
+        transition={{ duration: 0.6 }}
+         >
             <h2>Pending Bookings</h2>
-            <div>
+
+            {/* Animated Pending Bookings */}
+            <AnimatePresence>
                 {pendingBookings.map((booking) => (
-                    <div key={booking.id} className="pending-booking-item">
+                    <motion.div
+                        key={booking.id}
+                        className="pending-booking-item"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
                         <div className="pending-booking-content">
-                        <div className="pending-booking-details">
-                        <div className="pending-booking-course">{booking.course}</div>
+                            <div className="pending-booking-details">
+                                <div className="pending-booking-course">{booking.course}</div>
+                                <div className="pending-booking-grid">
+                                    <div className="pending-booking-header">User</div>
+                                    <div className="pending-booking-header">Room</div>
+                                    <div className="pending-booking-header">Date of booking</div>
+                                    <div className="pending-booking-header">Time</div>
 
-                        <div className="pending-booking-grid">
-                            <div className="pending-booking-header">User</div>
-                            <div className="pending-booking-header">Room</div>
-                            <div className="pending-booking-header">Date of booking</div>
-                            <div className="pending-booking-header">Time</div>
-
-                            <div className="pending-booking-value">{booking.user}</div>
-                            <div className="pending-booking-value">{booking.room}</div>
-                            <div className="pending-booking-value">{booking.date}</div>
-                            <div className="pending-booking-value">{booking.time} {booking.duration}</div>
-                        </div>
-
-                        <div className="pending-booking-requested">
-                            Requested on: {booking.requestedDay}, {booking.requestedDate} at {booking.requestedTime}
-                        </div>
-                    </div>
+                                    <div className="pending-booking-value">{booking.user}</div>
+                                    <div className="pending-booking-value">{booking.room}</div>
+                                    <div className="pending-booking-value">{booking.date}</div>
+                                    <div className="pending-booking-value">
+                                        {booking.time} {booking.duration}
+                                    </div>
+                                </div>
+                                <div className="pending-booking-requested">
+                                    Requested on: {booking.requestedDay}, {booking.requestedDate} at{" "}
+                                    {booking.requestedTime}
+                                </div>
+                            </div>
                             <div className="pending-booking-actions">
                                 <button
                                     onClick={() => handleReject(booking.id)}
@@ -121,31 +138,43 @@ const Viewpending = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* Rejection Remarks Input - Changed to use rejectionRemarksVisible */}
-                        {rejectionRemarksVisible[booking.id] && (
-                            <div className="pending-rejection-section">
-                                <input
-                                    type="text"
-                                    placeholder="Enter rejection remarks"
-                                    className="pending-rejection-input"
-                                    value={rejectionRemarksContent[booking.id] || ''}
-                                    onChange={(e) => setRejectionRemarksContent(prev => ({
-                                        ...prev,
-                                        [booking.id]: e.target.value
-                                    }))}
-                                />
-                                <button
-                                    onClick={() => handleSubmitRejection(booking.id)}
-                                    className="pending-rejection-submit"
+
+                        {/* Animated Rejection Remarks */}
+                        <AnimatePresence>
+                            {rejectionRemarksVisible[booking.id] && (
+                                <motion.div
+                                    className="pending-rejection-section"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ duration: 0.3 }}
                                 >
-                                    Submit Remarks
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter rejection remarks"
+                                        className="pending-rejection-input"
+                                        value={rejectionRemarksContent[booking.id] || ""}
+                                        onChange={(e) =>
+                                            setRejectionRemarksContent((prev) => ({
+                                                ...prev,
+                                                [booking.id]: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <button
+                                        onClick={() => handleSubmitRejection(booking.id)}
+                                        className="pending-rejection-submit"
+                                    >
+                                        Submit Remarks
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
                 ))}
-            </div>
-        </div>
+            </AnimatePresence>
+        </motion.div>
     );
 };
+
 export default Viewpending;

@@ -130,6 +130,19 @@
 .booking-tooltip-detail {
   margin-bottom: 3px;
 }
+/* Add to your CSS file */
+.date-picker-container {
+  position: absolute; /* or fixed */
+  z-index: 9999;
+  top: 100px; /* adjust to fit your layout */
+  left: 100px; /* adjust to fit your layout */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
 @media (max-width: 768px) {
   .dropdown-container {
     flex-direction: column;
