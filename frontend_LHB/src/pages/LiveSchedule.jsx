@@ -355,6 +355,10 @@ import "./LiveSchedule.css"; // Import the new CSS file
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../api/api";
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 const LiveSchedule = () => {
@@ -533,6 +537,17 @@ const LiveSchedule = () => {
     console.log("here")
     setCurrentView(arg.view.type); // this ensures state tracks current view
   };
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.showLoginToast) {
+      toast.success("Login successful!", {
+        position: "top-right",
+        autoClose: 1000,
+      });
+    }
+  }, [location]);
+
   return (
     <motion.div
       className="calendar-container"
@@ -540,6 +555,7 @@ const LiveSchedule = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
+      
       <motion.div
         className="dropdown-container"
         initial={{ opacity: 0, y: -10 }}
@@ -620,7 +636,18 @@ const LiveSchedule = () => {
           }}
         />
       </motion.div>
-      
+      <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
       <AnimatePresence>
         {isDatePickerOpen && (
           <motion.div

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import './Bookingdetails.css';
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import FRONTEND_ROUTES from '../frontend_urls';
 import { motion } from 'framer-motion';
 // Transformation function
@@ -43,7 +46,7 @@ function BookingDetails() {
       const token = localStorage.getItem('ACCESS_TOKEN');
       if (!token) {
         console.error("No ACCESS_TOKEN found in localStorage.");
-        setError("User not authenticated. Please log in.");
+        toast.error("User not authenticated. Please log in.");
         setLoading(false);
         return;
       }
@@ -60,7 +63,7 @@ function BookingDetails() {
         const transformedBookingData = transformBookingData([response.data]);
         setBookingData(transformedBookingData[0]);
       } catch (err) {
-        setError('Failed to fetch booking details.');
+        toast.error('Failed to fetch booking details.');
       } finally {
         setLoading(false);
       }
@@ -101,7 +104,7 @@ function BookingDetails() {
         window.location.href = FRONTEND_ROUTES.adminViewBooking;
       }, 3000);
     } catch (error) {
-      console.error("Error removing booking:", error);
+      toast.error("Error removing booking:", error);
 
       // Show error notification
       const notification = document.createElement('div');
@@ -134,6 +137,7 @@ function BookingDetails() {
   );
   return (
     <div className="bd-container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <motion.button
         onClick={handleBack}
         className="bd-back-button"

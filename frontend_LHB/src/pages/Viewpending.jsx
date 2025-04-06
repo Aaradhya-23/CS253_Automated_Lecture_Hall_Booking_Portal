@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './Viewpending.css';
 import api from '../api/api';
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { ACCESS_TOKEN } from '../api/constants';
 import { AnimatePresence, motion } from "framer-motion";
 // Import Lucide icons instead of FontAwesome for consistency with Status component
@@ -128,8 +131,8 @@ const Viewpending = () => {
     
     const handleSubmitRejection = async (bookingId) => {
         const remarks = rejectionRemarksContent[bookingId] || '';
-        if (!remarks.trim()) {
-            alert("Please enter rejection remarks.");
+        if (!(remarks ?? "").trim()) {
+            toast.error("Please enter rejection remarks.");
             return;
         }
         
@@ -169,6 +172,18 @@ const Viewpending = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
         >
+            <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="colored"
+                  />
             <h2>Pending Bookings</h2>
             
             <AnimatePresence>

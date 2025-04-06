@@ -7,6 +7,7 @@ import {
   Presentation,
   Mic,
   HelpCircle,
+  Wind,
 } from "lucide-react";
 import "./RoomDetails.css";
 import { assets } from "../assets/assets";
@@ -14,11 +15,12 @@ import { ACCESS_TOKEN } from "../api/constants";
 import api from "../api/api";
 
 const accessoryIcons = {
-  projector: Projector,
-  computer: Computer,
-  microphone: Mic,
-  speaker_system: Speaker,
-  whiteboard: Presentation,
+  AC: Wind,
+  Projector: Projector,
+  Computer: Computer,
+  Microphone: Mic,
+  Speaker_system: Speaker,
+  Whiteboard: Presentation,
   default: HelpCircle,
 };
 

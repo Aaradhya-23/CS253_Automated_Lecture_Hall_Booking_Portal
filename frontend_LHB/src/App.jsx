@@ -31,7 +31,7 @@ import FRONTEND_ROUTES from './frontend_urls';
 import ProtectedRoute from "./api/protected_route";
 import api from "./api/api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./api/constants";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Importing CSS for toast notifications
 // import ForgotPassword from "./pages/ForgotPassword";
 
@@ -84,7 +84,13 @@ const App = () => {
       localStorage.setItem('USERNAME', username);
       setUserRole(role);
       setIsLoggedIn(true);
-      navigate(FRONTEND_ROUTES.home)
+      toast.success("Login successful!",{
+        position: "top-right",
+        autoClose: 2000,
+      });
+      navigate(FRONTEND_ROUTES.home, {
+        state: { showLoginToast: true }
+      });
     } catch (error) {
       console.error('Login failed:', error.response?.data?.detail || error.message);
       throw error; // Throw error to handle it in the Login component
@@ -257,6 +263,7 @@ const App = () => {
 
           </Routes>
         </div>
+        {/* <ToastContainer/> */}
       </div>
     </div>
   );

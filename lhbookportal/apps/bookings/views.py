@@ -313,7 +313,23 @@ class BookingCRUDView(
             settings.DEFAULT_FROM_EMAIL,
             [booking.creator.email]
             )
-            
+            send_email_in_background(
+        subject="[LHC OFFICE] Booking Details",
+        message=f"""
+
+User       : {booking.creator.username}
+Purpose    : {booking.title}
+Remarks    : {booking.remarks}
+Room       : {booking.room.name}
+Date       : {booking.booking_date}
+Time       : {booking.start_time} - {booking.end_time}
+Requested On: {booking.requested_on}
+Total Cost : ₹{booking.cost}
+
+""",
+        from_email="no-reply@yourdomain.com",
+        recipient_list=["bhavya0525@gmail.com"], #accounts email to be addeded
+    )
             return  # Skip email for faculty
         
         
@@ -362,7 +378,6 @@ class BookingCRUDView(
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
-    
     # DELETE: Delete a booking
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
