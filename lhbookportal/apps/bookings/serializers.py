@@ -105,7 +105,7 @@ class BookingSerializer(serializers.ModelSerializer):
         # print(Holiday)
         holidays = Holiday.objects.filter(date=booking_date)
         if holidays.exists() or booking_date.weekday() == 6:
-            raise serializers.ValidationError("Bookings cannot be made on holidays.")
+            raise serializers.ValidationError(f"Bookings cannot be made on holidays. HOLIDAY : {holidays[0].name}")
 
         # # Convert to time objects if they are strings
         if isinstance(start_time, str):

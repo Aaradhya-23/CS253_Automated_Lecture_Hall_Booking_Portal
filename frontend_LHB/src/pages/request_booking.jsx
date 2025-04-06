@@ -329,6 +329,7 @@ const handleConfirmSubmit = async () => {
       setCapacity("");
       setAccessoryOptions([]);
     } else {
+      
       setShowError(true);
       setShowSuccess(false);
       setTimeout(() => setShowError(false), 5000);
