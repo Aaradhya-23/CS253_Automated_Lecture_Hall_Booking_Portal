@@ -84,17 +84,23 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         # exclude = ['otp', 'otp_created_at']
         fields = ['username', 'email', 'role', 'authorities', 'password',"ordered_authorities"]
-        extra_kwargs = {'password': {'write_only': True, 'required' : False},
+        extra_kwargs = {'password': {'write_only': True, 'required' : False, 'allow_blank' : True},
             'otp' : {'required' : 'False'},
             'otp_created_at' : { 'required' : 'False'}
           }
         read_only_fields = ['total_bill']
+
+    def validate(self, data):
+        if not data.get('password') or data['password'].strip() == "":
+            data['password'] = get_random_string(8)
+        return data
 
     def get_ordered_authorities(self, obj):
         user_auths = obj.get_ordered_authorities()
         return UserAuthoritySerializer(user_auths, many=True).data
 
     def create(self, validated_data):
+        # if validated_data.get('password'):
         password = get_random_string(8)  # Default password if not provided
         authorities_ids = validated_data.pop('authorities', [])
         with transaction.atomic():  # Ensures rollback if anything fails

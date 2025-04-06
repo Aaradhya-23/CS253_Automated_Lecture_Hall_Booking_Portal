@@ -149,10 +149,13 @@ const CreateUser = () => {
       setFormData({
         username: "",
         email: "",
+        password: "",
         role: "",
         authorities: [],
       });
     } catch (error) {
+
+      
       console.error("Error creating user:", error.response?.data || error.message);
       
       // Extract the specific error message
@@ -178,6 +181,10 @@ const CreateUser = () => {
       } else if (error.message) {
         errorMessage = error.message;
       }
+      const errorData = error.response?.data;
+      const firstField = Object.keys(errorData)[0];
+      const firstErrorMessage = errorData[firstField][0]; // "OTP expired or wrong"
+      errorMessage = firstErrorMessage;
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -238,7 +245,7 @@ const CreateUser = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required
+                // required
                 autoComplete="new-password"
               />
             </div> */}
