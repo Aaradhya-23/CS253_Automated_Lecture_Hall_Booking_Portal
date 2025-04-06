@@ -230,7 +230,9 @@ class BookingCRUDView(
         print("Validated Data:", validated_data)  # Debugging step
 
         user = self.request.user  # Default to the logged-in user
-
+        admin_is_booking = False;
+        if self.request.user.role == 'admin': admin_is_booking = True 
+        # print("----------------------------------", self.request.user)
         # Check if 'user' exists in request.data (before validation)
         if 'user' in self.request.data and self.request.data['user'] != 'INVALID':
             user = get_object_or_404(User, username=self.request.data['user'])
@@ -285,7 +287,7 @@ class BookingCRUDView(
         requested_on = timezone.now()
         # booking_token = {auth.email: str(uuid.uuid4())}
         # Save the booking
-        if user.role == 'faculty':
+        if user.role == 'faculty' or admin_is_booking:
             booking = serializer.save(
                 creator=user,
                 title=title,  # Ensure title is saved
@@ -301,13 +303,20 @@ class BookingCRUDView(
                 accessories=accessories,
                 remarks=remarks,
             )  
-
+            #send mail
+            send_email_in_background(
+            'Booking Approved',
+            f"""
+            Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
+            Your bill amount is : ₹{booking.cost}
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.creator.email]
+            )
+            
             return  # Skip email for faculty
         
-        print("----------------------------------------------------------------------------------------------------------------------------")
-        print(1)
-        print("----------------------------------------------------------------------------------------------------------------------------")
-        # multiple authority email
+        
         authorities = user.authorities.order_by('userauthority__order')
         approvals_pending = {auth.email: False for auth in authorities}
         authority_tokens = {auth.email: str(uuid.uuid4()) for auth in authorities}
@@ -334,16 +343,9 @@ class BookingCRUDView(
             remarks=remarks,
         )
         first_authority_email = next(iter(booking.approvals_pending.keys()), None)
-        print(first_authority_email)
-        print("----------------------------------------------------------------------------------------------------------------------------")
-        print(2)
-        print("----------------------------------------------------------------------------------------------------------------------------")
         
-        print()
+        
         if first_authority_email:
-            print("----------------------------------------------------------------------------------------------------------------------------")
-            print(3)
-            print("----------------------------------------------------------------------------------------------------------------------------")
             send_approval_email(first_authority_email, booking)
 
             # return render(request, "bookings/Confirmed.html", status=200)

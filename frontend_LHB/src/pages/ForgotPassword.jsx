@@ -41,7 +41,7 @@ const ForgotPassword = () => {
       setIsSuccess(true);
       setMessage('Password reset successful!');
     } catch (err) {
-      console.log(err.response.data['otp'])
+      // console.log(err.response.data['otp'])
       const errorData = err.response?.data;
       const firstField = Object.keys(errorData)[0];
       const firstErrorMessage = errorData[firstField][0]; // "OTP expired or wrong"
