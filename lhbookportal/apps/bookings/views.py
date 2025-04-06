@@ -285,7 +285,8 @@ class BookingCRUDView(
         requested_on = timezone.now()
         # booking_token = {auth.email: str(uuid.uuid4())}
         # Save the booking
-        if user.role == 'faculty':
+        if user.role == 'faculty' or user.role == 'admin':
+            # If the user is a faculty or admin, save the booking without sending an email
             booking = serializer.save(
                 creator=user,
                 title=title,  # Ensure title is saved
@@ -523,17 +524,6 @@ def approve_booking(request):
             Q(start_time__lt=booking.end_time, end_time__gt=booking.start_time) 
     )  # Exclude cancelled bookings
 
-    if(pending_bookings_same_slot.exists()):
-        for pending in pending_bookings_same_slot:
-            if pending.status == 'pending':
-                pending.status = 'rejected'
-                send_mail(
-                'Booking Rejected',
-                f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
-                settings.DEFAULT_FROM_EMAIL,
-                [ pending.creator.email ],
-            )  
-                pending.delete()
 
     authority_email = next(
         (email for email, token in booking.authority_tokens.items() if token == authority_token),
@@ -551,6 +541,7 @@ def approve_booking(request):
     booking.save()
 
     if all(booking.approvals_pending.values()):
+        # All authorities have approved the booking
         booking.status = "Approved"
         booking.decision_time = timezone.now()
         booking.save()
@@ -584,6 +575,17 @@ Total Cost : ₹{booking.cost}
         from_email="no-reply@yourdomain.com",
         recipient_list=["bhavya0525@gmail.com"], #accounts email to be addeded
     )
+        if(pending_bookings_same_slot.exists()):
+            for pending in pending_bookings_same_slot:
+                if pending.status == 'pending':
+                    pending.status = 'rejected'
+                    send_mail(
+                    'Booking Rejected',
+                    f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [ pending.creator.email ],
+                )  
+                    pending.delete()
 
 
         return render(request, "bookings/Confirmed.html", context={}, status=200)
