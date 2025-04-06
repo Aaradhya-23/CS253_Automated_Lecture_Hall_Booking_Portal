@@ -104,56 +104,67 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
 class SendOTP(APIView):
     permission_classes = [Issameuser]
-
     def post(self, request, *args, **kwargs):
-        user = request.user
+        email = request.data.get('email')
         otp_code = str(random.randint(100000, 999999))
 
         # Update user model with new OTP
+        user = User.objects.get(email = email)
         user.otp = otp_code
         user.otp_created_at = now()
         user.save()
-
-        # Compose email
-        subject = '[LHC Office] OTP for password reset'
-        message = f"""
-Your OTP to reset your account password is:
-{otp_code}
-Please do not share this with anyone.
-Valid for 10 minutes.
-"""
-
-        # Send email in background
-        send_email_in_background(
-            subject,
-            message,
+        send_mail(
+                '[LHC Office] OTP for password reset',
+                f"""Your OTP to reset your account password is :
+                {otp_code}
+                Please do not share this with anyone. 
+                Valid for 10 minutes.
+                
+            """,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
-        )
-
-        return Response({"message": "OTP sent successfully"}, status=status.HTTP_200_OK)    
-
-# class ChangePasswordView(APIView):
-#     """ Allow users to change their password. """
-#     permission_classes = [Issameuser]
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
-        
-#         if serializer.is_valid():
-#             user = request.user
-#             user.set_password(serializer.validated_data['newpassword'])
-#             user.save()
-#             send_mail(
-#                 '[LHC Office] Password Updated Successfully',
-#                 f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
-                
-#             """,
-#             settings.DEFAULT_FROM_EMAIL,
-#             [user.email],
             
-#             )
-#             return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+        )
+        return Response({"message": "OPT send successfully"}, status=status.HTTP_200_OK)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ChangePasswordView(APIView):
+    """ Allow users to change their password. """
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        
+        userid = request.data.get('username')
+        # print(request.data.get('new_password'))
+        user = User.objects.get(username = userid)
+        serializer = ChangePasswordSerializer(data=request.data, context={'user': user})
+        
+        if serializer.is_valid():
+            # user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            send_mail(
+                '[LHC Office] Password Updated Successfully',
+                f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
+                
+            """,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            
+            )
+            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+        print("Serializer errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AuthorityViewSet(ReadOnlyModelViewSet):  
+    """
+    View for listing existing authorities.
+    Only accessible by admins.
+    """
+    queryset = Authority.objects.all() 
+    serializer_class = AuthoritySerializer
+    permission_classes = [IsAdmin]  
 
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

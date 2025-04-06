@@ -18,7 +18,7 @@ const OTPRequest = () => {
     setLoading(true);
 
     try {
-      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}accounts/request_reset/`, {
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}accounts/users/generate_otp/`, {
         email,
         username,
       });

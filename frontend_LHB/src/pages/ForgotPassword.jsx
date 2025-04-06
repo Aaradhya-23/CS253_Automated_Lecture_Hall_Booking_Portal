@@ -32,8 +32,8 @@ const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      await api.post(`${import.meta.env.VITE_API_BASE_URL}accounts/verify_reset/`, {
-        user_id: userId,
+      await api.post(`${import.meta.env.VITE_API_BASE_URL}accounts/users/change_password/`, {
+        username,
         otp,
         new_password: newPassword,
       });
@@ -41,7 +41,12 @@ const ForgotPassword = () => {
       setIsSuccess(true);
       setMessage('Password reset successful!');
     } catch (err) {
-      setMessage(err.response?.data?.error || 'Error resetting password');
+      console.log(err.response.data['otp'])
+      const errorData = err.response?.data;
+      const firstField = Object.keys(errorData)[0];
+      const firstErrorMessage = errorData[firstField][0]; // "OTP expired or wrong"
+      setMessage(firstErrorMessage);
+      // setMessage(err.response?.data?.error || 'Error resetting password');
     } finally {
       setLoading(false);
     }
