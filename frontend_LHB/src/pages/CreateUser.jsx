@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 const CreateUser = () => {
   const [formData, setFormData] = useState({
     username: "",
-    password: "",
     email: "",
     role: "",
     authorities: [], // Unified list of existing and new authorities
@@ -107,7 +106,6 @@ const CreateUser = () => {
   const validateForm = () => {
     if (
       !formData.username ||
-      // !formData.password ||
       !formData.email ||
       !formData.role
     ) {
@@ -137,7 +135,6 @@ const CreateUser = () => {
       username: formData.username,
       email: formData.email,
       role: formData.role,
-      password: formData.password,
       authorities: formData.authorities.map((auth) => auth.id),
     };
 
@@ -151,8 +148,8 @@ const CreateUser = () => {
       toast.success("User created successfully!");
       setFormData({
         username: "",
-        password: "",
         email: "",
+        password: "",
         role: "",
         authorities: [],
       });
@@ -239,7 +236,7 @@ const CreateUser = () => {
               />
             </div>
 
-            <div className="form-column">
+            {/* <div className="form-column">
               <label htmlFor="password">Password :</label>
               <input
                 type="password"
@@ -251,7 +248,7 @@ const CreateUser = () => {
                 // required
                 autoComplete="new-password"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="form-row">
