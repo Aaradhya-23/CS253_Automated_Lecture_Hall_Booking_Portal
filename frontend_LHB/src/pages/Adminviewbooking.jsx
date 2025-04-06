@@ -4,8 +4,10 @@ import { AnimatePresence, motion } from "framer-motion"; // Import Framer Motion
 // import axios from 'axios';
 import api from '../api/api';
 import './Adminviewbooking.css';
+import { toast,ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css"; // Importing toast for notifications
 
-const HISTORY_URL = import.meta.env.VITE_API_BASE_URL; // API Endpoint
+// const HISTORY_URL = import.meta.env.VITE_API_BASE_URL; // API Endpoint
 
 const convertTo12HourFormat = (time) => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -58,7 +60,7 @@ function Adminviewbooking() {
       }
 
       try {
-        const response = await api.get(`${HISTORY_URL}?status=approved/`, {
+        const response = await api.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?status=approved`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -127,9 +129,8 @@ function Adminviewbooking() {
     console.log(`Removing booking with ID: ${id}`);
     const token = localStorage.getItem('ACCESS_TOKEN');
     try {
-        await api.post(
-            `${import.meta.env.VITE_API_BASE_URL}bookings/send-rejected-mail/${id}/`,
-            { remark: "Your booking was removed by admin" },  // Fixed remark
+        await api.delete(
+            `${import.meta.env.VITE_API_BASE_URL}bookings/${id}/`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -138,15 +139,16 @@ function Adminviewbooking() {
                 },
             }
         );
-
-        console.log(`Rejection email sent for booking ${id}.`);
-        alert("Booking removed, email sent to user.");
-
+        
+        // console.log(`Rejection email sent for booking ${id}.`);
+        // alert("Booking removed, email sent to user.");
+        toast.success("Booking removed successfully!\nPlease refresh the page to load changes.");
+        navigate('/admin-view-booking'); // Redirect to the same page to refresh the list
         // Close dropdown after successful removal
         setOpenDropdownId(null);
     } catch (error) {
         console.error("Error removing booking:", error);
-        alert("Error removing booking. Please try again.");
+        toast.error("Error removing booking. Please try again.");
     }
 };
 
@@ -171,6 +173,7 @@ function Adminviewbooking() {
       animate={{ opacity: 1, y: 0 }} // Final state for animation
       transition={{ duration: 0.6 }}
       >
+       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick />
       {/* Date Range Section */}
       <div className="admin-date-range-section">
         <div className="admin-date-selector" onClick={() => setEditingDate('start')}>

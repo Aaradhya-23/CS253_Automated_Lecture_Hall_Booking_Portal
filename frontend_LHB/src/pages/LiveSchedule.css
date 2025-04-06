@@ -156,13 +156,13 @@
   }
 }
 .fc-list-event {
-  /* background-color: #f8fafc !important; */
+  background-color: transparent !important;
   border-left: 3px solid #3b82f6;
   padding: 8px 12px;
   margin-bottom: 2px;
 }
 .fc-list-event:hover {
-  background-color: #f0f9ff;
+  background-color: transparent !important;
 }
 .fc-list-event-time {
   color: #4b5563;
@@ -180,6 +180,7 @@
 .fc-list-table td {
   padding: 8px;
   border-width: 0;
+  background-color: transparent !important;
 }
 .fc-list-day-cushion {
   background-color: #dbeafe;

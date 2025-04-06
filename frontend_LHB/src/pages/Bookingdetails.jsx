@@ -16,7 +16,7 @@ const transformBookingData = (backendBookingData) => {
     return {
       id: booking.id,
       title: booking.title,
-      approvalStatus: booking.status === 'approved' ? 'Approved' : 'Pending',
+      approvalStatus: booking.status === 'Approved' || booking.status === 'approved'  ? 'Approved' : 'Pending',
       room: `LHC - ${booking.room_details.name}`,
       Time: `${convertTo12HourFormat(booking.start_time)}-${convertTo12HourFormat(booking.end_time)}`,
       date: `${booking.booking_date}`,

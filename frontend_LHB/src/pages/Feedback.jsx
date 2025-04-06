@@ -1,4 +1,3 @@
-// import React, { useState } from 'react';
 import { ACCESS_TOKEN } from '../api/constants';
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';

@@ -21,7 +21,7 @@ import Adminviewbooking from "./pages/Adminviewbooking";
 import Viewpending from "./pages/Viewpending";
 import RoomDetails from "./pages/RoomDetails";
 import Bookingdetails from "./pages/Bookingdetails";
-import OTPRequest from "./pages/RequestOTP";
+import RequestOTP from "./pages/RequestOTP";
 import AdminFeedbackview from "./pages/AdminFeedbackview";
 // Import navbar components
 import UserNavbar from "./components/UserNavbar";
@@ -31,6 +31,8 @@ import FRONTEND_ROUTES from './frontend_urls';
 import ProtectedRoute from "./api/protected_route";
 import api from "./api/api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./api/constants";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Importing CSS for toast notifications
 // import ForgotPassword from "./pages/ForgotPassword";
 
 
@@ -118,6 +120,7 @@ const App = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      
       <Header
         isLoggedIn={isLoggedIn}
         userRole={userRole}
@@ -155,7 +158,7 @@ const App = () => {
               }
             />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/request-otp" element={<OTPRequest />} />
+            <Route path="/request-otp" element={<RequestOTP />} />
             {/* Protected route for registration (admin only) */}
             <Route
               path={FRONTEND_ROUTES.register}

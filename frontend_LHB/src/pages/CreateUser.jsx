@@ -3,6 +3,9 @@ import "./CreateUser.css";
 import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 import api from "../api/api";
 import { ACCESS_TOKEN } from "../api/constants";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Importing CSS for toast notifications
+import { useNavigate } from "react-router-dom";
 
 const CreateUser = () => {
   const [formData, setFormData] = useState({
@@ -142,7 +145,7 @@ const CreateUser = () => {
           "Content-Type": "application/json",
         },
       });
-      alert("User created successfully!");
+      toast.success("User created successfully!");
       setFormData({
         username: "",
         email: "",
@@ -150,11 +153,32 @@ const CreateUser = () => {
         authorities: [],
       });
     } catch (error) {
-      console.error(
-        "Error creating user:",
-        error.response?.data || error.message
-      );
-      setErrorMessage("Error creating user. Please try again.");
+      console.error("Error creating user:", error.response?.data || error.message);
+      
+      // Extract the specific error message
+      let errorMessage = "Error creating user";
+      
+      if (error.response?.data) {
+        // Handle username already exists error
+        if (error.response.data.username) {
+          errorMessage = `${error.response.data.username[0]}`;
+        } 
+        // Handle other field errors (if any)
+        else if (error.response.data.email) {
+          errorMessage = `Email error: ${error.response.data.email[0]}`;
+        }
+        // Handle generic message if present
+        else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+        // Handle case where the entire data object is the message
+        else if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -168,6 +192,18 @@ const CreateUser = () => {
       // exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.6 }}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div
         className="create-user-container"
         // initial={{ opacity: 0, scale: 0.95 }}

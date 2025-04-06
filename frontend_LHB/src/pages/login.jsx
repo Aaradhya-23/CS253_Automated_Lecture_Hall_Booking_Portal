@@ -145,6 +145,10 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import * as assets from '../assets/assets';
 import FRONTEND_ROUTES from '../frontend_urls';
+import {FaEye, FaEyeSlash, FaUser} from 'react-icons/fa';
+import {toast,ToastContainer} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css' // Importing icons for show/hide password
+// Backend Integration Comments remain unchanged
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -162,13 +166,14 @@ const Login = ({ onLogin }) => {
     
     try {
       await onLogin(username, password);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) {
-      setError(err?.response?.data?.detail || 'Invalid credentials. Please try again.');
-      setUsername('');
-    setPassword('');
-    setShowPassword(false);
+      toast.success('Login successful!'); // Show success message
+      // navigate(FRONTEND_ROUTES.home); // Redirect to the home page after successful login
+      setTimeout(() => {
+        // If navigation happens in parent, this won't help
+        navigate(FRONTEND_ROUTES.home);
+      }, 1500);
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -180,6 +185,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-page">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <div className="login-container">
         <div
           className="login-image-container"
@@ -254,7 +260,7 @@ const Login = ({ onLogin }) => {
                     required
                   />
                   <span className="input-icon">
-                    <i className="fas fa-user"></i>
+                    <FaUser />
                   </span>
                 </div>
               </div>
@@ -273,11 +279,11 @@ const Login = ({ onLogin }) => {
                   />
                   <button
                     type="button"
-                    className="input-icon clickable"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <i className="fas fa-eye-slash"></i> : <i className="fas fa-eye"></i>}
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
               </div>

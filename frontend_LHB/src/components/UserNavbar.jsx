@@ -18,11 +18,13 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
 
   return (
     <>
+      {/* Trigger Area for Navbar */}
       <div
         className="navbar-trigger-area"
         onMouseEnter={() => setIsVisible(true)}
       ></div>
 
+      {/* Sidebar with Framer Motion Animations */}
       <motion.div
         className="user-navbar"
         initial={{ x: -220, opacity: 0 }}
@@ -37,7 +39,7 @@ const UserNavbar = ({ onNavigate, currentPath }) => {
             onClick={() => onNavigate(item.path)}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, y: 20 }}
-            animate={isVisible ?{ opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
             className={`nav-item ${currentPath === item.path ? 'active' : ''}`}
           >
