@@ -169,14 +169,17 @@ class AuthorityCreateView(CreateAPIView):
 def request_reset_otp(request):
     email = request.data.get('email')
     username = request.data.get('username')
+    print(email, username)
+    # Validate input
 
     if not email or not username:
-        return Response({'error': 'Email and username are required'}, status=400)
+        return Response({'error': 'Email and username are required'}, status=404)
 
     try:
         user = User.objects.get(email=email)
-        user2 = User.objects.get(username=username)
-        if user != user2:
+        print(user.username, username)
+        # Check if the username matches the one associated with the email
+        if user.username != username :
             return Response({'error': 'User and registered email do not match'}, status=404)
         otp_code = str(random.randint(100000, 999999))
         hashed_otp = make_password(otp_code)

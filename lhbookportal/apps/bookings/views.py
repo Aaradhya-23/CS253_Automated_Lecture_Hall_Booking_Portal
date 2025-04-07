@@ -228,14 +228,21 @@ class BookingCRUDView(
         print("this is creation", self.request.data)
         validated_data = serializer.validated_data  
         print("Validated Data:", validated_data)  # Debugging step
-
         user = self.request.user  # Default to the logged-in user
+
+
+        # Determine Type and status based on user role
+        Type = validated_data.get('Type', 'nonacademic')
+        status = 'pending'
+
+        if user.role != 'admin':
+            Type = 'academic' if user.role == 'faculty' else 'nonacademic'
+        status = 'approved' if user.role == 'admin' else 'pending'
+
         admin_is_booking = False;
         if self.request.user.role == 'admin': admin_is_booking = True 
-        # print("----------------------------------", self.request.user)
-        # Check if 'user' exists in request.data (before validation)
-        if 'user' in self.request.data and self.request.data['user'] != 'INVALID':
-            user = get_object_or_404(User, username=self.request.data['user'])
+        
+        user = get_object_or_404(User, username=self.request.data['user'])
 
         print("Validated Data:after changing user", validated_data)    
         print(user)  
@@ -260,14 +267,6 @@ class BookingCRUDView(
             raise serializers.ValidationError(
                 f"The following accessories are not available in {room.name}: {', '.join(unavailable_accessories)}"
             )
-
-        # Determine Type and status based on user role
-        Type = validated_data.get('Type', 'nonacademic')
-        status = 'pending'
-
-        if user.role != 'admin':
-            Type = 'academic' if user.role == 'faculty' else 'nonacademic'
-        status = 'approved' if user.role == 'admin' else 'pending'
 
         if Type == 'academic':
             status = 'approved'

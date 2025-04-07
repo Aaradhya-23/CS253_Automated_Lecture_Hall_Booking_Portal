@@ -6,7 +6,7 @@ import './Login.css';
 import * as assets from '../assets/assets';
 import FRONTEND_ROUTES from '../frontend_urls';
 import {FaEye, FaEyeSlash, FaUser} from 'react-icons/fa';
-import {toast,ToastContainer} from 'react-toastify'
+import {toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css' // Importing icons for show/hide password
 // Backend Integration Comments remain unchanged
 
@@ -41,7 +41,6 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-page">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <div className="login-container">
         <div
           className="login-image-container"

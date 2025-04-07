@@ -148,7 +148,7 @@ const Viewpending = () => {
                     },
                 }
             );
-            alert("Booking rejected, email sent.");
+            toast.success("Booking rejected, email sent.");
             
             setRejectionRemarksVisible(prev => ({
                 ...prev,
