@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import *
 
-from .views import UserListCreateView, UserRetrieveUpdateDestroyView,AuthorityCreateView,AuthorityViewSet, request_reset_otp, verify_and_reset_password
+from .views import *
 from rest_framework.routers import DefaultRouter
 
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path('users/generate_otp/',   SendOTP.as_view(), name = 'generate_otp'),
     path('request_reset/', request_reset_otp, name='request-reset'),
     path('verify_reset/', verify_and_reset_password, name='verify-reset'),
+    path('users/change_password/', ChangePasswordView.as_view(), name = 'change_password'  ),
     path('authorities/create/', AuthorityCreateView.as_view(), name='authority-create'),
 ]
 urlpatterns += router.urls
