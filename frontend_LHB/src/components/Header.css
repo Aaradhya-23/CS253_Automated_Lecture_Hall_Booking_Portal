@@ -1,3 +1,4 @@
+
 .header {
   background: linear-gradient(45deg, #ffffff, #2980b9);
   color: #1E40AF;
@@ -9,7 +10,6 @@
   position: relative;
   z-index: 1000;
   overflow: hidden;
-
 }
 .header::before {
   content: '';
