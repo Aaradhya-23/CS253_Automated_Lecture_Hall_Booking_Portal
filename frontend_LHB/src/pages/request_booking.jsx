@@ -365,159 +365,193 @@ const handleCancelSubmit = () => {
   };
   // return
   return (
-    // <div className="request-booking-container">
 
-    <div className="main-content-wrapper">
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4 }}
-            className="success-message"
-          >
-            ✅ Booking successful! You will receive a confirmation mail shortly
-          </motion.div>
-        )}
-      </AnimatePresence>
+  <div className="main-content-wrapper">
+    <AnimatePresence>
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4 }}
+          className="success-message"
+        >
+          ✅ Booking successful! You will receive a confirmation mail shortly
+        </motion.div>
+      )}
+    </AnimatePresence>
 
-      <AnimatePresence>
-        {showError && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4 }}
-            className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md my-2"
-          >
-            ❌ Booking failed. Please try again.
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {showConfirmation && (
-  <div className="confirmation-modal">
-    <div className="confirmation-content">
-      <h3>Confirm Booking</h3>
-      <p>Are you sure you want to submit this booking?</p>
-      <div className="confirmation-buttons">
-        <button onClick={handleConfirmSubmit} className="confirm-btn">
-          Yes, Book Now
-        </button>
-        <button onClick={handleCancelSubmit} className="cancel-btn">
-          Cancel
-        </button>
+    <AnimatePresence>
+      {showError && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4 }}
+          className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md my-2"
+        >
+          ❌ Booking failed. Please try again.
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {showConfirmation && (
+      <div className="confirmation-modal">
+        <div className="confirmation-content">
+          <h3>Confirm Booking</h3>
+          <p>Are you sure you want to submit this booking?</p>
+          <div className="confirmation-buttons">
+            <button onClick={handleConfirmSubmit} className="confirm-btn">
+              Yes, Book Now
+            </button>
+            <button onClick={handleCancelSubmit} className="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-)}
+    )}
 
-      <div className="booking-form-container">
-        <form className="booking-form" onSubmit={handleSubmitInit}>
-          <div className="form-row">
-            {role === "admin" ? (
-              <div className="form-column">
-                <label htmlFor="user">User</label>
-                <select
-                  id="user"
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                  className="form-control"
-                >
-                  <option value="">Select User</option>
-                  {users.length > 0 ? (
-                    users.map((u) => (
-                      <option key={u.email} value={u.username}>
-                        {u.username}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Loading users...</option>
-                  )}
-                </select>
-              </div>
-            ) : (
-              <div className="form-column">
-                <label htmlFor="user">User</label>
-                <input
-                  type="text"
-                  id="user"
-                  value={selectedUser}
-                  readOnly
-                  className="form-control"
-                  style={{ userSelect: "none", cursor: "not-allowed" }} // Prevent text selection and show disabled cursor
-                />
-              </div>
-            )}
+    <div className="booking-form-container">
+      <form className="booking-form" onSubmit={handleSubmitInit}>
+        <div className="form-row">
+          {role === "admin" ? (
             <div className="form-column">
-              <label htmlFor="purpose">Purpose</label>
+              <label htmlFor="user">User</label>
+              <select
+                id="user"
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="form-control"
+              >
+                <option value="">Select User</option>
+                {users.length > 0 ? (
+                  users.map((u) => (
+                    <option key={u.email} value={u.username}>
+                      {u.username}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Loading users...</option>
+                )}
+              </select>
+            </div>
+          ) : (
+            <div className="form-column">
+              <label htmlFor="user">User</label>
               <input
                 type="text"
-                id="purpose"
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                required
-                placeholder="Linux Session Y-24"
+                id="user"
+                value={selectedUser}
+                readOnly
                 className="form-control"
+                style={{ userSelect: "none", cursor: "not-allowed" }}
+              />
+            </div>
+          )}
+          <div className="form-column">
+            <label htmlFor="purpose">Purpose</label>
+            <input
+              type="text"
+              id="purpose"
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              required
+              placeholder="Linux Session Y-24"
+              className="form-control"
+            />
+          </div>
+        </div>
+        <div className="card booking-date-time-card">
+        {/* <h3>Enter Booking Date and Time</h3> */}
+        <div className="form-row">
+          <div className="form-column">
+            <label>Date</label>
+            <div className="date-time-controls">
+              <input
+                type="date"
+                value={startDate}
+                onChange={handleDateChange}
+                className="date-input"
+                placeholder="dd-mm-yyyy"
+                min={new Date(new Date().setDate(new Date().getDate() + 2))
+                  .toISOString()
+                  .split("T")[0]}
               />
             </div>
           </div>
-
-          <div className="form-row">
-            <div className="form-column">
-              <label>Date</label>
-              <div className="date-time-controls">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={handleDateChange}
-                  className="date-input"
-                  placeholder="dd-mm-yyyy"
-                  min={
-                    new Date(new Date().setDate(new Date().getDate() + 2))
-                      .toISOString()
-                      .split("T")[0]
-                  } // Disable dates up to 2 days ahead
-                />
-              </div>
-            </div>
-            <div className="form-column">
-              {/* <label>End</label> */}
-              <label>Start</label>
-              <div className="date-time-controls">
-                <select
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="time-select"
-                >
-                  {timeOptions.map((time) => (
-                    <option key={`start-${time}`} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="form-column">
-              {/* <label>End</label> */}
-              <label>End</label>
-              <div className="date-time-controls">
-                <select
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="time-select"
-                >
-                  {timeOptions.map((time) => (
-                    <option key={`end-${time}`} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <></>
+          <div className="form-column">
+            <label>Start</label>
+            <div className="date-time-controls">
+              <select
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="time-select"
+              >
+                <option value="" disabled>
+                  -- Select start time --
+                </option>
+                {timeOptions.map((time) => (
+                  <option key={`start-${time}`} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+          <div className="form-column">
+            <label>End</label>
+            <div className="date-time-controls">
+              <select
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="time-select"
+              >
+                <option value="" disabled>
+                  -- Select end time --
+                </option>
+                {timeOptions.map((time) => (
+                  <option key={`end-${time}`} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-column">
+            <label htmlFor="roomSelect">Select Available Rooms</label>
+            <select
+              id="roomSelect"
+              value={selectedHall}
+              onChange={(e) => setSelectedHall(e.target.value)}
+              className="form-control"
+              required
+            >
+              <option value="" disabled>
+                -- Select a Room --
+              </option>
+              {filteredRoomOptions.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name} (Capacity: {room.capacity})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="optional-filters-box">
           {startDate && startTime && endTime && (
             <>
+              <h3>Filter Available Rooms</h3>
+              <p>
+                Enter filters to let the system find the best available room for
+                you.
+              </p>
               <div className="form-row">
                 <div className="form-column">
                   <label>Capacity</label>
@@ -534,13 +568,6 @@ const handleCancelSubmit = () => {
                     ))}
                   </select>
                 </div>
-
-                {/* <div className="hall-header">{hall.name}</div>
-                <div className="hall-details">
-                  <p>Capacity: {hall.capacity}</p>
-                  <p>Accessories: {Object.keys(hall.accessories).join(", ")}</p>
-                  <p className="hall-description">{hall.description}</p>
-                </div> */}
               </div>
 
               <div className="form-row">
@@ -587,16 +614,17 @@ const handleCancelSubmit = () => {
                     onClick={() => setSelectedHall(hall.id)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, scale: 0.9 }} // Initial state when added
-                    animate={{ opacity: 1, scale: 1 }} // Animate to this state
-                    exit={{ opacity: 0, scale: 0.9 }} // Animate out when removed
-                    transition={{ duration: 0.3 }} // Smooth transition
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <div className="hall-header">{hall.name}</div>
                     <div className="hall-details">
                       <p>Capacity: {hall.capacity}</p>
                       <p>
-                        Accessories: {Object.keys(hall.accessories).join(", ")}
+                        Accessories:{" "}
+                        {Object.keys(hall.accessories).join(", ")}
                       </p>
                     </div>
                   </motion.div>
@@ -604,36 +632,32 @@ const handleCancelSubmit = () => {
               </AnimatePresence>
             </motion.div>
           )}
+        </div>
 
-            <div className="form-row" style={{ marginTop: "20px" }}>
-              <div className="form-column">
-                <label htmlFor="remark">Remark</label>
-                <textarea
-                  id="remark"
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                  className="form-control"
-                  placeholder="Any additional comments or remarks..."
-                  rows={3}
-                />
-              </div>
-            </div>
+        <div className="form-row" style={{ marginTop: "20px" }}>
+          <div className="form-column">
+            <label htmlFor="remark">Remark</label>
+            <textarea
+              id="remark"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="form-control"
+              placeholder="Any additional comments or remarks..."
+              rows={3}
+            />
+          </div>
+        </div>
 
-            {selectedHall && (
-              <button
-                type="submit"
-                className="submit-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "SUBMIT"}
-              </button>
-            )}
-        </form>
-      </div>
+        {selectedHall && (
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "SUBMIT"}
+          </button>
+        )}
+      </form>
     </div>
+  </div>
+);
 
-    
-  );
 };
 
 export default Request_Booking;

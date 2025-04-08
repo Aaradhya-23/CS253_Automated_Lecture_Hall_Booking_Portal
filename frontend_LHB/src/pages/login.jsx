@@ -17,6 +17,10 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  // const [showSuccess, setShowSuccess] = useState(false);
+  // setMessage(firstErrorMessage);
+  const [message, setMessage] = useState("")
+  const [showError, setShowError] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -29,7 +33,29 @@ const Login = ({ onLogin }) => {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000); // Show success message for 2 seconds
     } catch (error) {
-      toast.error(error?.response?.data?.detail || 'Invalid credentials. Please try again.');
+      const errorData = error.response?.data;
+      // console.log(errorData['detail'])
+
+      if (errorData && typeof errorData === 'object') {
+        const firstField = Object.keys(errorData)[0];
+        const firstErrorMessage = Array.isArray(errorData[firstField]) 
+        ? errorData[firstField][0] 
+        : errorData[firstField];
+        setMessage(firstErrorMessage || 'Login failed. Please try again.');
+      
+      } else {
+        // Fallback for non-field error like {"detail": "Invalid credentials"}
+        const fallbackError = error.response?.data?.detail || 'Login failed. Please try again.';
+        setMessage(fallbackError);
+        console.log(fallbackError)
+      }
+      // setMessage(errorData)
+    
+      setShowError(true);
+      setShowSuccess(false);
+      setTimeout(() => setShowError(false), 4000);
+
+      // toast.error(error?.response?.data?.detail || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -71,7 +97,7 @@ const Login = ({ onLogin }) => {
             {/* Animated Messages Container */}
             <div className="messages-container">
               <AnimatePresence>
-                {error && (
+                {showError && (
                   <motion.div
                     key="error"
                     initial={{ opacity: 0, y: -20 }}
@@ -80,7 +106,7 @@ const Login = ({ onLogin }) => {
                     transition={{ duration: 0.3 }}
                     className="error-message"
                   >
-                    <i className="fas fa-exclamation-circle"></i> {error}
+                    <i className="fas fa-exclamation-circle"></i> {message}
                   </motion.div>
                 )}
               </AnimatePresence>

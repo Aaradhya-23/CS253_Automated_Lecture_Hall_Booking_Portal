@@ -9,6 +9,7 @@
   position: relative;
   z-index: 1000;
   overflow: hidden;
+
 }
 .header::before {
   content: '';

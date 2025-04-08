@@ -58,7 +58,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/minute',  # Limit anonymous users to 10 requests per minute
-        'user': '100/hour',   # Limit authenticated users to 100 requests per hour
+        'user': '50/minute',   # Limit authenticated users to 100 requests per hour
     }
 }
 
