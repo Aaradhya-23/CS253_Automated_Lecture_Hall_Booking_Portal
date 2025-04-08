@@ -31,6 +31,8 @@ from rest_framework.permissions import AllowAny
 import threading
 
 
+
+
 class EmailThread(threading.Thread):
     def __init__(self, subject, message, from_email, recipient_list, *args, **kwargs):
         self.subject = subject
@@ -47,7 +49,6 @@ class EmailThread(threading.Thread):
             self.recipient_list,
             fail_silently=False,
         )
-
 def send_email_in_background(subject, message, from_email, recipient_list):
     EmailThread(subject, message, from_email, recipient_list).start()
 
@@ -303,11 +304,15 @@ class BookingCRUDView(
                 remarks=remarks,
             )  
             #send mail
+            calender_link = booking.get_google_calendar_link()
             send_email_in_background(
             'Booking Approved',
             f"""
             Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
             Your bill amount is : ₹{booking.cost}
+            
+            
+            Add This Event to your Calender: {calender_link}
             """,
             settings.DEFAULT_FROM_EMAIL,
             [booking.creator.email]
@@ -564,11 +569,15 @@ def approve_booking(request):
         x = f'Your bill amount is : {booking.cost}'
         # print(type([booking.creator.email]))
         # Send email to user
+        calender_link = booking.get_google_calendar_link()
         send_email_in_background(
     'Booking Approved',
     f"""
     Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
     Your bill amount is : ₹{booking.cost}
+    
+    Add this Booking to your calender
+    {calender_link}
     """,
     settings.DEFAULT_FROM_EMAIL,
     [booking.creator.email]

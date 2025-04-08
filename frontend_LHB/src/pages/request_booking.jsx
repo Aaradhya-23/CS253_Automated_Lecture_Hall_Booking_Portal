@@ -25,6 +25,7 @@ const Request_Booking = () => {
   const [capacity, setCapacity] = useState("");
   const [accessoryOptions, setAccessoryOptions] = useState([]);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
+  const [message, setMessage] = useState("")
 
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(
@@ -335,7 +336,23 @@ const handleConfirmSubmit = async () => {
       setTimeout(() => setShowError(false), 5000);
     }
   } catch (error) {
-    console.error("Error submitting booking:", error);
+    const errorData = error.response?.data;
+      // console.log(errorData['detail'])
+
+      if (errorData && typeof errorData === 'object') {
+        const firstField = Object.keys(errorData)[0];
+        const firstErrorMessage = Array.isArray(errorData[firstField]) 
+        ? errorData[firstField][0] 
+        : errorData[firstField];
+        setMessage(firstErrorMessage || 'Login failed. Please try again.');
+      
+      } else {
+        // Fallback for non-field error like {"detail": "Invalid credentials"}
+        const fallbackError = error.response?.data?.detail || 'Login failed. Please try again.';
+        setMessage(fallbackError);
+        console.log(fallbackError)
+      }
+    // console.error("Error submitting booking:", error);
     setShowError(true);
     setShowSuccess(false);
     setTimeout(() => setShowError(false), 5000);
@@ -390,7 +407,7 @@ const handleCancelSubmit = () => {
           transition={{ duration: 0.4 }}
           className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md my-2"
         >
-          ❌ Booking failed. Please try again.
+         <i className="fas fa-exclamation-circle"></i> {message}
         </motion.div>
       )}
     </AnimatePresence>

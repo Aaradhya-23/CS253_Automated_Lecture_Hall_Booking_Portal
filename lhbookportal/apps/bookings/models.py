@@ -24,6 +24,13 @@ class Room(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
 
+
+
+from django.utils import timezone
+from urllib.parse import quote
+
+
+
 class Booking(models.Model):
     #DONT DELETE BOOKINGS WHEN USER DELETED
     STATUS_CHOICES = [
@@ -59,7 +66,31 @@ class Booking(models.Model):
     def __str__(self):
         return f"{self.creator.username} - {self.room.name} ({self.status})"
     
-    
+    def get_google_calendar_link(self):
+        # Combine event_date + start_time into a full datetime
+        start_datetime = timezone.make_aware(
+            timezone.datetime.combine(self.booking_date, self.start_time)
+        ).strftime("%Y%m%dT%H%M%SZ")
+
+        end_datetime = timezone.make_aware(
+            timezone.datetime.combine(self.booking_date, self.end_time)
+        ).strftime("%Y%m%dT%H%M%SZ")
+
+        # URL-encode fields
+        event_title = quote(self.title)
+        location = f'IIT-Kanpur, Lecture Hall Complex, {self.room.name}'
+        event_location = location
+        event_description = quote("")
+
+        # Generate Google Calendar URL
+        return (
+             f"https://www.google.com/calendar/render?action=TEMPLATE"
+        f"&text={quote(event_title)}"
+        f"&dates={start_datetime}/{end_datetime}"
+        f"&details={quote(event_description)}"
+        f"&location={quote(event_location)}"
+        f"&sprop=name:{quote('IIT-Kanpur, LHC Office')}"
+        )
     
 class Holiday(models.Model):
     date = models.DateField(unique=True)
