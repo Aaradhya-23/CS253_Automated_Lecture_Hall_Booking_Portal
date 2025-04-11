@@ -22,6 +22,7 @@ const formatStatusText = (status) => {
     not_sent: "Not Sent",
     pending: "Pending",
     accepted: "Accepted",
+    approved: "Accepted",
     rejected: "Rejected",
   };
   return statusMap[status] || status;
@@ -48,7 +49,7 @@ function Status() {
         return;
       }
       try {
-        const url = `${import.meta.env.VITE_BOOKING_SEARCH_URL}?creator__username=${username}`;
+        const url = import.meta.env.VITE_HISTORY_URL;
         const response = await api.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -73,6 +74,7 @@ function Status() {
             approvals_pending: booking.approvals_pending,
           }))
           .reverse();
+        console.log(bookings);  
         setBookingData(bookings);
       } catch (err) {
         console.error(err);
@@ -95,10 +97,11 @@ function Status() {
   };
 
   const transformApprovalStatus = (accepted, boolPendingCovered, overallStatus) => {
+    console.log(accepted, boolPendingCovered, overallStatus);
     if (accepted) {
       return "accepted";
     }
-    if (overallStatus === "cancelled") {
+    if (overallStatus === "rejected") {
       if (!boolPendingCovered) {
         return "rejected";
       }

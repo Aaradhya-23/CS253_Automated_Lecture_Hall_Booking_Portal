@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Check, Clock, X, AlertCircle } from "lucide-react"; // Import icons
+import { Check, Clock, X, AlertCircle, Pen } from "lucide-react"; // Import icons
 import "./UserHistory.css";
 import api from "../api/api";
 import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
@@ -9,7 +9,10 @@ import { useNavigate } from "react-router-dom";
 const StatusIcon = ({ status }) => {
   const iconMap = {
     Approved: <Check className="user-status-icon user-approved" />,
+    approved: <Check className="user-status-icon user-approved" />,
+    Pending: <Clock className="user-status-icon user-pending" />,
     pending: <Clock className="user-status-icon user-pending" />,
+    Rejected: <X className="user-status-icon user-rejected" />,
     rejected: <X className="user-status-icon user-rejected" />,
     not_sent: <AlertCircle className="user-status-icon user-not-sent" />,
   };
@@ -21,7 +24,10 @@ const StatusIcon = ({ status }) => {
 const getStatusColor = (status) => {
   const colorMap = {
     Approved: "#28a745", // Green
+    approved: "#28a745", // Green
+    Pending: "#ffc107", // Yellow
     pending: "#ffc107", // Yellow
+    Rejected: "#dc3545", // Red
     rejected: "#dc3545", // Red
     not_sent: "#6c757d", // Grey
   };
@@ -216,7 +222,7 @@ function UserHistory() {
 
     try {
       const response = await api.get(
-        `http://127.0.0.1:8000/reports/download/bill/${id}/`,
+        `${import.meta.env.VITE_API_BASE_URL}reports/download/bill/${id}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -406,9 +412,9 @@ function UserHistory() {
                   <button
                     onClick={() => handleGeneratebill(booking.id)}
                     className={`user-dropdown-item ${
-                      booking.status !== "Approved" ? "disabled" : ""
+                      booking.status !== "Approved" && booking.status!=="approved" ? "disabled" : ""
                     }`}
-                    disabled={booking.status !== "Approved"} // Explicitly disable the button
+                    disabled={booking.status !== "Approved" && booking.status!=="approved"} // Explicitly disable the button
                   >
                     <span className="user-icon user-download">
                       <svg

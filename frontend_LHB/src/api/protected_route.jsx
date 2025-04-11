@@ -4,28 +4,27 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 import { jwtDecode } from "jwt-decode";
 import api from "./api";
 import FRONTEND_ROUTES from "../frontend_urls";
-
 function ProtectedRoute({ children, role }) {
   const [isAuthorized, setIsAuthorized] = useState(null);
-
   useEffect(() => {
     auth().catch((err) => {
       console.error("Auth error:", err);
       setIsAuthorized(false);
     });
   }, []);
-
   const refreshToken = async () => {
     const refresh = localStorage.getItem(REFRESH_TOKEN);
-    console.debug("Attempting to refresh token:", refresh);
+    console.log("Attempting to refresh token:", refresh);
     try {
       const res = await api.post(import.meta.env.VITE_REFRESH_TOKEN_URL, {
         refresh,
       });
-      console.debug("Refresh token response:", res.data);
+      console.log("Refresh token response:", res.data);
       if (res.status === 200) {
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
         setIsAuthorized(true);
+        console.log("New Refresh Set")
         return true;
       }
     } catch (error) {
@@ -34,7 +33,6 @@ function ProtectedRoute({ children, role }) {
       return false;
     }
   };
-
   const auth = async () => {
     const token = localStorage.getItem(ACCESS_TOKEN);
     const stored_role = localStorage.getItem("ROLE");
@@ -44,17 +42,8 @@ function ProtectedRoute({ children, role }) {
       setIsAuthorized(false);
       return;
     }
-    let decodedToken;
-    try {
-      decodedToken = token;
-      console.log("Decoded token:", decodedToken);
-    } catch (error) {
-      console.log("Error decoding token:", error);
-      setIsAuthorized(false);
-      return;
-    }
-
     const now = Date.now() / 1000;
+    const decodedToken = jwtDecode(token);
     if (decodedToken.exp < now) {
       console.warn("Access token expired. Now:", now, "Token exp:", decodedToken.exp);
       const success = await refreshToken();
@@ -62,19 +51,8 @@ function ProtectedRoute({ children, role }) {
         console.error("Token refresh failed.");
         return;
       }
-      // Re-decode the new token
-      const newToken = localStorage.getItem(ACCESS_TOKEN);
-      try {
-        // decodedToken = jwtDecode(newToken);
-        decodedToken = newToken
-        console.debug("New decoded token:", decodedToken);
-      } catch (error) {
-        console.error("Error decoding new token:", error);
-        setIsAuthorized(false);
-        return;
-      }
     }
-    console.log("token = ", decodedToken)
+    console.log("token = ", token)
     if (role) {
       const requiredRoles = Array.isArray(role) ? role : [role];
       console.log("Required roles:", requiredRoles, "User role:", stored_role);
@@ -84,11 +62,9 @@ function ProtectedRoute({ children, role }) {
         return;
       }
     }
-
     console.debug("User authorized.");
     setIsAuthorized(true);
   };
-
   if (isAuthorized === null) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -104,5 +80,5 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to={FRONTEND_ROUTES.login} />;
   }
 }
-
 export default ProtectedRoute;
+

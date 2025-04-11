@@ -1,0 +1,137 @@
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+April 09, 2025 - 09:45:34
+Django version 5.1.7, using settings 'lhbookportal.settings'
+Starting development server at http://172.27.16.252:8000/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[09/Apr/2025 09:46:36] "GET /admin HTTP/1.1" 301 0
+[09/Apr/2025 09:46:36] "GET /admin/ HTTP/1.1" 200 13305
+[09/Apr/2025 09:46:36] "GET /static/admin/css/base.css HTTP/1.1" 200 22092
+[09/Apr/2025 09:46:36] "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+[09/Apr/2025 09:46:36] "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2804
+[09/Apr/2025 09:46:36] "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+[09/Apr/2025 09:46:36] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+[09/Apr/2025 09:46:36] "GET /static/admin/css/responsive.css HTTP/1.1" 200 17972
+[09/Apr/2025 09:46:36] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+[09/Apr/2025 09:46:36] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+[09/Apr/2025 09:46:36] "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+[09/Apr/2025 09:46:36] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+Not Found: /favicon.ico
+[09/Apr/2025 09:46:36] "GET /favicon.ico HTTP/1.1" 404 3336
+[09/Apr/2025 09:47:49] "OPTIONS /bookings/rooms/ HTTP/1.1" 200 0
+Unauthorized: /bookings/rooms/
+[09/Apr/2025 09:47:50] "GET /bookings/rooms/ HTTP/1.1" 401 172
+[09/Apr/2025 09:47:51] code 400, message Bad request version ('\x00\x02\x01\x00\x00')
+[09/Apr/2025 09:47:51] You're accessing the development server over HTTPS, but it only supports HTTP.
+[09/Apr/2025 09:47:51] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x06à\x01\x00\x06Ü\x03\x030"\x04¥,')
+[09/Apr/2025 09:47:51] You're accessing the development server over HTTPS, but it only supports HTTP.
+[09/Apr/2025 09:47:53] "GET /admin HTTP/1.1" 301 0
+[09/Apr/2025 09:47:53] "GET /admin/ HTTP/1.1" 302 0
+[09/Apr/2025 09:47:53] "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4164
+[09/Apr/2025 09:47:53] "GET /static/admin/css/base.css HTTP/1.1" 200 22092
+[09/Apr/2025 09:47:53] "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2804
+[09/Apr/2025 09:47:53] "GET /static/admin/css/login.css HTTP/1.1" 200 951
+[09/Apr/2025 09:47:53] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+[09/Apr/2025 09:47:53] "GET /static/admin/css/responsive.css HTTP/1.1" 200 17972
+[09/Apr/2025 09:47:53] "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+[09/Apr/2025 09:47:53] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+Not Found: /favicon.ico
+[09/Apr/2025 09:47:54] "GET /favicon.ico HTTP/1.1" 404 3336
+[09/Apr/2025 09:47:58] "OPTIONS /auth/login/ HTTP/1.1" 200 0
+[09/Apr/2025 09:47:59] "POST /auth/login/ HTTP/1.1" 200 503
+Unauthorized: /bookings/rooms/
+[09/Apr/2025 09:47:59] "GET /bookings/rooms/ HTTP/1.1" 401 172
+[09/Apr/2025 09:47:59] "OPTIONS /auth/refresh/ HTTP/1.1" 200 0
+Bad Request: /auth/refresh/
+[09/Apr/2025 09:47:59] "POST /auth/refresh/ HTTP/1.1" 400 39
+[09/Apr/2025 09:49:27] "GET /admin/accounts/user/ HTTP/1.1" 200 20848
+[09/Apr/2025 09:49:27] "GET /static/admin/css/changelists.css HTTP/1.1" 200 6878
+[09/Apr/2025 09:49:27] "GET /static/admin/js/core.js HTTP/1.1" 200 6208
+[09/Apr/2025 09:49:27] "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+[09/Apr/2025 09:49:27] "GET /static/admin/js/actions.js HTTP/1.1" 200 8076
+[09/Apr/2025 09:49:27] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9097
+[09/Apr/2025 09:49:27] "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+[09/Apr/2025 09:49:27] "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+[09/Apr/2025 09:49:27] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+[09/Apr/2025 09:49:27] "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+[09/Apr/2025 09:49:27] "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+[09/Apr/2025 09:49:28] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+[09/Apr/2025 09:49:28] "GET /static/admin/js/filters.js HTTP/1.1" 200 978
+[09/Apr/2025 09:49:28] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+[09/Apr/2025 09:49:28] "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 200 1097
+[09/Apr/2025 09:49:28] "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+[09/Apr/2025 09:49:39] "GET /admin/accounts/user/18/change/ HTTP/1.1" 200 20800
+[09/Apr/2025 09:49:39] "GET /static/admin/css/forms.css HTTP/1.1" 200 8794
+[09/Apr/2025 09:49:39] "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+[09/Apr/2025 09:49:39] "GET /static/admin/js/inlines.js HTTP/1.1" 200 15526
+[09/Apr/2025 09:49:39] "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+[09/Apr/2025 09:49:39] "GET /static/admin/css/widgets.css HTTP/1.1" 200 11564
+[09/Apr/2025 09:49:39] "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+[09/Apr/2025 09:49:39] "GET /static/admin/img/inline-delete.svg HTTP/1.1" 200 560
+[09/Apr/2025 09:49:41] "GET /admin/accounts/user/18/password/ HTTP/1.1" 200 11734
+[09/Apr/2025 09:49:41] "GET /static/admin/css/unusable_password_field.css HTTP/1.1" 200 663
+[09/Apr/2025 09:49:41] "GET /static/admin/js/unusable_password_field.js HTTP/1.1" 200 1480
+/home/aviators/website/lhbookportal/lhbookportal/settings.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+April 09, 2025 - 09:45:45
+Django version 5.1.7, using settings 'lhbookportal.settings'
+Starting development server at http://172.27.16.252:8000/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+/home/aviators/website/lhbookportal/lhbookportal/settings.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 11 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): token_blacklist.
+Run 'python manage.py migrate' to apply them.
+April 09, 2025 - 13:52:55
+Django version 5.1.7, using settings 'lhbookportal.settings'
+Starting development server at http://172.27.16.252:8000/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[09/Apr/2025 13:56:07] "GET /admin/accounts/user/ HTTP/1.1" 200 22012
+[09/Apr/2025 13:56:07] "GET /static/admin/css/base.css HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/core.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+[09/Apr/2025 13:56:07] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 304 0
+[09/Apr/2025 13:56:07] "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+Not Found: /favicon.ico
+[09/Apr/2025 13:56:08] "GET /favicon.ico HTTP/1.1" 404 3336
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 11 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): token_blacklist.
+Run 'python manage.py migrate' to apply them.
+April 09, 2025 - 13:59:29
+Django version 5.1.7, using settings 'lhbookportal.settings'
+Starting development server at http://172.27.16.252:8000/
+Quit the server with CONTROL-C.
+

@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-7)is^)xj2t&1n)wh(d9$azkvwg8*4+9d60m(3^j9oc0x=63u3r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['172.27.16.252', 'localhost', '127.0.0.1']
 
 from datetime import timedelta
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -64,7 +64,7 @@ REST_FRAMEWORK = {
 
 # JWT Token Expiry Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token expires in 30 minutes
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token expires in 60 minutes
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Refresh token expires in 1 day
     'ROTATE_REFRESH_TOKENS': True,  # Issue new refresh token on refresh
     'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old refresh token
@@ -77,21 +77,21 @@ SIMPLE_JWT = {
 # Application definition
 AUTH_USER_MODEL = 'accounts.User'
 
-INSTALLED_APPS = [
-    'rest_framework',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'apps.accounts',
-    'apps.bookings',
-    'apps.email_services',
-    'apps.reports',
-    'django_filters',
-    'corsheaders', # The corsheaders are basically used to tell our browser that our app is running at an origin and we want to access our backend through different origin which in our case is react frontend. 
-]
+# INSTALLED_APPS = [
+#     'rest_framework',
+#     'django.contrib.admin',
+#     'django.contrib.auth',
+#     'django.contrib.contenttypes',
+#     'django.contrib.sessions',
+#     'django.contrib.messages',
+#     'django.contrib.staticfiles',
+#     'apps.accounts',
+#     'apps.bookings',
+#     'apps.email_services',
+#     'apps.reports',
+#     'django_filters',
+#     'corsheaders', # The corsheaders are basically used to tell our browser that our app is running at an origin and we want to access our backend through different origin which in our case is react frontend. 
+# ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -108,17 +108,36 @@ MIDDLEWARE = [
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'HELLO',
+#         'NAME': 'lhb_psql',
 #         'USER': 'postgres',
-#         'PASSWORD': '28122251',
-#         'HOST': 'localhost',  # Change if using a remote DB
-#         'PORT': '5432',       # Default PostgreSQL port
+#         'PASSWORD': 'MrBombastic',
+#         'HOST': 'localhost',
+#         'PORT': '5435',
 #     }
 # }
 
-ROOT_URLCONF = 'lhbookportal.urls'
-CORS_ALLOW_ALL_ORIGINS = True
 
+ROOT_URLCONF = 'lhbookportal.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+INSTALLED_APPS = [
+    'rest_framework',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'apps.accounts',
+    'apps.bookings',
+    'apps.email_services',
+    'apps.reports',
+    'django_filters',
+    'corsheaders',
+    'rest_framework_simplejwt.token_blacklist', #------------------------------------------------------
+]
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',

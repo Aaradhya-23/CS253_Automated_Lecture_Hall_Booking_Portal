@@ -31,17 +31,15 @@ import FRONTEND_ROUTES from './frontend_urls';
 import ProtectedRoute from "./api/protected_route";
 import api from "./api/api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./api/constants";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Importing CSS for toast notifications
 // import ForgotPassword from "./pages/ForgotPassword";
-
 
 const App = () => {
   const [userRole, setUserRole] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN);
     if (token) {
@@ -53,31 +51,28 @@ const App = () => {
       }
     }
   }, []);
-
   // Show navbar only if logged in and not on login or register pages
   const showNavbar =
     isLoggedIn &&
     location.pathname !== FRONTEND_ROUTES.login;
-
   // Function to handle login using the backend API endpoint
   const handleLogin = async (username, password) => {
     try {
       console.log('Attempting login...');
       console.log(import.meta.env.VITE_API_URL); // Should print "http://127.0.0.1:8000/"
       console.log(import.meta.env.VITE_LOGIN_URL); // Should print "auth/login/"
-
       const response = await api.post(
         import.meta.env.VITE_LOGIN_URL,
         {
           username,
           password,
         });
-  
+
       const { access, refresh, role } = response.data;
       console.log('Login successful:', role);
       console.log('Access Token:', access)
       console.log('Refresh Token:', refresh)
-  
+
       localStorage.setItem('ACCESS_TOKEN', access);
       localStorage.setItem('REFRESH_TOKEN', refresh);
       localStorage.setItem('ROLE', role);
@@ -88,15 +83,14 @@ const App = () => {
         position: "top-right",
         autoClose: 2000,
       });
-      navigate(FRONTEND_ROUTES.home, {
-        state: { showLoginToast: true }
+      navigate(FRONTEND_ROUTES.home,{
+        state: { showLoginToast: true}
       });
     } catch (error) {
       console.error('Login failed:', error.response?.data?.detail || error.message);
       throw error; // Throw error to handle it in the Login component
     }
   };
-  
 
   // Function to handle registration via the backend API
   const handleRegister = async (email, password) => {
@@ -107,32 +101,27 @@ const App = () => {
       console.error("Registration failed", error);
     }
   };
-
   // Function for navigation (for navbars, etc.)
   const handleNavigation = (path) => {
     navigate(path);
   };
-
   const handleLogout = () => {
     localStorage.clear(); // Clear local storage
     setIsLoggedIn(false); // Update state to reflect logged-out status
     setUserRole(""); // Clear the user role
     navigate(FRONTEND_ROUTES.home); // Navigate to the home page
   };
-
   // const handleForgotPassword = () => {
   //   navigate(FRONTEND_ROUTES.ForgotPassword); // Navigate to the forgot password page
   // }
-
   return (
     <div className="flex flex-col min-h-screen">
-      
+
       <Header
         isLoggedIn={isLoggedIn}
         userRole={userRole}
         handleLogout={handleLogout}
       />
-
 
       <div className="flex flex-grow">
         {showNavbar &&
@@ -151,7 +140,6 @@ const App = () => {
           <Routes>
             {/* When at the root, redirect to the home/timetable page */}
             <Route path={FRONTEND_ROUTES.home} element={<LiveSchedule />} />
-
             {/* Public route for login */}
             <Route
               path={FRONTEND_ROUTES.login}
@@ -174,10 +162,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* Public routes */}
             <Route path={FRONTEND_ROUTES.feedback} element={<Feedback />} />
-
             {/* Protected routes for regular users */}
             <Route
               path={FRONTEND_ROUTES.history}
@@ -203,7 +189,6 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path={FRONTEND_ROUTES.history}
               element={
@@ -238,7 +223,7 @@ const App = () => {
               </ProtectedRoute>
             }
             />
-            
+
             {/* This route expects a booking ID parameter - ensure navigation uses the correct format: `/booking/${bookingId}` */}
             <Route path={FRONTEND_ROUTES.bookingDetails} element={
               <ProtectedRoute role={["student", "Student", "faculty", "admin"]}>
@@ -246,27 +231,22 @@ const App = () => {
               </ProtectedRoute>
             }
             />
-
             <Route path={FRONTEND_ROUTES.userhelp} element={
               <ProtectedRoute role={["student", "Student", "faculty"]}>
                 <UserHelp />
               </ProtectedRoute>
             }
             />
-
             <Route path={FRONTEND_ROUTES.adminhelp} element={
               <ProtectedRoute role={["admin"]}>
                 <AdminHelp />
               </ProtectedRoute>
             }
             />
-
           </Routes>
         </div>
-        {/* <ToastContainer/> */}
       </div>
     </div>
   );
 };
-
 export default App;

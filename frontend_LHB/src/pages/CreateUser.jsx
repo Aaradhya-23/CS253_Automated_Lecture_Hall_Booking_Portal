@@ -175,16 +175,20 @@ const CreateUser = () => {
           errorMessage = error.response.data.message;
         }
         // Handle case where the entire data object is the message
-        else if (typeof error.response.data === 'string') {
-          errorMessage = error.response.data;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
+       else if (error.response.data.includes("IntegrityError") && 
+        error.response.data.includes("UNIQUE constraint failed")) {
+      if (error.response.data.includes("accounts_user.email")) {
+        errorMessage = "This email address is already registered";
+      } else if (error.response.data.includes("accounts_user.username")) {
+        errorMessage = "This username is already taken";
       }
-      const errorData = error.response?.data;
-      const firstField = Object.keys(errorData)[0];
-      const firstErrorMessage = errorData[firstField][0]; // "OTP expired or wrong"
-      errorMessage = firstErrorMessage;
+    }
+    }
+      console.log(error)
+      // const errorData = error.response?.data;
+      // const firstField = Object.keys(errorData)[0];
+      // const firstErrorMessage = errorData[firstField][0]; // "OTP expired or wrong"
+      // errorMessage = firstErrorMessage;
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

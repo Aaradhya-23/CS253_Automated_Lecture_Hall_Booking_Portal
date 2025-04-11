@@ -82,7 +82,8 @@ def send_rejection_mail(request, booking_id):
         send_email_in_background(subject, message, from_email, recipient_list)
 
         # Delete the booking
-        booking.delete()
+        # booking.delete()
+        booking.save()
         return JsonResponse({"message": "Deleted successfully"}, status=204)
 
     except json.JSONDecodeError:
@@ -163,11 +164,11 @@ def send_approval_email(authority_email, booking):
     accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
 
     approval_link = (
-        f"http://127.0.0.1:8000/bookings/approve/?booking_token={booking.booking_token}"
+        f"http://172.27.16.252:8000/bookings/approve/?booking_token={booking.booking_token}"
         f"&authority_token={authority_token}"
     )
     rejection_link = (
-        f"http://127.0.0.1:8000/bookings/reject/?booking_token={booking.booking_token}"
+        f"http://172.27.16.252:8000/bookings/reject/?booking_token={booking.booking_token}"
         f"&authority_token={authority_token}"
     )
 
@@ -364,8 +365,39 @@ Total Cost : ₹{booking.cost}
         )
         first_authority_email = next(iter(booking.approvals_pending.keys()), None)
         
-        
+        accessories_list = [
+            name.replace('_', ' ').title()
+            for name, selected in booking.accessories.items() if selected
+        ]
+        accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
         if first_authority_email:
+            user = booking.creator
+            subject = "[LHC OFFICE] Booking Request Recorded"
+            message = f"""
+Your({user.username}) booking request has been recorded and sent to the respective authorities for confirmation.
+You will receive a confirmation email once it is approved.
+
+👉 To track your booking status, visit:
+http://172.27.16.252:5174/login
+
+Purpose    : {booking.title}
+Remarks    : {booking.remarks}
+Room       : {booking.room.name}
+Date       : {booking.booking_date}
+Time       : {booking.start_time} - {booking.end_time}
+Requested On: {booking.requested_on}
+Accessories: {accessories_str}
+Total Cost : ₹{booking.cost}
+Note: Unapproved bookings will be auto-rejected in 2 days or less.
+    """
+
+            send_email_in_background(
+                subject,
+                message,
+                from_email="no-reply@yourdomain.com",
+                recipient_list=[user.email]
+
+            )            
             send_approval_email(first_authority_email, booking)
 
             # return render(request, "bookings/Confirmed.html", status=200)
@@ -550,7 +582,7 @@ def approve_booking(request):
         None
     )
 
-    if not authority_email or booking.status in ["Approved", "Rejected"]:
+    if not authority_email or booking.status in ["approved", "rejected"]:
         return render(request, "bookings/Booking Processed.html", context={"status" : booking.status}, status=200)
 
     if booking.approvals_pending.get(authority_email, False):
@@ -562,7 +594,7 @@ def approve_booking(request):
 
     if all(booking.approvals_pending.values()):
         # All authorities have approved the booking
-        booking.status = "Approved"
+        booking.status = "approved"
         booking.decision_time = timezone.now()
         booking.save()
 
@@ -609,7 +641,9 @@ Total Cost : ₹{booking.cost}
                     settings.DEFAULT_FROM_EMAIL,
                     [ pending.creator.email ],
                 )  
-                    pending.delete()
+                    # pending.delete()
+                    pending.save()
+
 
 
         return render(request, "bookings/Confirmed.html", context={}, status=200)
@@ -637,11 +671,15 @@ def reject_booking(request):
         None
     )
 
-    if booking.status in ["Approved", "Rejected"]:
+    if booking.status in ["approved", "rejected"]:
         return render(request, "bookings/Booking Processed.html", context={"status":booking.status}, status=200)
-
-    booking.status = "Rejected"
-    booking.approvals_pending = {}
+    authority_email = next(
+            (email for email, token in booking.authority_tokens.items() if token == authority_token),
+            None
+        )
+    booking.status = "rejected"
+    # booking.approvals_pending = {}
+    booking.approvals_pending[authority_email] = False
     booking.save()
 
     send_email_in_background(
@@ -651,6 +689,6 @@ def reject_booking(request):
     [booking.creator.email],
 )
 
-    booking.delete()
+    # booking.delete()
     return render(request, "bookings/Rejected.html", context={}, status=200);
 

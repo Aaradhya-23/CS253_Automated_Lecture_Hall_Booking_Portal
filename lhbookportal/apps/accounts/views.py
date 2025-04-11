@@ -153,7 +153,7 @@ class ChangePasswordView(APIView):
             user.save()
             send_email_in_background(
                 '[LHC Office] Password Updated Successfully',
-                f"""If you did not requested this, someone else might be using your account. Contact LHC Office Immediately.
+                f"""If you did not request this, someone else might be using your account. Contact LHC Office Immediately.
                 
             """,
             settings.DEFAULT_FROM_EMAIL,

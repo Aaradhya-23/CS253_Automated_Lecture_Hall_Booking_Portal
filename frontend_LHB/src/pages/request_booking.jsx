@@ -105,6 +105,12 @@ const Request_Booking = () => {
     "5:00 PM",
     "5:30 PM",
     "6:00 PM",
+    "6:30 PM",
+    "7:00 PM",
+    "7:30 PM",
+    "8:00 PM",
+    "8:30 PM",
+    "9:00 PM",
   ];
 
   // Repeat options
@@ -275,7 +281,7 @@ const handleSubmitInit = async (e) => {
     end_time: formattedEndTime,
     room: selectedHall,
     duration: Math.abs(
-      new Date(`${endDate}T${formattedEndTime}`) - 
+      new Date(`${startDate}T${formattedEndTime}`) - 
       new Date(`${startDate}T${formattedStartTime}`)
     ) / (1000 * 60 * 60),
     Type: "academic",
@@ -371,6 +377,9 @@ const handleCancelSubmit = () => {
     const value = e.target.value;
     setStartDate(value);
     setEndDate(value);
+    setStartTime("");
+    setEndTime("");
+    setEndDate("");
   };
   const handleAccessoryChange = (accessory) => {
     setSelectedAccessories(
@@ -474,12 +483,12 @@ const handleCancelSubmit = () => {
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               required
-              placeholder="Linux Session Y-24"
+              placeholder="Type your Purpose Here..."
               className="form-control"
             />
           </div>
         </div>
-        <div className="card booking-date-time-card">
+        {/* <div className="card booking-date-time-card"> */}
         {/* <h3>Enter Booking Date and Time</h3> */}
         <div className="form-row">
           <div className="form-column">
@@ -494,6 +503,9 @@ const handleCancelSubmit = () => {
                 min={new Date(new Date().setDate(new Date().getDate() + 2))
                   .toISOString()
                   .split("T")[0]}
+                  max={new Date(new Date().setMonth(new Date().getMonth() + 3))
+                    .toISOString()
+                    .split("T")[0]}
               />
             </div>
           </div>
@@ -503,13 +515,16 @@ const handleCancelSubmit = () => {
             <div className="date-time-controls">
               <select
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(e) => {
+                  setStartTime(e.target.value)
+                  setEndTime("")
+                }}
                 className="time-select"
               >
                 <option value="" disabled>
                   -- Select start time --
                 </option>
-                {timeOptions.map((time) => (
+                {timeOptions.slice(0, timeOptions.length - 1).map((time) => (
                   <option key={`start-${time}`} value={time}>
                     {time}
                   </option>
@@ -528,16 +543,21 @@ const handleCancelSubmit = () => {
                 <option value="" disabled>
                   -- Select end time --
                 </option>
-                {timeOptions.map((time) => (
-                  <option key={`end-${time}`} value={time}>
-                    {time}
-                  </option>
-                ))}
+                {timeOptions
+                  .slice(
+                    timeOptions.indexOf(startTime) + 1, 
+                    Math.min(timeOptions.indexOf(startTime) + 7, timeOptions.length)
+                  )
+                  .map((time) => (
+                    <option key={`end-${time}`} value={time}>
+                      {time}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
         </div>
-        </div>
+        {/* </div> */}
 
         <div className="form-row">
           <div className="form-column">
@@ -561,9 +581,10 @@ const handleCancelSubmit = () => {
           </div>
         </div>
 
-        <div className="optional-filters-box">
-          {startDate && startTime && endTime && (
+        {startDate && startTime && endTime && (
             <>
+        <div className="optional-filters-box">
+          
               <h3>Filter Available Rooms</h3>
               <p>
                 Enter filters to let the system find the best available room for
@@ -611,8 +632,8 @@ const handleCancelSubmit = () => {
                   </div>
                 </div>
               </div>
-            </>
-          )}
+            
+          
 
           {capacity && (
             <motion.div
@@ -650,6 +671,8 @@ const handleCancelSubmit = () => {
             </motion.div>
           )}
         </div>
+        </>
+        )}
 
         <div className="form-row" style={{ marginTop: "20px" }}>
           <div className="form-column">

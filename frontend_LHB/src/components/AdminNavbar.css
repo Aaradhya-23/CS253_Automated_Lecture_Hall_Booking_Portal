@@ -1,19 +1,21 @@
 
 .navbar-trigger-area {
   width: 180px;
-  height: 100vh;
+  min-height: 100%;
   position: fixed;
   left: 0;
   top: 0;
+  bottom: 0;
   background: transparent;
 }
 .admin-navbar {
   width: 200px;
   background: linear-gradient(135deg, #ffffff, #2980b9);
   padding: 20px 16px;
-  position: sticky;
+  position: fixed;
   top: 0;
-  height: 100vh;
+  bottom: 0;
+  min-height: 100%;
   z-index: 10;
   overflow: hidden;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
