@@ -56,6 +56,10 @@ const Feedback = () => {
       if(response.status === 200 || response.status === 201){
         console.log('Feedback submitted successfully!');
         setIsSubmitted(true);
+        setOverallSatisfaction(null);
+        setFacilitySatisfaction(null);
+        setBookingExperience(null);
+        setAdditionalComments('');
       } else {
         console.error('Failed to submit feedback');
       }
@@ -119,23 +123,27 @@ const Feedback = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <motion.div className="feedback-form" layout>
+      <form onSubmit={handleSubmit} className="feedback-form">
         <motion.div className="feedback-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Smile size={36} />
           <h1>Help us make the lecture hall booking experience even better!</h1>
         </motion.div>
+  
         <div className="feedback-section">
           <div className="feedback-label"><Smile className="label-icon" /> Overall Satisfaction</div>
           {renderSatisfactionIcons(overallSatisfaction, setOverallSatisfaction)}
         </div>
+  
         <div className="feedback-section">
           <div className="feedback-label"><Star className="label-icon" /> Facility Rating</div>
           {renderStarRating(facilitySatisfaction, setFacilitySatisfaction)}
         </div>
+  
         <div className="feedback-section">
           <div className="feedback-label"><MessageCircle className="label-icon" /> Booking Experience</div>
           {renderSatisfactionIcons(bookingExperience, setBookingExperience)}
         </div>
+  
         <div className="feedback-section">
           <div className="feedback-label"><MessageCircle className="label-icon" /> Additional Comments</div>
           <textarea
@@ -144,20 +152,72 @@ const Feedback = () => {
             placeholder="Share your thoughts..."
             className="feedback-textarea"
             rows={4}
+            required
           />
         </div>
+  
         <motion.button
           type="submit"
           className="submit-button"
-          onClick={handleSubmit}
           disabled={!overallSatisfaction || !facilitySatisfaction || !bookingExperience}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           <Send className="send-icon" /> Submit Feedback
         </motion.button>
-      </motion.div>
+      </form>
     </motion.div>
   );
+  
 };
 export default Feedback;
+
+// here is old code //
+// return (
+//   <motion.div
+//     className="feedback-container"
+//     initial={{ opacity: 0, y: 20 }}
+//     animate={{ opacity: 1, y: 0 }}
+//     transition={{ duration: 0.6 }}
+//   >
+//     <motion.div className="feedback-form" layout>
+//       <motion.div className="feedback-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+//         <Smile size={36} />
+//         <h1>Help us make the lecture hall booking experience even better!</h1>
+//       </motion.div>
+//       <div className="feedback-section">
+//         <div className="feedback-label"><Smile className="label-icon" /> Overall Satisfaction</div>
+//         {renderSatisfactionIcons(overallSatisfaction, setOverallSatisfaction)}
+//       </div>
+//       <div className="feedback-section">
+//         <div className="feedback-label"><Star className="label-icon" /> Facility Rating</div>
+//         {renderStarRating(facilitySatisfaction, setFacilitySatisfaction)}
+//       </div>
+//       <div className="feedback-section">
+//         <div className="feedback-label"><MessageCircle className="label-icon" /> Booking Experience</div>
+//         {renderSatisfactionIcons(bookingExperience, setBookingExperience)}
+//       </div>
+//       <div className="feedback-section">
+//         <div className="feedback-label"><MessageCircle className="label-icon" /> Additional Comments</div>
+//         <textarea
+//           value={additionalComments}
+//           onChange={(e) => setAdditionalComments(e.target.value)}
+//           placeholder="Share your thoughts..."
+//           className="feedback-textarea"
+//           rows={4}
+//           required
+//         />
+//       </div>
+//       <motion.button
+//         type="submit"
+//         className="submit-button"
+//         onClick={handleSubmit}
+//         disabled={!overallSatisfaction || !facilitySatisfaction || !bookingExperience}
+//         whileHover={{ scale: 1.02 }}
+//         whileTap={{ scale: 0.98 }}
+//       >
+//         <Send className="send-icon" /> Submit Feedback
+//       </motion.button>
+//     </motion.div>
+//   </motion.div>
+// );

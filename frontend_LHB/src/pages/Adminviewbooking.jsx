@@ -49,26 +49,29 @@ function Adminviewbooking() {
     const fetchBookings = async () => {
       setLoading(true);
       setError(null);
-
+  
       const token = localStorage.getItem('ACCESS_TOKEN');
-
+  
       if (!token) {
         console.error("No ACCESS_TOKEN found in localStorage.");
         setError("User not authenticated. Please log in.");
         setLoading(false);
         return;
       }
-
+  
       try {
-        const response = await api.get(`${import.meta.env.VITE_BOOKING_SEARCH_URL}?status=approved`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
+        const response = await api.get(
+          `${import.meta.env.VITE_BOOKING_SEARCH_URL}?status=approved`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+  
         console.log("Fetched Bookings:", response.data);
-
+  
         const transformedData = transformBookings(response.data);
         setBookings(transformedData);
       } catch (err) {
@@ -78,9 +81,11 @@ function Adminviewbooking() {
         setLoading(false);
       }
     };
-
+  
     fetchBookings();
   }, []);
+  
+
 
   // **Date Range Filtering**
   // filtering the booking based on date 
