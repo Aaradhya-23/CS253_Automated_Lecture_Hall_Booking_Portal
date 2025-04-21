@@ -12,7 +12,36 @@
   position: relative; /* For the gradient border */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
 }
+.no-rooms-message {
+  margin: 20px 0;
+  padding: 20px;
+  border: 2px dashed #ff6b6b; /* Dashed border for emphasis */
+  background-color: #ffe6e6; /* Light red background */
+  color: #cc0000; /* Dark red text */
+  border-radius: 8px; /* Rounded corners */
+  text-align: center; /* Center-align the text */
+  font-size: 16px; /* Slightly larger font size */
+  font-weight: bold; /* Bold text */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  animation: fadeIn 0.5s ease-in-out; /* Smooth fade-in animation */
+}
 
+.no-rooms-message p {
+  margin: 0;
+  line-height: 1.5; /* Improve readability */
+}
+
+/* Optional: Add a fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 /* Hover effect for the form container */
 .booking-form-container:hover {
   transform: translateY(-5px); /* Slight lift on hover */
@@ -80,7 +109,63 @@
   border-radius: 20px; 
   transition: all 0.3s ease;
 }
+.duration-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Make the slider take the full width of the container */
+  margin-top: 10px;
+}
 
+.duration-slider .slider {
+  -webkit-appearance: none; /* Remove default styling for WebKit browsers */
+  appearance: none;
+  width: 80%; /* Increase the width of the slider */
+  height: 8px; /* Adjust the height of the slider */
+  background: #d3d3d3; /* Light gray background */
+  border-radius: 5px; /* Rounded corners */
+  outline: none; /* Remove outline */
+  transition: background 0.3s ease-in-out;
+}
+
+.duration-slider .slider:hover {
+  background: #b0c4de; /* Change background color on hover */
+}
+
+.duration-slider .slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Remove default styling for WebKit browsers */
+  appearance: none;
+  width: 20px; /* Width of the thumb */
+  height: 20px; /* Height of the thumb */
+  background: #2980b9; /* Blue color for the thumb */
+  border-radius: 50%; /* Make the thumb circular */
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background 0.3s ease-in-out;
+}
+
+.duration-slider .slider::-webkit-slider-thumb:hover {
+  background: #1e6091; /* Darker blue on hover */
+}
+
+.duration-slider .slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #2980b9;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.duration-slider .slider::-moz-range-thumb:hover {
+  background: #1e6091;
+}
+
+.duration-slider .slider-value {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333; /* Dark gray text */
+}
 .accessory-btn.selected {
   background-color: #007bff;
   color: white;

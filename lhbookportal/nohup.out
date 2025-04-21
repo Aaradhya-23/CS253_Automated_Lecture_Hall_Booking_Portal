@@ -135,3 +135,5 @@ Django version 5.1.7, using settings 'lhbookportal.settings'
 Starting development server at http://172.27.16.252:8000/
 Quit the server with CONTROL-C.
 
+Watching for file changes with StatReloader
+Error: That port is already in use.

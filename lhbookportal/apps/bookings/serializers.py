@@ -135,7 +135,7 @@ class BookingSerializer(serializers.ModelSerializer):
             Q(room=room)&
             Q(booking_date=booking_date)&
             Q(start_time__lt=end_time, end_time__gt=start_time) 
-        ).exclude(status='cancelled')  # Exclude cancelled bookings
+        ).exclude(status = 'rejected')  # Exclude cancelled bookings
         
         
 

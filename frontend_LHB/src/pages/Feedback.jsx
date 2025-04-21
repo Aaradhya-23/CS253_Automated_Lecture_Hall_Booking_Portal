@@ -56,6 +56,10 @@ const Feedback = () => {
       if(response.status === 200 || response.status === 201){
         console.log('Feedback submitted successfully!');
         setIsSubmitted(true);
+        setOverallSatisfaction(null);
+        setFacilitySatisfaction(null);
+        setBookingExperience(null);
+        setAdditionalComments('');
       } else {
         console.error('Failed to submit feedback');
       }

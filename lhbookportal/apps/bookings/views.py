@@ -28,29 +28,111 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import time, datetime, timedelta
 from rest_framework.permissions import AllowAny
-import threading
+from .mails import send_booking_details_to_admin, send_email_in_background,send_rejection_mail_to_user, send_confirmation_mail, send_approved_mail_to_user,send_rejected_mail_to_user
 
+def send_approval_email(authority_email, booking):
+    authority_token = booking.authority_tokens.get(authority_email)
+    if not authority_token:
+        return  # Safety check
+    print("please be triggered bc")
+    print(authority_email)
+    accessories_list = [
+        name.replace('_', ' ').title()
+        for name, selected in booking.accessories.items() if selected
+    ]
+    accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
 
+    approval_link = (
+        f"http://172.27.16.252:8000/bookings/approve/?booking_token={booking.booking_token}"
+        f"&authority_token={authority_token}"
+    )
+    rejection_link = (
+        f"http://172.27.16.252:8000/bookings/reject/?booking_token={booking.booking_token}"
+        f"&authority_token={authority_token}"
+    )
 
+    user = booking.creator
+    subject = "[LHC OFFICE] Booking Request Approval Needed"
 
-class EmailThread(threading.Thread):
-    def __init__(self, subject, message, from_email, recipient_list, *args, **kwargs):
-        self.subject = subject
-        self.message = message
-        self.from_email = from_email
-        self.recipient_list = recipient_list
-        super().__init__(*args, **kwargs)
+    html_message = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background-color: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="color: #2c3e50;">Booking Request Submitted</h2>
+        <p>A new booking request has been submitted by <strong>{user.username}</strong>.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Purpose:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.title}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Remarks:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.remarks}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Room:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.room.name}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Date:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.booking_date}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Time:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.start_time} - {booking.end_time}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Requested On:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{booking.requested_on}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Accessories:</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{accessories_str}</td>
+            </tr>
+            <tr>
+            <td style="padding: 8px;"><strong>Total Cost:</strong></td>
+            <td style="padding: 8px;">₹{booking.cost}</td>
+            </tr>
+        </table>
 
-    def run(self):
-        send_mail(
-            self.subject,
-            self.message,
-            self.from_email,
-            self.recipient_list,
-            fail_silently=False,
-        )
-def send_email_in_background(subject, message, from_email, recipient_list):
-    EmailThread(subject, message, from_email, recipient_list).start()
+        <div style="margin-top: 20px;">
+            <a href="{approval_link}" style="background-color: #27ae60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Approve</a>
+            <a href="{rejection_link}" style="background-color: #c0392b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reject</a>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 13px; color: #888;">Note: Unapproved bookings will be auto-rejected in 2 days or less.</p>
+        </div>
+    </body>
+    </html>
+"""
+
+    subject = "[LHC OFFICE] Booking Request Approval Needed"
+    message = f"""
+A new booking request has been submitted by {user.username}.
+
+Purpose    : {booking.title}
+Remarks    : {booking.remarks}
+Room       : {booking.room.name}
+Date       : {booking.booking_date}
+Time       : {booking.start_time} - {booking.end_time}
+Requested On: {booking.requested_on}
+Accessories: {accessories_str}
+Total Cost : ₹{booking.cost}
+
+Approve: {approval_link}
+Reject:  {rejection_link}
+
+Note: Unapproved bookings will be auto-rejected in 2 days or less.
+    """
+
+    send_email_in_background(
+        subject,
+        message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[authority_email],
+        html_message=html_message
+    )
 
 @csrf_exempt
 def send_rejection_mail(request, booking_id):
@@ -66,20 +148,24 @@ def send_rejection_mail(request, booking_id):
 
         # Get the booking object
         booking = get_object_or_404(Booking, id=booking_id)
+
+        print("this is the booking id", booking)
         booking.status = 'rejected'
+        us = booking.creator
+
+        print("this is the user", us)
+                    
+        us.total_bill = us.total_bill - booking.cost
+        us.save()
+
+        print("Total cost after rejection", us.total_bill)
+
+        print("this is the booking", booking)
+        print("this is the user", us)
 
         # Compose the email content
-        subject = 'Booking Rejected'
-        message = (
-            f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} '
-            f'for date {booking.booking_date} has been rejected by LECTURE HALL ADMINISTRATION.\n'
-            f'Remarks: {remarks}'
-        )
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = [booking.creator.email]
-
-        # Send the email in the background
-        send_email_in_background(subject, message, from_email, recipient_list)
+        # send_booking_details_to_admin(booking)
+        send_rejection_mail_to_user(booking, remarks)
 
         # Delete the booking
         # booking.delete()
@@ -118,6 +204,7 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
                 {"error": "Invalid date/time format."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
 
         if start_time >= end_time:
             return JsonResponse(
@@ -126,9 +213,22 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
             )
 
         # Ensure booking is not on a holiday (every Sunday)
-        if booking_date.weekday() == 6 or Holiday.objects.filter(date=booking_date).exists():
+        # if booking_date.weekday() == 6 or Holiday.objects.filter(date=booking_date).exists():
+        #     return JsonResponse(
+        #         {"error": f"Bookings cannot be made on Holidays:"},
+        #         status=status.HTTP_400_BAD_REQUEST
+        #     )
+        # Ensure booking is not on a holiday (every Sunday or a specific holiday)
+        if booking_date.weekday() == 6:  # Sunday
             return JsonResponse(
-                {"error": "Bookings cannot be made on Holidays"},
+                {"error": "Bookings cannot be made on Sundays."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        holiday = Holiday.objects.filter(date=booking_date).first()
+        if holiday:
+            return JsonResponse(
+                {"error": f"Bookings cannot be made on holidays: {holiday.name}."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -137,12 +237,17 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
             booking_date=booking_date,
             start_time__lt=end_time,
             end_time__gt=start_time
-        ).values_list("room_id", flat=True)  # Get booked room IDs
+        ).exclude(status= 'rejected').values_list("room_id", flat=True)  # Get booked room IDs
 
         # Get available rooms
         available_rooms = Room.objects.exclude(id__in=booked_room_ids)
-
+        # end = "20:30:00"
+        # end_t = datetime.strptime(end, "%H:%M:%S")
         if not available_rooms.exists():
+            # new_end = end_time + timedelta(minutes=30)
+            # while(new_end != end_t):
+            #   
+            # while(new_time_obj = time_obj + timedelta(minutes=30))
             return JsonResponse(
                 {"error": "No available rooms for this slot found."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -152,52 +257,6 @@ class AvailableBookingSlotsView(generics.GenericAPIView):
         serializer = RoomSerializer(available_rooms, many=True)
         return Response({"rooms": serializer.data}, status=status.HTTP_200_OK)
     
-def send_approval_email(authority_email, booking):
-    authority_token = booking.authority_tokens.get(authority_email)
-    if not authority_token:
-        return  # Safety check
-
-    accessories_list = [
-        name.replace('_', ' ').title()
-        for name, selected in booking.accessories.items() if selected
-    ]
-    accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
-
-    approval_link = (
-        f"http://172.27.16.252:8000/bookings/approve/?booking_token={booking.booking_token}"
-        f"&authority_token={authority_token}"
-    )
-    rejection_link = (
-        f"http://172.27.16.252:8000/bookings/reject/?booking_token={booking.booking_token}"
-        f"&authority_token={authority_token}"
-    )
-
-    user = booking.creator
-    subject = "[LHC OFFICE] Booking Request Approval Needed"
-    message = f"""
-A new booking request has been submitted by {user.username}.
-
-Purpose    : {booking.title}
-Remarks    : {booking.remarks}
-Room       : {booking.room.name}
-Date       : {booking.booking_date}
-Time       : {booking.start_time} - {booking.end_time}
-Requested On: {booking.requested_on}
-Accessories: {accessories_str}
-Total Cost : ₹{booking.cost}
-
-Approve: {approval_link}
-Reject:  {rejection_link}
-
-Note: Unapproved bookings will be auto-rejected in 2 days or less.
-    """
-
-    send_email_in_background(
-        subject,
-        message,
-        from_email="no-reply@yourdomain.com",
-        recipient_list=[authority_email]
-    )
 
 class BookingCRUDView(
     generics.GenericAPIView, 
@@ -305,36 +364,8 @@ class BookingCRUDView(
                 remarks=remarks,
             )  
             #send mail
-            calender_link = booking.get_google_calendar_link()
-            send_email_in_background(
-            'Booking Approved',
-            f"""
-            Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
-            Your bill amount is : ₹{booking.cost}
-            
-            
-            Add This Event to your Calender: {calender_link}
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [booking.creator.email]
-            )
-            send_email_in_background(
-        subject="[LHC OFFICE] Booking Details",
-        message=f"""
-
-User       : {booking.creator.username}
-Purpose    : {booking.title}
-Remarks    : {booking.remarks}
-Room       : {booking.room.name}
-Date       : {booking.booking_date}
-Time       : {booking.start_time} - {booking.end_time}
-Requested On: {booking.requested_on}
-Total Cost : ₹{booking.cost}
-
-""",
-        from_email="no-reply@yourdomain.com",
-        recipient_list=["bhavya0525@gmail.com"], #accounts email to be addeded
-    )
+            send_approved_mail_to_user(booking)
+            send_booking_details_to_admin(booking) 
             return  # Skip email for faculty
         
         
@@ -365,41 +396,9 @@ Total Cost : ₹{booking.cost}
         )
         first_authority_email = next(iter(booking.approvals_pending.keys()), None)
         
-        accessories_list = [
-            name.replace('_', ' ').title()
-            for name, selected in booking.accessories.items() if selected
-        ]
-        accessories_str = ', '.join(accessories_list) if accessories_list else 'None'
         if first_authority_email:
-            user = booking.creator
-            subject = "[LHC OFFICE] Booking Request Recorded"
-            message = f"""
-Your({user.username}) booking request has been recorded and sent to the respective authorities for confirmation.
-You will receive a confirmation email once it is approved.
-
-👉 To track your booking status, visit:
-http://172.27.16.252:5174/login
-
-Purpose    : {booking.title}
-Remarks    : {booking.remarks}
-Room       : {booking.room.name}
-Date       : {booking.booking_date}
-Time       : {booking.start_time} - {booking.end_time}
-Requested On: {booking.requested_on}
-Accessories: {accessories_str}
-Total Cost : ₹{booking.cost}
-Note: Unapproved bookings will be auto-rejected in 2 days or less.
-    """
-
-            send_email_in_background(
-                subject,
-                message,
-                from_email="no-reply@yourdomain.com",
-                recipient_list=[user.email]
-
-            )            
             send_approval_email(first_authority_email, booking)
-
+            send_confirmation_mail(booking)
             # return render(request, "bookings/Confirmed.html", status=200)
 
     def get(self, request, *args, **kwargs):
@@ -598,49 +597,16 @@ def approve_booking(request):
         booking.decision_time = timezone.now()
         booking.save()
 
-        x = f'Your bill amount is : {booking.cost}'
-        # print(type([booking.creator.email]))
-        # Send email to user
-        calender_link = booking.get_google_calendar_link()
-        send_email_in_background(
-    'Booking Approved',
-    f"""
-    Your booking request titled {booking.title} at {booking.room.name} for date {booking.booking_date} has been approved.
-    Your bill amount is : ₹{booking.cost}
-    
-    Add this Booking to your calender
-    {calender_link}
-    """,
-    settings.DEFAULT_FROM_EMAIL,
-    [booking.creator.email]
-)
-        send_email_in_background(
-        subject="[LHC OFFICE] Booking Details",
-        message=f"""
-
-User       : {booking.creator.username}
-Purpose    : {booking.title}
-Remarks    : {booking.remarks}
-Room       : {booking.room.name}
-Date       : {booking.booking_date}
-Time       : {booking.start_time} - {booking.end_time}
-Requested On: {booking.requested_on}
-Total Cost : ₹{booking.cost}
-
-""",
-        from_email="no-reply@yourdomain.com",
-        recipient_list=["bhavya0525@gmail.com"], #accounts email to be addeded
-    )
+        send_approved_mail_to_user(booking)
+        send_booking_details_to_admin(booking)
         if(pending_bookings_same_slot.exists()):
             for pending in pending_bookings_same_slot:
                 if pending.status == 'pending':
                     pending.status = 'rejected'
-                    send_mail(
-                    'Booking Rejected',
-                    f'Sorry, your booking request titled "{pending.title}" at {pending.room.name} for date {pending.booking_date} has been rejected.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [ pending.creator.email ],
-                )  
+                    us = pending.creator
+                    us.total_bill = us.total_bill - pending.cost
+                    us.save()
+                    send_rejected_mail_to_user(booking) 
                     # pending.delete()
                     pending.save()
 
@@ -650,6 +616,8 @@ Total Cost : ₹{booking.cost}
 
     next_approver_email = next((email for email, approved in booking.approvals_pending.items() if not approved), None)
     if next_approver_email:
+        print("please be triggeredooooooooooooooedbjsrhbik;rgesuroih;seoiugheogbedogheao;graerpghea[pgrhep0hephe"
+              )
         send_approval_email(next_approver_email, booking)
 
     return render(request, "bookings/Approved.html", context={}, status=200)
@@ -678,17 +646,14 @@ def reject_booking(request):
             None
         )
     booking.status = "rejected"
+    us = booking.creator
+    us.total_bill = us.total_bill - booking.cost
+    us.save()
     # booking.approvals_pending = {}
     booking.approvals_pending[authority_email] = False
     booking.save()
 
-    send_email_in_background(
-    'Booking Rejected',
-    f'Sorry, your booking request titled "{booking.title}" at {booking.room.name} for date {booking.booking_date} has been rejected.',
-    settings.DEFAULT_FROM_EMAIL,
-    [booking.creator.email],
-)
+    send_rejected_mail_to_user(booking)
 
     # booking.delete()
     return render(request, "bookings/Rejected.html", context={}, status=200);
-

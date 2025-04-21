@@ -9,7 +9,7 @@ django.setup()
 
 from apps.bookings.models import Room
 
-accessory_keys = ["AC", "MIC", "BIOMETRIC", "BLACKBOARD", "PROJECTOR"]
+accessory_keys = ["AC", "microphone", "blackboard", "projector"]
 
 def generate_random_accessories():
     return {key: random.choice([True, False]) for key in accessory_keys}
@@ -17,14 +17,14 @@ def generate_random_accessories():
 def create_room_entries(n=10):
     for j in range(5):
         room = Room(
-            name="L-" + str(j + 1),
-            capacity=5 * (j + 1),
-            room_type="tutorial",
+            name="L-" + str(j + 3),
+            capacity=50 * (j + 1),
+            room_type="lecture_hall",
             accessories=generate_random_accessories(),
-            price_per_hour=15 * (j + 2)
+            price_per_hour=800 * (j + 2)
         )
+        # print(f"Created Room ID: {room.id}, Name: {room.name}")
         room.save()
-        print(f"Created Room ID: {room.id}, Name: {room.name}")
 
 if __name__ == "__main__":
     create_room_entries(20)  # Create 20 room entries

@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import { ACCESS_TOKEN } from "../api/constants";
@@ -9,6 +12,8 @@ const Request_Booking = () => {
   const loggedInUsername = localStorage.getItem("USERNAME"); // Assuming the username is stored in localStorage
   console.log(role);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const [duration, setDuration] = useState(1); 
   const [showError, setShowError] = useState(false);
   const [roomOptions, setRoomOptions] = useState([]);
   const [filteredRoomOptions, setFilteredRoomOptions] = useState([]);
@@ -26,7 +31,8 @@ const Request_Booking = () => {
   const [accessoryOptions, setAccessoryOptions] = useState([]);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [message, setMessage] = useState("")
-
+  const [noRoomsAvailable, setNoRoomsAvailable] = useState(false); // New state for no rooms available
+  const [noRoomsMessage, setNoRoomsMessage] = useState("No available rooms found for this time slot. Try changing time slots.");
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(
     role === "admin" ? "" : loggedInUsername
@@ -34,7 +40,7 @@ const Request_Booking = () => {
   const VITE_USER_LIST_CREATE_URL = `${
     import.meta.env.VITE_API_BASE_URL
   }accounts/users/`;
-
+  
   function convertTo24HourFormat(time12h) {
     const [time, modifier] = time12h.split(" "); // ["8:30", "AM"]
     let [hours, minutes] = time.split(":").map(Number);
@@ -150,6 +156,19 @@ const Request_Booking = () => {
             },
           }
         );
+
+        setNoRoomsAvailable(false);
+        console.log("158")
+        
+        if (response.data.error) {
+          // If the backend returns an error, set noRoomsAvailable to true
+          setNoRoomsAvailable(true);
+          setRoomOptions([]);
+          console.log("hhii")
+          setFilteredRoomOptions([]);
+          return;
+        }
+
         console.log("here");
         console.log(response.data);
         const rooms = Array.isArray(response.data)
@@ -193,11 +212,22 @@ const Request_Booking = () => {
         setAccessoryOptions(uniqueAccessories);
       } catch (error) {
         console.error("Error fetching rooms:", error);
+        setNoRoomsAvailable(true);
+          setRoomOptions([]);
+          console.log("hhii")
+          setFilteredRoomOptions([]);
+          const data = error.response.data;
+      const field = Object.keys(data)[0];
+      const message = data[field];
+      console.log(message)
+      setNoRoomsMessage(message || "No Rooms available. Try changing filters and date-time")
+          // console.log(error.data
+          
       }
     };
 
     fetchRooms();
-  }, [endTime, startDate, startTime, token]);
+  }, [endTime, startDate, startTime, token, duration]);
 
   // Filter room options based on selected capacity and accessories
   useEffect(() => {
@@ -332,9 +362,14 @@ const handleConfirmSubmit = async () => {
       setStartTime("");
       setEndDate("");
       setEndTime("");
+      setDuration("");
       setSelectedHall("");
       setCapacity("");
       setAccessoryOptions([]);
+      setSelectedAccessories([]);
+      // setAccessoryOptions([]);
+      setFilteredRoomOptions([]);
+      setRoomOptions([]);
     } else {
       
       setShowError(true);
@@ -350,11 +385,11 @@ const handleConfirmSubmit = async () => {
         const firstErrorMessage = Array.isArray(errorData[firstField]) 
         ? errorData[firstField][0] 
         : errorData[firstField];
-        setMessage(firstErrorMessage || 'Login failed. Please try again.');
+        setMessage(firstErrorMessage || 'Booking failed please try again later.');
       
       } else {
         // Fallback for non-field error like {"detail": "Invalid credentials"}
-        const fallbackError = error.response?.data?.detail || 'Login failed. Please try again.';
+        const fallbackError = error.response?.data?.detail || 'Booking failed. Please try again.';
         setMessage(fallbackError);
         console.log(fallbackError)
       }
@@ -389,6 +424,34 @@ const handleCancelSubmit = () => {
           : [...prev, accessory] // Add if not selected
     );
   };
+
+  function calculateEndTime(startTime, duration) {
+    // Parse the start time into hours and minutes
+    const [time, modifier] = startTime.split(" "); // e.g., ["8:00", "AM"]
+    let [hours, minutes] = time.split(":").map(Number);
+  
+    // Convert to 24-hour format
+    if (modifier === "PM" && hours !== 12) {
+      hours += 12;
+    }
+    if (modifier === "AM" && hours === 12) {
+      hours = 0;
+    }
+  
+    // Add the duration to the start time
+    const totalMinutes = hours * 60 + minutes + duration;
+  
+    // Calculate the new hours and minutes
+    const endHours = Math.floor(totalMinutes / 60) % 24; // Handle overflow past midnight
+    const endMinutes = totalMinutes % 60;
+  
+    // Convert back to 12-hour format
+    const endModifier = endHours >= 12 ? "PM" : "AM";
+    const formattedHours = endHours % 12 === 0 ? 12 : endHours % 12; // Convert 0 to 12 for 12-hour format
+    const formattedMinutes = String(endMinutes).padStart(2, "0");
+  
+    return `${formattedHours}:${formattedMinutes} ${endModifier}`;
+  }
   // return
   return (
 
@@ -533,32 +596,31 @@ const handleCancelSubmit = () => {
             </div>
           </div>
           <div className="form-column">
-            <label>End</label>
-            <div className="date-time-controls">
-              <select
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="time-select"
-              >
-                <option value="" disabled>
-                  -- Select end time --
-                </option>
-                {timeOptions
-                  .slice(
-                    timeOptions.indexOf(startTime) + 1, 
-                    Math.min(timeOptions.indexOf(startTime) + 7, timeOptions.length)
-                  )
-                  .map((time) => (
-                    <option key={`end-${time}`} value={time}>
-                      {time}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
+    <label>Duration</label>
+    <div className="duration-slider">
+      <input
+        type="range"
+        min="1"
+        max="3"
+        step="0.5"
+        value={duration}
+        onChange={(e) => {
+          setDuration(e.target.value);
+          const calculatedEndTime = calculateEndTime(startTime, e.target.value * 60); // Convert hours to minutes
+          setEndTime(calculatedEndTime);
+        }}
+        className="slider"
+      />
+      <div className="slider-value">
+        {duration} {duration === "1" ? "hour" : "hours"}
+      </div>
+    </div>
+  </div>
         </div>
         {/* </div> */}
 
+        {!noRoomsAvailable ? (
+            <>
         <div className="form-row">
           <div className="form-column">
             <label htmlFor="roomSelect">Select Available Rooms</label>
@@ -687,7 +749,13 @@ const handleCancelSubmit = () => {
             />
           </div>
         </div>
-
+        </>
+        ) : (
+          <div className="no-rooms-message">
+        <p>{noRoomsMessage}</p>
+      </div>
+        )
+      }
         {selectedHall && (
           <button type="submit" className="submit-btn" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "SUBMIT"}

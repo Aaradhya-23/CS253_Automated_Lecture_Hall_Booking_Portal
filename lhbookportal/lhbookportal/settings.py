@@ -58,7 +58,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/minute',  # Limit anonymous users to 10 requests per minute
-        'user': '50/minute',   # Limit authenticated users to 100 requests per hour
+        'user': '30/minute',   # Limit authenticated users to 100 requests per hour
     }
 }
 
@@ -105,16 +105,16 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'lhb_psql',
-#         'USER': 'postgres',
-#         'PASSWORD': 'MrBombastic',
-#         'HOST': 'localhost',
-#         'PORT': '5435',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mydb',
+        'USER': 'Aviators',
+        'PASSWORD': 'MrBombastic',
+        'HOST': 'localhost',
+        'PORT': '5433',
+    }
+}
 
 
 ROOT_URLCONF = 'lhbookportal.urls'
@@ -174,12 +174,12 @@ WSGI_APPLICATION = 'lhbookportal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
